@@ -1,1 +1,64 @@
-{\rtf1}
+DROP TABLE Store CASCADE CONSTRAINTS;
+DROP TABLE Orders CASCADE CONSTRAINTS;
+DROP TABLE PUBLISHER CASCADE CONSTRAINTS;
+DROP TABLE AUTHOR CASCADE CONSTRAINTS;
+DROP TABLE BOOKS CASCADE CONSTRAINTS;
+DROP TABLE ORDERITEMS CASCADE CONSTRAINTS;
+DROP TABLE BOOKAUTHOR CASCADE CONSTRAINTS;
+DROP TABLE PROMOTION CASCADE CONSTRAINTS;
+DROP TABLE ACCTMANAGER CASCADE CONSTRAINTS;
+
+
+CREATE TABLE Customers (
+customer_id CHAR(5) PRIMARY KEY,
+firstname VARCHAR2(20),
+lastname VARCHAR2(20),
+email VARCHAR2(30),
+address VARCHAR2(50)
+);
+
+CREATE TABLE Stores (
+Store_Id CHAR(5) PRIMARY KEY,
+name VARCHAR2(30)
+);
+
+CREATE TABLE Products (
+Product_Id CHAR(5) PRIMARY KEY,
+name VARCHAR2(30),
+category VARCHAR2(15)
+);
+
+CREATE TABLE Warehouse( 
+Warehouse_Id CHAR(5) PRIMARY KEY,
+name VARCHAR2(20),
+address VARCHAR2(50)
+);
+
+CREATE TABLE Reviews (
+review_Id CHAR(5) PRIMARY KEY,
+Product_Id REFERENCES Products(Product_Id),
+flag NUMBER(1,0),
+descrption VARCHAR2(200)
+);
+
+CREATE TABLE Inventory (
+Warehouse_Id CHAR(5) REFERENCES Warehouse(Warehouse_Id) ,
+Product_Id REFERENCES Products(Product_Id),
+CONSTRAINT inventory_pk PRIMARY KEY (Warehouse_Id, Product_Id)
+);
+
+CREATE TABLE Orders (
+Order_Id CHAR(5) PRIMARY KEY,
+customer_id CHAR(5) REFERENCES Customers(customer_id),
+Store_Id CHAR(5) REFERENCES Stores(Store_Id),
+quantity NUMBER(2,0),
+orderDate DATE,
+Price NUMBER (10,2)
+);
+
+CREATE TABLE Products_Orders (
+Order_Id CHAR(5) REFERENCES Orders(Order_Id) ,
+Product_Id REFERENCES Products(Product_Id),
+CONSTRAINT ProductsOrders_pk PRIMARY KEY (Order_Id, Product_Id)
+);
+
