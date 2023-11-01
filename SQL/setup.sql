@@ -9,7 +9,7 @@ DROP TABLE Products_Orders CASCADE CONSTRAINTS;
 
 
 CREATE TABLE Customers (
-Customer_Id     NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+Customer_Id     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Firstname       VARCHAR2(20),
 Lastname        VARCHAR2(20),
 Email           VARCHAR2(30),
@@ -17,24 +17,24 @@ Address         VARCHAR2(50)
 );
 
 CREATE TABLE Stores (   
-Store_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+Store_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Name            VARCHAR2(30)
 );
 
 CREATE TABLE Products (
-Product_Id      NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+Product_Id      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Name            VARCHAR2(30),
 Category        VARCHAR2(15)
 );
 
 CREATE TABLE Warehouse( 
-Warehouse_Id    NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+Warehouse_Id    NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Name            VARCHAR2(20),
 Address         VARCHAR2(50)
 );
 
 CREATE TABLE Reviews (
-Review_Id       NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+Review_Id       NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Product_Id      NUMBER(5)          REFERENCES Products(Product_Id),
 Flag            NUMBER(1,0),
 Descrption      VARCHAR2(200)
@@ -48,7 +48,7 @@ CONSTRAINT inventory_pk PRIMARY KEY (Warehouse_Id, Product_Id)
 );
 
 CREATE TABLE Orders (
-Order_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+Order_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Customer_Id     NUMBER(5)          REFERENCES Customers(customer_id),
 Store_Id        NUMBER(5)          REFERENCES Stores(Store_Id),
 Quantity        NUMBER(2,0),
