@@ -97,9 +97,6 @@ USING (product_id)
 INNER JOIN Warehouse
 USING (warehouse_id);
 
--- Mohammad's work
-
--- Mitchell's work
 
 CREATE OR REPLACE TYPE stores_typ AS OBJECT(
     Store_Id  NUMBER(5),
@@ -129,6 +126,34 @@ CREATE OR REPLACE TYPE inventory_typ AS OBJECT(
 );
 /
 
+CREATE OR REPLACE TYPE Customers_Type AS OBJECT(
+Customer_Id     NUMBER(5),
+Firstname       VARCHAR2(20),
+Lastname        VARCHAR2(20),
+Email           VARCHAR2(30),
+Address         VARCHAR2(50)
+);
+
+CREATE OR REPLACE TYPE Products_Type AS OBJECT(
+Product_Id      NUMBER(5),
+Product_Name    VARCHAR2(30),
+Category        VARCHAR2(15)
+);
+
+CREATE OR REPLACE TYPE Orders_Type AS OBJECT(
+Order_Id        NUMBER(5),
+Customer_Id     NUMBER(5),
+Store_Id        NUMBER(5),
+Quantity        NUMBER(2,0),
+OrderDate       DATE,
+Price           NUMBER (10,2)
+);
+
+
+CREATE OR REPLACE TYPE Products_Orders_Type AS OBJECT(
+Order_Id        NUMBER(5),
+Product_Id      NUMBER(5)
+);
 
 
 
