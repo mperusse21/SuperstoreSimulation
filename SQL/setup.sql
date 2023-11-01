@@ -97,3 +97,38 @@ USING (product_id)
 INNER JOIN Warehouse
 USING (warehouse_id);
 
+-- Mohammad's work
+
+-- Mitchell's work
+
+CREATE OR REPLACE TYPE stores_typ AS OBJECT(
+    Store_Id  NUMBER(5),
+    Store_Name VARCHAR2(30)
+);
+/
+
+CREATE OR REPLACE TYPE reviews_typ AS OBJECT(
+    Review_Id       NUMBER(5),
+    Product_Id      NUMBER(5),
+    Flag            NUMBER(1,0),
+    Description      VARCHAR2(200)
+);
+/
+
+CREATE OR REPLACE TYPE warehouse_typ AS OBJECT(
+    Warehouse_Id    NUMBER(5),
+    Warehouse_Name  VARCHAR2(20),
+    Address         VARCHAR2(50)
+);
+/
+
+CREATE OR REPLACE TYPE inventory_typ AS OBJECT(
+    Warehouse_Id    NUMBER(5),
+    Product_Id      NUMBER(5),
+    Stock           NUMBER(10,0)
+);
+/
+
+
+
+
