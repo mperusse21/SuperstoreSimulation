@@ -1,3 +1,6 @@
+DROP TABLE Province_Country CASCADE CONSTRAINTS;
+DROP TABLE City_Province CASCADE CONSTRAINTS;
+DROP TABLE Addresses CASCADE CONSTRAINTS;
 DROP TABLE Customers CASCADE CONSTRAINTS;
 DROP TABLE Stores CASCADE CONSTRAINTS;
 DROP TABLE Products CASCADE CONSTRAINTS;
@@ -8,12 +11,32 @@ DROP TABLE Orders CASCADE CONSTRAINTS;
 DROP TABLE Products_Orders CASCADE CONSTRAINTS;
 
 
+CREATE TABLE Province_Country (
+    Province        VARCHAR2(20) PRIMARY KEY,
+    Country     VARCHAR(20) 
+);
+/
+
+CREATE TABLE City_Province (
+    City        VARCHAR2(20) PRIMARY KEY,
+    Province     VARCHAR(20) REFERENCES Province_Country (province)
+);
+/
+
+CREATE TABLE Addresses (
+    Address_Id     NUMBER(5)     GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    Address         VARCHAR2(50),
+    City            VARCHAR2(20) REFERENCES City_Province (city)
+
+);
+/
+
 CREATE TABLE Customers (
 Customer_Id     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Firstname       VARCHAR2(20),
 Lastname        VARCHAR2(20),
 Email           VARCHAR2(30),
-Address         VARCHAR2(50)
+Address_id      NUMBER(5) REFERENCES Addresses (address_id)
 );
 
 CREATE TABLE Stores (   
@@ -26,18 +49,12 @@ Product_Id      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Product_Name    VARCHAR2(30),
 Category        VARCHAR2(15)
 );
-
-CREATE TABLE Warehouse_Country (
-    city        VARCHAR2(20) PRIMARY KEY,
-    country     VARCHAR(20) 
-);
 /
 
 CREATE TABLE Warehouse( 
 Warehouse_Id    NUMBER(5) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Warehouse_Name  VARCHAR2(20),
-Address         VARCHAR2(50),
-city            VARCHAR2(20) REFERENCES Warehouse_Country (city)
+Address_id     NUMBER(5) REFERENCES Addresses (address_id)
 );
 
 CREATE TABLE Reviews (
