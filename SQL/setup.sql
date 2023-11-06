@@ -27,10 +27,17 @@ Product_Name    VARCHAR2(30),
 Category        VARCHAR2(15)
 );
 
+CREATE TABLE Warehouse_Country (
+    city        VARCHAR2(20) PRIMARY KEY,
+    country     VARCHAR(20) 
+);
+/
+
 CREATE TABLE Warehouse( 
-Warehouse_Id    NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+Warehouse_Id    NUMBER(5) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Warehouse_Name  VARCHAR2(20),
-Address         VARCHAR2(50)
+Address         VARCHAR2(50),
+city            VARCHAR2(20) REFERENCES Warehouse_Country (city)
 );
 
 CREATE TABLE Reviews (
@@ -112,6 +119,12 @@ CREATE OR REPLACE TYPE reviews_typ AS OBJECT(
 );
 /
 
+CREATE OR REPLACE TYPE warehouse_countyr_typ AS OBJECT (
+City        VARCHAR2(20),
+Country     VARCHAR(20) 
+);
+/
+
 CREATE OR REPLACE TYPE warehouse_typ AS OBJECT(
     Warehouse_Id    NUMBER(5),
     Warehouse_Name  VARCHAR2(20),
@@ -157,5 +170,7 @@ Order_Id        NUMBER(5),
 Product_Id      NUMBER(5)
 );
 /
+
+
 
 
