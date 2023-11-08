@@ -12,7 +12,7 @@ DROP TABLE Products_Orders CASCADE CONSTRAINTS;
 
 
 CREATE TABLE Province_Country (
-    Province        VARCHAR2(20) PRIMARY KEY,
+    Province    VARCHAR2(20) PRIMARY KEY,
     Country     VARCHAR(20) 
 );
 /
