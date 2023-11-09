@@ -9,70 +9,72 @@ DROP TABLE Orders CASCADE CONSTRAINTS;
 
 
 CREATE TABLE Cities (
-CityId          NUMBER(5)       GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-City            VARCHAR2(50)    NOT NULL,
-Province        VARCHAR2(20)
+    CityId          NUMBER(5)       GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+    City            VARCHAR2(50)    NOT NULL,
+    Province        VARCHAR2(20)
 );
 /
 
 CREATE TABLE Addresses (
-AddressId       NUMBER(5)        GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-Address         VARCHAR2(50)     NOT NULL,
-CityId          NUMBER(5)        REFERENCES Cities (CityId)
+    AddressId       NUMBER(5)        GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+    Address         VARCHAR2(50)     NOT NULL,
+    CityId          NUMBER(5)        REFERENCES Cities (CityId)
 );
 /
 
 CREATE TABLE Stores (   
-StoreId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-StoreName       VARCHAR2(30)       NOT NULL
+    StoreId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    StoreName       VARCHAR2(30)       NOT NULL
 );
 /
 
 CREATE TABLE Products (
-ProductId       NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-ProductName     VARCHAR2(30)       NOT NULL,
-Category        VARCHAR2(20)
+    ProductId       NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ProductName     VARCHAR2(30)       NOT NULL,
+    Category        VARCHAR2(20)
 );
 /
 
 CREATE TABLE Customers (
-CustomerId      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Firstname       VARCHAR2(20),
-Lastname        VARCHAR2(20),
-Email           VARCHAR2(30),
-Addressid       NUMBER(5)          REFERENCES Addresses (AddressId)
+    CustomerId      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    Firstname       VARCHAR2(20),
+    Lastname        VARCHAR2(20),
+    Email           VARCHAR2(30),
+    Addressid       NUMBER(5)          REFERENCES Addresses (AddressId)
 );
 /
 
 CREATE TABLE Warehouses( 
-WarehouseId     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-ProductId       NUMBER(5)          REFERENCES Products (ProductId),
-WarehouseName   VARCHAR2(20),
-Stock           NUMBER(10,0),
-Address_id      NUMBER(5)          REFERENCES Addresses (AddressId)
-
-CONSTRAINT warehouses_pk PRIMARY KEY (ProductId)
+    WarehouseId     NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+    ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+    WarehouseName   VARCHAR2(20),
+    Stock           NUMBER(10,0),
+    Address_id      NUMBER(5)          REFERENCES Addresses (AddressId),
+    
+    CONSTRAINT warehouses_pk PRIMARY KEY (WarehouseId, ProductId)
 );
 /
 
 CREATE TABLE Reviews (
-ReviewId        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-ProductId       NUMBER(5)          REFERENCES Products (ProductId),
-CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
-Score           NUMBER(1,0),
-Flag            NUMBER(1,0),
-Description     VARCHAR2(200)
+    ReviewId        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+    CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
+    Score           NUMBER(1,0),
+    Flag            NUMBER(1,0),
+    Description     VARCHAR2(200)
 );
 /
 
 CREATE TABLE Orders (
-OrderId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-ProductId       NUMBER(5)          REFERENCES Products (ProductId),
-CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
-StoreId         NUMBER(5)          REFERENCES Stores(StoreId),
-Quantity        NUMBER(5,0),
-Price           NUMBER (10,2),
-OrderDate       DATE
+    OrderId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+    ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+    CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
+    StoreId         NUMBER(5)          REFERENCES Stores(StoreId),
+    Quantity        NUMBER(5,0),
+    Price           NUMBER (10,2),
+    OrderDate       DATE,
+    
+    CONSTRAINT orders_pk PRIMARY KEY (OrderId, ProductId)
 );
 /
 
@@ -110,71 +112,72 @@ INNER JOIN Warehouse
 USING (warehouse_id);
 
 
-CREATE OR REPLACE TYPE stores_typ AS OBJECT(
-    Store_Id  NUMBER(5),
-    Store_Name VARCHAR2(30)
+-- SQL types for tables with more than 3 columns (and products because it's important)
+/*
+JUST IN CASE!
+CREATE OR REPLACE TYPE addresses_type AS OBJECT(
+    AddressId       NUMBER(5), 
+    Address         VARCHAR2(50),
+    CityId          NUMBER(5)
 );
 /
 
+CREATE OR REPLACE TYPE cities_type AS OBJECT(
+    CityId          NUMBER(5), 
+    City            VARCHAR2(50),
+    Province        VARCHAR2(20)
+);
+/
+*/
 CREATE OR REPLACE TYPE reviews_typ AS OBJECT(
-    Review_Id       NUMBER(5),
-    Product_Id      NUMBER(5),
+    ReviewId        NUMBER(5),
+    ProductId       NUMBER(5),
+    CustomerId      NUMBER(5),
+    Score           NUMBER(1,0),
     Flag            NUMBER(1,0),
-    Description      VARCHAR2(200)
+    Description     VARCHAR2(200)
 );
 /
 
-CREATE OR REPLACE TYPE warehouse_countyr_typ AS OBJECT (
-City        VARCHAR2(20),
-Country     VARCHAR(20) 
-);
-/
 
 CREATE OR REPLACE TYPE warehouse_typ AS OBJECT(
-    Warehouse_Id    NUMBER(5),
-    Warehouse_Name  VARCHAR2(20),
-    Address         VARCHAR2(50)
+    WarehouseId     NUMBER(5),
+    ProductId       NUMBER(5),
+    WarehouseName   VARCHAR2(20),
+    Stock           NUMBER(10,0),
+    Address_id      NUMBER(5)
 );
 /
 
-CREATE OR REPLACE TYPE inventory_typ AS OBJECT(
-    Warehouse_Id    NUMBER(5),
-    Product_Id      NUMBER(5),
-    Stock           NUMBER(10,0)
-);
-/
 
 CREATE OR REPLACE TYPE customers_type AS OBJECT(
-Customer_Id     NUMBER(5),
-Firstname       VARCHAR2(20),
-Lastname        VARCHAR2(20),
-Email           VARCHAR2(30),
-Address         VARCHAR2(50)
+    CustomerId      NUMBER(5),
+    Firstname       VARCHAR2(20),
+    Lastname        VARCHAR2(20),
+    Email           VARCHAR2(30),
+    Addressid       NUMBER(5)  
 );
 /
 
 CREATE OR REPLACE TYPE products_type AS OBJECT(
-Product_Id      NUMBER(5),
-Product_Name    VARCHAR2(30),
-Category        VARCHAR2(15)
+    ProductId       NUMBER(5),
+    ProductName     VARCHAR2(30),
+    Category        VARCHAR2(20)
 );
 /
 
 CREATE OR REPLACE TYPE orders_typ AS OBJECT(
-Order_Id        NUMBER(5),
-Customer_Id     NUMBER(5),
-Store_Id        NUMBER(5),
-Quantity        NUMBER(2,0),
-OrderDate       DATE,
-Price           NUMBER (10,2)
+    OrderId         NUMBER(5),
+    ProductId       NUMBER(5),
+    CustomerId      NUMBER(5),
+    StoreId         NUMBER(5),
+    Quantity        NUMBER(5,0),
+    Price           NUMBER (10,2),
+    OrderDate       DATE
 );
 /
 
-CREATE OR REPLACE TYPE products_orders_typ AS OBJECT(
-Order_Id        NUMBER(5),
-Product_Id      NUMBER(5)
-);
-/
+
 
 
 
