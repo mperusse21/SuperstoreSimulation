@@ -1,92 +1,80 @@
-DROP TABLE Province_Country CASCADE CONSTRAINTS;
-DROP TABLE City_Province CASCADE CONSTRAINTS;
+DROP TABLE Cities CASCADE CONSTRAINTS;
 DROP TABLE Addresses CASCADE CONSTRAINTS;
-DROP TABLE Customers CASCADE CONSTRAINTS;
 DROP TABLE Stores CASCADE CONSTRAINTS;
 DROP TABLE Products CASCADE CONSTRAINTS;
-DROP TABLE Warehouse CASCADE CONSTRAINTS;
+DROP TABLE Customers CASCADE CONSTRAINTS;
+DROP TABLE Warehouses CASCADE CONSTRAINTS;
 DROP TABLE Reviews CASCADE CONSTRAINTS;
-DROP TABLE Inventory CASCADE CONSTRAINTS;
 DROP TABLE Orders CASCADE CONSTRAINTS;
-DROP TABLE Products_Orders CASCADE CONSTRAINTS;
 
 
-CREATE TABLE Province_Country (
-    Province    VARCHAR2(20) PRIMARY KEY,
-    Country     VARCHAR(20) 
-);
-/
-
-CREATE TABLE City_Province (
-    City        VARCHAR2(20) PRIMARY KEY,
-    Province     VARCHAR(20) REFERENCES Province_Country (province)
+CREATE TABLE Cities (
+CityId          NUMBER(5)       GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+City            VARCHAR2(50)    NOT NULL,
+Province        VARCHAR2(20)
 );
 /
 
 CREATE TABLE Addresses (
-    Address_Id     NUMBER(5)     GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    Address         VARCHAR2(50),
-    City            VARCHAR2(20) REFERENCES City_Province (city)
+AddressId       NUMBER(5)        GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+Address         VARCHAR2(50)     NOT NULL,
+CityId          NUMBER(5)        REFERENCES Cities (CityId)
+);
+/
 
+CREATE TABLE Stores (   
+StoreId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+StoreName       VARCHAR2(30)       NOT NULL
+);
+/
+
+CREATE TABLE Products (
+ProductId       NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ProductName     VARCHAR2(30)       NOT NULL,
+Category        VARCHAR2(20)
 );
 /
 
 CREATE TABLE Customers (
-Customer_Id     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+CustomerId      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 Firstname       VARCHAR2(20),
 Lastname        VARCHAR2(20),
 Email           VARCHAR2(30),
-Address_id      NUMBER(5) REFERENCES Addresses (address_id)
-);
-
-CREATE TABLE Stores (   
-Store_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Store_Name      VARCHAR2(30)
-);
-
-CREATE TABLE Products (
-Product_Id      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Product_Name    VARCHAR2(30),
-Category        VARCHAR2(15)
+Addressid       NUMBER(5)          REFERENCES Addresses (AddressId)
 );
 /
 
-CREATE TABLE Warehouse( 
-Warehouse_Id    NUMBER(5) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Warehouse_Name  VARCHAR2(20),
-Address_id     NUMBER(5) REFERENCES Addresses (address_id)
+CREATE TABLE Warehouses( 
+WarehouseId     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+WarehouseName   VARCHAR2(20),
+Stock           NUMBER(10,0),
+Address_id      NUMBER(5)          REFERENCES Addresses (AddressId)
+
+CONSTRAINT warehouses_pk PRIMARY KEY (ProductId)
 );
+/
 
 CREATE TABLE Reviews (
-Review_Id       NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Product_Id      NUMBER(5)          REFERENCES Products(Product_Id),
+ReviewId        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
+Score           NUMBER(1,0),
 Flag            NUMBER(1,0),
-Description      VARCHAR2(200)
+Description     VARCHAR2(200)
 );
-
-CREATE TABLE Inventory (
-Warehouse_Id    NUMBER(5)          REFERENCES Warehouse(Warehouse_Id) ,
-Product_Id      NUMBER(5)          REFERENCES Products(Product_Id),
-Stock           NUMBER(10,0),
-
-CONSTRAINT inventory_pk PRIMARY KEY (Warehouse_Id, Product_Id)
-);
+/
 
 CREATE TABLE Orders (
-Order_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Customer_Id     NUMBER(5)          REFERENCES Customers(customer_id),
-Store_Id        NUMBER(5)          REFERENCES Stores(Store_Id),
-Quantity        NUMBER(2,0),
-OrderDate       DATE,
-Price           NUMBER (10,2)
+OrderId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
+StoreId         NUMBER(5)          REFERENCES Stores(StoreId),
+Quantity        NUMBER(5,0),
+Price           NUMBER (10,2),
+OrderDate       DATE
 );
-
-CREATE TABLE Products_Orders (
-Order_Id        NUMBER(5)          REFERENCES Orders(Order_Id) ,
-Product_Id      NUMBER(5)          REFERENCES Products(Product_Id),
-
-CONSTRAINT ProductsOrders_pk PRIMARY KEY (Order_Id, Product_Id)
-);
+/
 
 COMMIT;
 
