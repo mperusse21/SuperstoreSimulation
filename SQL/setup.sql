@@ -1,3 +1,4 @@
+DROP TABLE Provinces CASCADE CONSTRAINTS;
 DROP TABLE Cities CASCADE CONSTRAINTS;
 DROP TABLE Addresses CASCADE CONSTRAINTS;
 DROP TABLE Stores CASCADE CONSTRAINTS;
@@ -7,11 +8,16 @@ DROP TABLE Warehouses CASCADE CONSTRAINTS;
 DROP TABLE Reviews CASCADE CONSTRAINTS;
 DROP TABLE Orders CASCADE CONSTRAINTS;
 
+CREATE TABLE Provinces (
+    ProvinceId      NUMBER(5)      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    Province        VARCHAR2(20)   NOT NULL
+);
+/
 
 CREATE TABLE Cities (
     CityId          NUMBER(5)       GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
     City            VARCHAR2(50)    NOT NULL,
-    Province        VARCHAR2(20)
+    ProvinceId      NUMBER(5)       REFERENCES Provinces (ProvinceId)
 );
 /
 
@@ -80,51 +86,35 @@ CREATE TABLE Orders (
 
 COMMIT;
 
-INSERT INTO Customers (Firstname,Lastname,Email,Address) VALUES ('Mahsa','Sadeghi','msadeghi@dawsoncollege.qc.ca','Dawson College, Montreal, Quebec, Canada');
-SELECT * FROM Customers;
-INSERT INTO Stores (Store_Name) VALUES ('Marche Atwater');
-SELECT * FROM Stores;
-INSERT INTO Products (Product_Name,Category) VALUES ('Laptop ASUS 104S','Electronics');
-SELECT * FROM Products;
-INSERT INTO Warehouse (Warehouse_Name,Address) VALUES ('A','100 Rue William, Saint Laurent, Quebec, Canada'); 
-SELECT * FROM Warehouse;
-INSERT INTO Reviews (Product_Id,Flag,Description) VALUES (1,0,'It was affordable');
-SELECT * FROM Reviews;
-INSERT INTO Inventory VALUES(1,1,1000);
-SELECT * FROM Inventory;
-INSERT INTO Orders (Customer_Id,Store_Id,Quantity,OrderDate,Price) VALUES
-(1,1,1,SYSDATE,970);
-SELECT * FROM Orders;
-INSERT INTO Products_Orders VALUES (1,1);
-SELECT * FROM Products_Orders;
+INSERT INTO Provinces (Province) VALUES ('Quebec');
+INSERT INTO Provinces (Province) VALUES ('Ontario');
+INSERT INTO Provinces (Province) VALUES ('Alberta');
 
-SELECT *
-FROM
-Customers INNER JOIN Orders
-USING (customer_id)
-INNER JOIN Products_orders
-USING (order_id)
-INNER JOIN Products
-USING (product_id)
-INNER JOIN Inventory
-USING (product_id)
-INNER JOIN Warehouse
-USING (warehouse_id);
-
+INSERT INTO Cities (City, ProvinceId) VALUES ('Montreal', '1');
+INSERT INTO Cities (City, ProvinceId) VALUES ('Toronto', '2');
+INSERT INTO Cities (City, ProvinceId) VALUES ('Calgary', '3');
+INSERT INTO Cities (City, ProvinceId) VALUES ('Laval', '1');
+INSERt INTO Cities (City, ProvinceId) VALUES ('Brossard', 1);
 
 -- SQL types for tables with more than 3 columns (and products because it's important)
 /*
 JUST IN CASE!
-CREATE OR REPLACE TYPE addresses_type AS OBJECT(
+CREATE OR REPLACE TYPE addresses_typ AS OBJECT(
     AddressId       NUMBER(5), 
     Address         VARCHAR2(50),
     CityId          NUMBER(5)
 );
 /
 
-CREATE OR REPLACE TYPE cities_type AS OBJECT(
+CREATE OR REPLACE TYPE cities_typ AS OBJECT(
     CityId          NUMBER(5), 
     City            VARCHAR2(50),
+    ProvinceId      NUMBER(5)
+);
+/
+
+CREATE OR REPLACE TYPE provinces_typ AS OBJECT(
+    ProvinceId      NUMBER(5),
     Province        VARCHAR2(20)
 );
 /
