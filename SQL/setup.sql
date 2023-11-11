@@ -8,22 +8,17 @@ DROP TABLE Warehouses CASCADE CONSTRAINTS;
 DROP TABLE Reviews CASCADE CONSTRAINTS;
 DROP TABLE Orders CASCADE CONSTRAINTS;
 
-CREATE TABLE Provinces (
-    ProvinceId      NUMBER(5)      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    Province        VARCHAR2(20)   NOT NULL
-);
-/
 
 CREATE TABLE Cities (
     CityId          NUMBER(5)       GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-    City            VARCHAR2(50)    NOT NULL,
-    ProvinceId      NUMBER(5)       REFERENCES Provinces (ProvinceId)
+    City            VARCHAR2(50),
+    Province        VARCHAR2(20)    
 );
 /
 
 CREATE TABLE Addresses (
     AddressId       NUMBER(5)        GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-    Address         VARCHAR2(50)     NOT NULL,
+    Address         VARCHAR2(50),
     CityId          NUMBER(5)        REFERENCES Cities (CityId)
 );
 /
@@ -86,15 +81,16 @@ CREATE TABLE Orders (
 
 COMMIT;
 
-INSERT INTO Provinces (Province) VALUES ('Quebec');
-INSERT INTO Provinces (Province) VALUES ('Ontario');
-INSERT INTO Provinces (Province) VALUES ('Alberta');
+INSERT INTO Cities (City, Province) VALUES ('Montreal', 'Quebec');
+INSERT INTO Cities (City, Province) VALUES ('Toronto', 'Ontatio');
+INSERT INTO Cities (City, Province) VALUES ('Calgary', 'Alberta');
+INSERT INTO Cities (City, Province) VALUES ('Laval', 'Quebec');
+INSERt INTO Cities (City, Province) VALUES ('Brossard', 'Quebec');
 
-INSERT INTO Cities (City, ProvinceId) VALUES ('Montreal', '1');
-INSERT INTO Cities (City, ProvinceId) VALUES ('Toronto', '2');
-INSERT INTO Cities (City, ProvinceId) VALUES ('Calgary', '3');
-INSERT INTO Cities (City, ProvinceId) VALUES ('Laval', '1');
-INSERt INTO Cities (City, ProvinceId) VALUES ('Brossard', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('090 boul saint laurent', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('boul saint laurent', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('100 boul saint laurent', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('100 atwater street', 2);
 
 -- SQL types for tables with more than 3 columns (and products because it's important)
 /*
@@ -109,12 +105,6 @@ CREATE OR REPLACE TYPE addresses_typ AS OBJECT(
 CREATE OR REPLACE TYPE cities_typ AS OBJECT(
     CityId          NUMBER(5), 
     City            VARCHAR2(50),
-    ProvinceId      NUMBER(5)
-);
-/
-
-CREATE OR REPLACE TYPE provinces_typ AS OBJECT(
-    ProvinceId      NUMBER(5),
     Province        VARCHAR2(20)
 );
 /
