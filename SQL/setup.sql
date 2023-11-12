@@ -179,9 +179,56 @@ INSERT INTO Warehouses (ProductId, WarehouseName, Stock, Address_id)
     VALUES (9, 'Warehouse A', 1000, 13);
 INSERT INTO Warehouses (WarehouseId, ProductId, WarehouseName, Stock, Address_id) 
     VALUES (1, 10, 'Warehouse A', 10, 13); 
-    
+
+-- Reviews
+
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (9, 8, 4, 0, 'it was affordable.');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (1, 1, 3, 0, 'quality was not good');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (3, 10, 2, 1, NULL);
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (6, 4, 5, 0, 'highly recommend');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (2, 1, 1, 0, NULL);    
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (12, 10, 1, 0, 'did not worth the price');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (10, 8, 1, 0, 'missing some parts');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (8, 6, 5, 1, 'trash');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (5, 3, 2, NULL, NULL);
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (4, 2, 5, NULL, NULL);
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (7, 5, 4, NULL, NULL);
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (12, 10, 3, NULL, NULL);
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (11, 8, 1, 0, 'missing some parts');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (7, 8, 4, NULL, NULL);
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (11, 9, 1, 0, 'great product');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (8, 7, 5, 1, 'bad quality.');    
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (3, 1, 1, 0, 'it was affordable.');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (2, 1, 4, 0, 'it was affordable.');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (13, 11, 4, NULL, 'it was affordable.');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (15, 13, 5, NULL, 'it was affordable.');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (10, 8, 1, 2, 'worse car i have droven!');
+INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description) 
+    VALUES (15, 13, 4, NULL, 'it was affordable.');
 
 COMMIT;
+
 
 -- SQL types for tables with more than 3 columns (and products because it's important)
 /*
