@@ -1,161 +1,256 @@
-DROP TABLE Customers CASCADE CONSTRAINTS;
+DROP TABLE Provinces CASCADE CONSTRAINTS;
+DROP TABLE Cities CASCADE CONSTRAINTS;
+DROP TABLE Addresses CASCADE CONSTRAINTS;
 DROP TABLE Stores CASCADE CONSTRAINTS;
 DROP TABLE Products CASCADE CONSTRAINTS;
-DROP TABLE Warehouse CASCADE CONSTRAINTS;
+DROP TABLE Customers CASCADE CONSTRAINTS;
+DROP TABLE Warehouses CASCADE CONSTRAINTS;
 DROP TABLE Reviews CASCADE CONSTRAINTS;
-DROP TABLE Inventory CASCADE CONSTRAINTS;
 DROP TABLE Orders CASCADE CONSTRAINTS;
-DROP TABLE Products_Orders CASCADE CONSTRAINTS;
 
 
-CREATE TABLE Customers (
-Customer_Id     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Firstname       VARCHAR2(20),
-Lastname        VARCHAR2(20),
-Email           VARCHAR2(30),
-Address         VARCHAR2(50)
+CREATE TABLE Cities (
+    CityId          NUMBER(5)       GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+    City            VARCHAR2(50),
+    Province        VARCHAR2(20)    
 );
+/
+
+CREATE TABLE Addresses (
+    AddressId       NUMBER(5)        GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+    Address         VARCHAR2(50),
+    CityId          NUMBER(5)        REFERENCES Cities (CityId)
+);
+/
 
 CREATE TABLE Stores (   
-Store_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Store_Name      VARCHAR2(30)
+    StoreId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    StoreName       VARCHAR2(30)       NOT NULL
 );
+/
 
 CREATE TABLE Products (
-Product_Id      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Product_Name    VARCHAR2(30),
-Category        VARCHAR2(15)
+    ProductId       NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ProductName     VARCHAR2(30)       NOT NULL,
+    Category        VARCHAR2(20)
 );
+/
 
-CREATE TABLE Warehouse( 
-Warehouse_Id    NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Warehouse_Name  VARCHAR2(20),
-Address         VARCHAR2(50)
+CREATE TABLE Customers (
+    CustomerId      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    Firstname       VARCHAR2(20),
+    Lastname        VARCHAR2(20),
+    Email           VARCHAR2(30),
+    Addressid       NUMBER(5)          REFERENCES Addresses (AddressId)
 );
+/
+
+CREATE TABLE Warehouses( 
+    WarehouseId     NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+    ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+    WarehouseName   VARCHAR2(20),
+    Stock           NUMBER(10,0),
+    Address_id      NUMBER(5)          REFERENCES Addresses (AddressId),
+    
+    CONSTRAINT warehouses_pk PRIMARY KEY (WarehouseId, ProductId)
+);
+/
 
 CREATE TABLE Reviews (
-Review_Id       NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Product_Id      NUMBER(5)          REFERENCES Products(Product_Id),
-Flag            NUMBER(1,0),
-Description      VARCHAR2(200)
+    ReviewId        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+    CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
+    Score           NUMBER(1,0),
+    Flag            NUMBER(1,0),
+    Description     VARCHAR2(200)
 );
-
-CREATE TABLE Inventory (
-Warehouse_Id    NUMBER(5)          REFERENCES Warehouse(Warehouse_Id) ,
-Product_Id      NUMBER(5)          REFERENCES Products(Product_Id),
-Stock           NUMBER(10,0),
-
-CONSTRAINT inventory_pk PRIMARY KEY (Warehouse_Id, Product_Id)
-);
+/
 
 CREATE TABLE Orders (
-Order_Id        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-Customer_Id     NUMBER(5)          REFERENCES Customers(customer_id),
-Store_Id        NUMBER(5)          REFERENCES Stores(Store_Id),
-Quantity        NUMBER(2,0),
-OrderDate       DATE,
-Price           NUMBER (10,2)
+    OrderId         NUMBER(5)          GENERATED ALWAYS AS IDENTITY,
+    ProductId       NUMBER(5)          REFERENCES Products (ProductId),
+    CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
+    StoreId         NUMBER(5)          REFERENCES Stores(StoreId),
+    Quantity        NUMBER(5,0),
+    Price           NUMBER (10,2),
+    OrderDate       DATE,
+    
+    CONSTRAINT orders_pk PRIMARY KEY (OrderId, ProductId)
 );
+/
 
-CREATE TABLE Products_Orders (
-Order_Id        NUMBER(5)          REFERENCES Orders(Order_Id) ,
-Product_Id      NUMBER(5)          REFERENCES Products(Product_Id),
+-- Insert statements 
+-- Cities
+INSERT INTO Cities (City, Province) VALUES ('Montreal', 'Quebec');
+INSERT INTO Cities (City, Province) VALUES ('Toronto', 'Ontatio');
+INSERT INTO Cities (City, Province) VALUES ('Calgary', 'Alberta');
+INSERT INTO Cities (City, Province) VALUES ('Laval', 'Quebec');
+INSERT INTO Cities (City, Province) VALUES ('Brossard', 'Quebec');
+-- Warehouse Cities
+INSERT INTO Cities (City, Province) VALUES ('Saint Laurent', 'Quebec');
+INSERT INTO Cities (City, Province) VALUES ('Quebec City', 'Quebec');
+INSERT INTO Cities (City, Province) VALUES ('Ottawa', 'Ontario');
+INSERT INTO Cities (Province) VALUES ('Alberta');
 
-CONSTRAINT ProductsOrders_pk PRIMARY KEY (Order_Id, Product_Id)
-);
+
+
+-- Addresses
+INSERT INTO Addresses (Address, CityId) VALUES ('87 boul saint laurent', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('090 boul saint laurent', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('100 boul saint laurent', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('100 atwater street', 2);
+INSERT INTO Addresses (Address, CityId) VALUES ('dawson college', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('100 Young street', 2);
+INSERT INTO Addresses (Address, CityId) VALUES ('104 gill street', 2);
+INSERT INTO Addresses (Address, CityId) VALUES ('105 Young street', 2);
+INSERT INTO Addresses (Address, CityId) VALUES ('22222 happy street', 4);
+INSERT INTO Addresses (Address, CityId) VALUES ('76 boul decalthon', 4);
+-- For customers with no address and only city
+INSERT INTO Addresses (CityId) VALUES (3);
+INSERT INTO Addresses (CityId) VALUES (5);
+-- Warehouse Addresses
+INSERT INTO Addresses (Address, CityId) VALUES ('100 rue William', 6);
+-- This is wrong but the address confused me
+-- INSERT INTO Addresses (Address, CityId) VALUES ('304 Rue François-Perrault, Villera Saint-Michel', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('86700 Weston Rd', 2);
+INSERT INTO Addresses (Address, CityId) VALUES ('170 Sideroad', 7);
+INSERT INTO Addresses (Address, CityId) VALUES ('1231 Trudea road', 8);
+INSERT INTO Addresses (Address, CityId) VALUES ('16 Whitlock Rd', 9);
+
+-- Stores (stores with same name only differentiated by StoreId) NOT SURE IF CORRECT!!!!
+INSERT INTO Stores (StoreName) VALUES ('dawson store');
+INSERT INTO Stores (StoreName) VALUES ('dealer montreal');
+INSERT INTO Stores (StoreName) VALUES ('Dealer one');
+INSERT INTO Stores (StoreName) VALUES ('marche adonis');
+INSERT INTO Stores (StoreName) VALUES ('movie start');
+INSERT INTO Stores (StoreName) VALUES ('movie store');
+INSERT INTO Stores (StoreName) VALUES ('star store');
+-- Quebec
+INSERT INTO Stores (StoreName) VALUES ('store magic');
+-- Toronto
+INSERT INTO Stores (StoreName) VALUES ('store magic');
+INSERT INTO Stores (StoreName) VALUES ('super rue champlain');
+-- Quebec
+INSERT INTO Stores (StoreName) VALUES ('toy r us');
+-- Toronto
+INSERT INTO Stores (StoreName) VALUES ('toy r us');
+-- Quebec
+INSERT INTO Stores (StoreName) VALUES ('marche atwater');
+-- Calgary
+INSERT INTO Stores (StoreName) VALUES ('marche atwater');
+
+-- Products
+
+INSERT INTO Products (ProductName, Category) VALUES ('apple', 'Grocery');
+INSERT INTO Products (ProductName, Category) VALUES ('Barbie Movie', 'DVD');
+INSERT INTO Products (ProductName, Category) VALUES ('SIMS CD', 'Video Games');
+INSERT INTO Products (ProductName, Category) VALUES ('paper towel', 'Beauty');
+INSERT INTO Products (ProductName, Category) VALUES ('Truck 500c ', 'Vehicle');
+INSERT INTO Products (ProductName, Category) VALUES ('orange', 'Grocery');
+INSERT INTO Products (ProductName, Category) VALUES ('plum', 'Grocery');
+INSERT INTO Products (ProductName, Category) VALUES ('BMW i6', 'Cars');
+INSERT INTO Products (ProductName, Category) VALUES ('laptop ASUS 104S', 'electronics');
+INSERT INTO Products (ProductName, Category) VALUES ('BMW iX Lego', 'Toys');
+INSERT INTO Products (ProductName, Category) VALUES ('Lamborghini Lego', 'Toys');
+INSERT INTO Products (ProductName, Category) VALUES ('L''Oreal Normal Hair', 'Health');
+INSERT INTO Products (ProductName, Category) VALUES ('chicken', 'Grocery');
+INSERT INTO Products (ProductName, Category) VALUES ('PS5', 'electronics');
+INSERT INTO Products (ProductName, Category) VALUES ('pasta', 'Grocery');
+
+
+-- Customers
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Alex', 'Brown', 'alex@gmail.com', 2);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Amanda', 'Harry', 'am.harry@yahioo.com', 3);
+INSERT INTO Customers (Firstname, Lastname, Email) VALUES ('Ari', 'Brown', 'b.a@gmail.com');
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Daneil', 'Hanne', 'daneil@yahoo.com', 4);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Jack', 'Jonhson', 'johnson.a@gmail.com', 11);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('John', 'Boura', 'bdoura@gmail.com', 6);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('John', 'Belle', 'abcd@yahoo.com', 8);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Mahsa', 'Sadeghi', 'msadeghi@dawsoncollege.qc.ca', 5);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Mahsa', 'Sadeghi', 'ms@gmail.com', 7);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Martin', 'Alexandre', 'marting@yahoo.com', 12);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Martin', 'Li', 'm.li@gmail.com', 1);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Noah', 'Garcia', 'g.noah@yahoo.com', 9);
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Olivia', 'Smith', 'smith@hotmail.com', 10);
+
+-- Warehouses (Doesn't work with generated identity, have to change)
+
+INSERT INTO Warehouses (ProductId, WarehouseName, Stock, Address_id) 
+    VALUES (9, 'Warehouse A', 1000, 13);
+INSERT INTO Warehouses (WarehouseId, ProductId, WarehouseName, Stock, Address_id) 
+    VALUES (1, 10, 'Warehouse A', 10, 13); 
+    
 
 COMMIT;
 
-INSERT INTO Customers (Firstname,Lastname,Email,Address) VALUES ('Mahsa','Sadeghi','msadeghi@dawsoncollege.qc.ca','Dawson College, Montreal, Quebec, Canada');
-SELECT * FROM Customers;
-INSERT INTO Stores (Store_Name) VALUES ('Marche Atwater');
-SELECT * FROM Stores;
-INSERT INTO Products (Product_Name,Category) VALUES ('Laptop ASUS 104S','Electronics');
-SELECT * FROM Products;
-INSERT INTO Warehouse (Warehouse_Name,Address) VALUES ('A','100 Rue William, Saint Laurent, Quebec, Canada'); 
-SELECT * FROM Warehouse;
-INSERT INTO Reviews (Product_Id,Flag,Description) VALUES (1,0,'It was affordable');
-SELECT * FROM Reviews;
-INSERT INTO Inventory VALUES(1,1,1000);
-SELECT * FROM Inventory;
-INSERT INTO Orders (Customer_Id,Store_Id,Quantity,OrderDate,Price) VALUES
-(1,1,1,SYSDATE,970);
-SELECT * FROM Orders;
-INSERT INTO Products_Orders VALUES (1,1);
-SELECT * FROM Products_Orders;
-
-SELECT *
-FROM
-Customers INNER JOIN Orders
-USING (customer_id)
-INNER JOIN Products_orders
-USING (order_id)
-INNER JOIN Products
-USING (product_id)
-INNER JOIN Inventory
-USING (product_id)
-INNER JOIN Warehouse
-USING (warehouse_id);
-
-
-CREATE OR REPLACE TYPE stores_typ AS OBJECT(
-    Store_Id  NUMBER(5),
-    Store_Name VARCHAR2(30)
+-- SQL types for tables with more than 3 columns (and products because it's important)
+/*
+JUST IN CASE!
+CREATE OR REPLACE TYPE addresses_typ AS OBJECT(
+    AddressId       NUMBER(5), 
+    Address         VARCHAR2(50),
+    CityId          NUMBER(5)
 );
 /
 
+CREATE OR REPLACE TYPE cities_typ AS OBJECT(
+    CityId          NUMBER(5), 
+    City            VARCHAR2(50),
+    Province        VARCHAR2(20)
+);
+/
+*/
 CREATE OR REPLACE TYPE reviews_typ AS OBJECT(
-    Review_Id       NUMBER(5),
-    Product_Id      NUMBER(5),
+    ReviewId        NUMBER(5),
+    ProductId       NUMBER(5),
+    CustomerId      NUMBER(5),
+    Score           NUMBER(1,0),
     Flag            NUMBER(1,0),
-    Description      VARCHAR2(200)
+    Description     VARCHAR2(200)
 );
 /
+
 
 CREATE OR REPLACE TYPE warehouse_typ AS OBJECT(
-    Warehouse_Id    NUMBER(5),
-    Warehouse_Name  VARCHAR2(20),
-    Address         VARCHAR2(50)
+    WarehouseId     NUMBER(5),
+    ProductId       NUMBER(5),
+    WarehouseName   VARCHAR2(20),
+    Stock           NUMBER(10,0),
+    Address_id      NUMBER(5)
 );
 /
 
-CREATE OR REPLACE TYPE inventory_typ AS OBJECT(
-    Warehouse_Id    NUMBER(5),
-    Product_Id      NUMBER(5),
-    Stock           NUMBER(10,0)
-);
-/
 
 CREATE OR REPLACE TYPE customers_type AS OBJECT(
-Customer_Id     NUMBER(5),
-Firstname       VARCHAR2(20),
-Lastname        VARCHAR2(20),
-Email           VARCHAR2(30),
-Address         VARCHAR2(50)
+    CustomerId      NUMBER(5),
+    Firstname       VARCHAR2(20),
+    Lastname        VARCHAR2(20),
+    Email           VARCHAR2(30),
+    Addressid       NUMBER(5)  
 );
 /
 
 CREATE OR REPLACE TYPE products_type AS OBJECT(
-Product_Id      NUMBER(5),
-Product_Name    VARCHAR2(30),
-Category        VARCHAR2(15)
+    ProductId       NUMBER(5),
+    ProductName     VARCHAR2(30),
+    Category        VARCHAR2(20)
 );
 /
 
 CREATE OR REPLACE TYPE orders_typ AS OBJECT(
-Order_Id        NUMBER(5),
-Customer_Id     NUMBER(5),
-Store_Id        NUMBER(5),
-Quantity        NUMBER(2,0),
-OrderDate       DATE,
-Price           NUMBER (10,2)
+    OrderId         NUMBER(5),
+    ProductId       NUMBER(5),
+    CustomerId      NUMBER(5),
+    StoreId         NUMBER(5),
+    Quantity        NUMBER(5,0),
+    Price           NUMBER (10,2),
+    OrderDate       DATE
 );
 /
 
-CREATE OR REPLACE TYPE products_orders_typ AS OBJECT(
-Order_Id        NUMBER(5),
-Product_Id      NUMBER(5)
-);
-/
+
+COMMIT;
+
+
 
 
