@@ -133,6 +133,8 @@ PROCEDURE add_products(product_name VARCHAR2, category_name VARCHAR2);
 
 PROCEDURE remove_products(product_id NUMBER);
 
+PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2);
+
 END products_package;
 /
 
@@ -154,12 +156,36 @@ DELETE FROM Products WHERE ProductId = product_id;
 
 END remove_products;
 
+PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2) IS
+
+BEGIN
+
+UPDATE Products SET ProductName = product_name WHERE ProductId = product_id;
+UPDATE Products SET Category = category_name WHERE ProductId = product_id;
+
+END update_products;
+
 END products_package;
 /
 
 --Customers
 
-CREATE OR REPLACE PROCEDURE add_customers(first_name VARCHAR2, last_name VARCHAR2,
+CREATE OR REPLACE PACKAGE customers_package AS
+
+PROCEDURE add_customers(first_name VARCHAR2, last_name VARCHAR2,
+customer_email VARCHAR2, address_id NUMBER);
+
+PROCEDURE remove_customers(customer_id NUMBER);
+
+PROCEDURE update_customers(customer_id NUMBER, first_name VARCHAR2, last_name VARCHAR2,
+customer_email VARCHAR2, address_id NUMBER);
+
+END customers_package;
+/
+
+CREATE OR REPLACE PACKAGE BODY customers_package AS 
+
+PROCEDURE add_customers(first_name VARCHAR2, last_name VARCHAR2,
 customer_email VARCHAR2, address_id NUMBER) IS 
 
 BEGIN
@@ -168,15 +194,28 @@ INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES
 (first_name, last_name, customer_email, address_id);
 
 END add_customers;
-/
 
-CREATE OR REPLACE PROCEDURE remove_customers(customer_id NUMBER) IS 
+PROCEDURE remove_customers(customer_id NUMBER) IS 
 
 BEGIN
 
 DELETE FROM Customers WHERE CustomerId = customer_id;
 
 END remove_customers;
+
+PROCEDURE update_customers(customer_id NUMBER, first_name VARCHAR2, last_name VARCHAR2,
+customer_email VARCHAR2, address_id NUMBER) IS
+
+BEGIN
+
+UPDATE Customers SET Firstname = first_name WHERE CustomerId = customer_id;
+UPDATE Customers SET Lastname = last_name WHERE CustomerId = customer_id;
+UPDATE Customers SET Email = customer_email WHERE CustomerId = customer_id;
+UPDATE Customers SET AddressId = address_id WHERE CustomerId = customer_id;
+
+END update_customers;
+
+END customers_package;
 /
 
 
