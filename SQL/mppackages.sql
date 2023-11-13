@@ -82,7 +82,7 @@ CREATE OR REPLACE PROCEDURE delete_review (
     vreviewid IN NUMBER(5)
 ) IS
 BEGIN
-DELETE FROM Reviews WHERE ReviewId = vorderid;
+DELETE FROM Reviews WHERE ReviewId = vreviewid;
 END;
 /
 
