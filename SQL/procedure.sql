@@ -129,7 +129,7 @@ END stores_package;
 
 CREATE OR REPLACE PACKAGE products_package AS
 
-PROCEDURE add_products(product_name VARCHAR2, category_name VARCHAR2);
+PROCEDURE add_products(vproduct IN products_type);
 
 PROCEDURE remove_products(product_id NUMBER);
 
@@ -140,11 +140,11 @@ END products_package;
 
 CREATE OR REPLACE PACKAGE BODY products_package AS 
 
-PROCEDURE add_products(product_name VARCHAR2, category_name VARCHAR2) IS 
+PROCEDURE add_products(vproduct IN products_type) IS 
 
 BEGIN
 
-INSERT INTO Products (ProductName, Category) VALUES (product_name, category_name);
+INSERT INTO Products VALUES (vproduct.ProductId, vproduct.ProductName, vproduct.Category);
 
 END add_products;
 
@@ -172,8 +172,7 @@ END products_package;
 
 CREATE OR REPLACE PACKAGE customers_package AS
 
-PROCEDURE add_customers(first_name VARCHAR2, last_name VARCHAR2,
-customer_email VARCHAR2, address_id NUMBER);
+PROCEDURE add_customers(vcustomer IN customers_type);
 
 PROCEDURE remove_customers(customer_id NUMBER);
 
@@ -185,13 +184,12 @@ END customers_package;
 
 CREATE OR REPLACE PACKAGE BODY customers_package AS 
 
-PROCEDURE add_customers(first_name VARCHAR2, last_name VARCHAR2,
-customer_email VARCHAR2, address_id NUMBER) IS 
+PROCEDURE add_customers(vcustomer IN customers_type) IS 
 
 BEGIN
 
-INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES 
-(first_name, last_name, customer_email, address_id);
+INSERT INTO Customers VALUES (vcustomer.CustomerId, vcustomer.Firstname, vcustomer.Lastname,
+vcustomer.Email, vcustomer.AddressId);
 
 END add_customers;
 
