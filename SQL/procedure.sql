@@ -129,32 +129,16 @@ END stores_package;
 
 CREATE OR REPLACE PACKAGE products_package AS
 
-PROCEDURE add_products(vproduct IN products_type);
-
-PROCEDURE remove_products(product_id NUMBER);
-
 PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2);
+
+TYPE products_name_varray IS VARRAY(100) OF VARCHAR2(30);
+
+FUNCTION getProductNameByCategory(category_name VARCHAR2) RETURN products_name_varray;
 
 END products_package;
 /
 
 CREATE OR REPLACE PACKAGE BODY products_package AS 
-
-PROCEDURE add_products(vproduct IN products_type) IS 
-
-BEGIN
-
-INSERT INTO Products VALUES (vproduct.ProductId, vproduct.ProductName, vproduct.Category);
-
-END add_products;
-
-PROCEDURE remove_products(product_id NUMBER) IS 
-
-BEGIN
-
-DELETE FROM Products WHERE ProductId = product_id;
-
-END remove_products;
 
 PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2) IS
 
@@ -164,6 +148,31 @@ UPDATE Products SET ProductName = product_name WHERE ProductId = product_id;
 UPDATE Products SET Category = category_name WHERE ProductId = product_id;
 
 END update_products;
+
+FUNCTION getProductNameByCategory(category_name VARCHAR2)
+
+RETURN products_name_varray IS
+products_name products_name_varray := products_name_varray();
+
+BEGIN
+
+SELECT
+
+ProductName BULK COLLECT INTO products_name FROM Products WHERE Category = category_name;
+
+RETURN products_name;
+
+END getProductNameByCategory;
+
+CREATE TRIGGER ProductsUpdate
+
+AFTER UPDATE ON Products
+
+FOR EACH ROW
+
+BEGIN
+
+INSERT INTO AuditTable () VALUES ();
 
 END products_package;
 /
@@ -215,5 +224,13 @@ END update_customers;
 
 END customers_package;
 /
+
+CREATE TABLE AuditTable (
+
+AuditId     NUMBER(10)      GENERATED ALWAYS AS IDENTITY,
+Action      CHAR(6)         CHECK (Action IN ('INSERT', 'UPDATE', 'DELETE')),
+
+
+);
 
 
