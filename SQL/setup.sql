@@ -48,7 +48,7 @@ CREATE TABLE Customers (
 CREATE TABLE Warehouses( 
     WarehouseId     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     WarehouseName   VARCHAR2(20),
-    Address_id      NUMBER(5)          REFERENCES Addresses (AddressId)
+    Addressid      NUMBER(5)          REFERENCES Addresses (AddressId)
 );
 /
 

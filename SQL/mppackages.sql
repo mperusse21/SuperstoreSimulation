@@ -1,6 +1,18 @@
 -- Orders
 -- create exceptions for negative price/quantity
-CREATE OR REPLACE PROCEDURE add_order (
+
+CREATE OR REPLACE PACKAGE orders_package AS
+PROCEDURE add_order(vorder IN orders_typ);
+PROCEDURE delete_order(vorderid IN NUMBER);
+FUNCTION get_order(vorderid NUMBER, vproductid NUMBER)
+    RETURN orders_typ;
+FUNCTION get_times_ordered (vproductid NUMBER)
+    RETURN NUMBER;
+END orders_package;
+/
+
+CREATE OR REPLACE PACKAGE BODY orders_package AS 
+PROCEDURE add_order (
     vorder IN orders_typ
 ) IS
 BEGIN
@@ -15,62 +27,18 @@ INSERT INTO Orders
             vorder.Price,
             vorder.OrderDate
     );
-END;
-/
+END add_order;
 
 -- takes an orderid and deletes all rows with the orderid. (if it has multiple products they will all be deleted)
-CREATE OR REPLACE PROCEDURE delete_order (
+PROCEDURE delete_order (
     vorderid IN NUMBER
 ) IS
 BEGIN
 DELETE FROM Orders WHERE OrderId = vorderid;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE updatequantity (
-vorderid IN NUMBER,
-vproductid IN NUMBER,
-vquantity IN NUMBER
-) IS
-BEGIN
-    UPDATE Orders
-    SET
-        quantity = vquantity
-    WHERE
-        OrderId = vorderid AND ProductId = vproductid;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE updateprice (
-vorderid IN NUMBER,
-vproductid IN NUMBER,
-vprice IN NUMBER
-) IS
-BEGIN
-    UPDATE Orders
-    SET
-        Price = vprice
-    WHERE
-        OrderId = vorderid AND ProductId = vproductid;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE updatedate (
-vorderid IN NUMBER,
-vproductid IN NUMBER,
-vorderdate IN DATE
-) IS
-BEGIN
-    UPDATE Orders
-    SET
-        Date = vorderdate
-    WHERE
-        OrderId = vorderid AND ProductId = vproductid;
-END;
-/
+END delete_order;
 
 -- Gets an order with a certain id and product (example order 1 apple)
-CREATE OR REPLACE FUNCTION get_order (vorderid NUMBER, vproductid NUMBER)
+FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
 RETURN orders_typ AS
     vcustomerid      NUMBER(5);
     vstoreid         NUMBER(5);
@@ -98,7 +66,25 @@ BEGIN
     
     vorder := orders_typ(vorderid, vproductid, vcustomerid, vstoreid, vquantity, vprice, vorderdate);
     return vorder;
-END;
+END get_order;
+
+FUNCTION get_times_ordered (vproductid NUMBER)
+RETURN NUMBER AS
+    times_ordered NUMBER(10);
+BEGIN
+    SELECT
+        COUNT(*)
+    INTO
+        times_ordered
+    FROM
+        Orders
+    WHERE
+        ProductId = vproductid;
+    
+    return times_ordered;
+END get_times_ordered;
+
+END orders_package;
 /
 
 -- Reviews 
@@ -121,50 +107,19 @@ END;
 
 -- takes an reviewid and deletes all rows with the revuewid.
 CREATE OR REPLACE PROCEDURE delete_review (
-    vreviewid IN NUMBER(5)
+    vreviewid IN NUMBER
 ) IS
 BEGIN
 DELETE FROM Reviews WHERE ReviewId = vreviewid;
 END;
 /
 
-CREATE OR REPLACE PROCEDURE updatescore (
-vreviewid IN NUMBER,
-vscore IN NUMBER
-) IS
+CREATE OR REPLACE PROCEDURE update_reviews(vreview_id NUMBER, vscore NUMBER, vflag VARCHAR2, vdescription VARCHAR2) IS
 BEGIN
-    UPDATE Reviews
-    SET
-        Score = vscore
-    WHERE
-        ReviewId = vreviewid;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE updateflag (
-vreviewid IN NUMBER,
-vflag IN NUMBER
-) IS
-BEGIN
-    UPDATE Reviews
-    SET
-        Flag = vflag
-    WHERE
-        ReviewId = vreviewid;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE updatedescription (
-vreviewid IN NUMBER,
-vdescription IN NUMBER
-) IS
-BEGIN
-    UPDATE Reviews
-    SET
-        Description = vdescription
-    WHERE
-        ReviewId = vreviewid;
-END;
+UPDATE Reviews SET Score = vscore WHERE ReviewId = vreview_id;
+UPDATE Reviews SET Flag = vflag WHERE ReviewId = vreview_id;
+UPDATE Reviews SET Description = vdescription WHERE ReviewId = vreview_id;
+END; 
 /
 
 CREATE OR REPLACE FUNCTION get_review (vreviewid NUMBER)
@@ -195,6 +150,23 @@ BEGIN
     
     vreview := reviews_typ(vreviewid, vproductid, vcustomerid, vscore, vflag, vdescription);
     return vreview;
+END;
+/
+
+CREATE OR REPLACE FUNCTION get_average_score (vproductid NUMBER)
+RETURN NUMBER AS
+    average_score NUMBER(1,2);
+BEGIN
+    SELECT
+        AVG(Score)
+    INTO
+        average_score
+    FROM
+        Reviews
+    WHERE
+        ProductId = vproductid;
+    
+    return average_score;
 END;
 /
 
