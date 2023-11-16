@@ -1,4 +1,6 @@
---Cities
+-- CITIES --
+
+--Specification
 
 CREATE OR REPLACE PACKAGE cities_package AS
 
@@ -6,42 +8,73 @@ PROCEDURE add_cities(city_name VARCHAR2, province_name VARCHAR2);
 
 PROCEDURE remove_cities(city_id NUMBER);
 
-PROCEDURE update_cities(city_id NUMBER, city_name VARCHAR2, province_name VARCHAR2);
+FUNCTION getCity(city_id NUMBER) RETURN VARCHAR2;
 
 END cities_package;
 /
+
+--Body
 
 CREATE OR REPLACE PACKAGE BODY cities_package AS 
 
 PROCEDURE add_cities(city_name VARCHAR2, province_name VARCHAR2) IS 
-
 BEGIN
-
 INSERT INTO Cities (City, Province) VALUES (city_name, province_name);
-
 END add_cities;
 
 PROCEDURE remove_cities(city_id NUMBER) IS
-
 BEGIN
-
 DELETE FROM Cities WHERE CityId = city_id;
-
 END remove_cities;
 
-PROCEDURE update_cities(city_id NUMBER, city_name VARCHAR2, province_name VARCHAR2) IS
-
+FUNCTION getCity(city_id NUMBER)
+RETURN VARCHAR2 IS
+city_name VARCHAR2(50);   
 BEGIN
-
-UPDATE Cities SET City = city_name WHERE CityId = city_id;
-UPDATE Cities SET Province = province_name WHERE CityId = city_id;
-
-END update_cities;
+SELECT
+City INTO city_name FROM Cities WHERE CityId = city_id;
+RETURN city_name;
+END getCity;
 
 END cities_package;
 /
 
---Addresses
+--Triggers (not working)
+
+CREATE OR REPLACE TRIGGER CitiesChange
+AFTER UPDATE ON Cities
+FOR EACH ROW
+BEGIN
+IF INSERTING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.CityId, 'INSERT', 'CITIES', SYSDATE);
+ELSIF DELETING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.CityId, 'REMOVE', 'CITIES', SYSDATE);
+END IF;
+END CitiesChange;
+/
+
+--Anonymous block
+
+SELECT * FROM Cities;
+SELECT * FROM AuditTable;
+
+DECLARE
+
+city_name VARCHAR2(50);
+
+BEGIN
+
+--cities_package.add_cities('Dorval', 'Quebec');
+--cities_package.remove_cities();
+city_name := cities_package.getCity(7);
+DBMS_OUTPUT.PUT_LINE(city_name);
+  
+END;
+/
+
+-- ADDRESSES --
+
+--Specification
 
 CREATE OR REPLACE PACKAGE addresses_package AS
 
@@ -49,41 +82,73 @@ PROCEDURE add_addresses(address_name VARCHAR2, city_id NUMBER);
 
 PROCEDURE remove_addresses(address_id NUMBER);
 
-PROCEDURE update_addresses(address_id NUMBER, address_name VARCHAR2);
+FUNCTION getAddress(address_id NUMBER) RETURN VARCHAR2;
 
 END addresses_package;
 /
+
+--Body
 
 CREATE OR REPLACE PACKAGE BODY addresses_package AS 
 
 PROCEDURE add_addresses(address_name VARCHAR2, city_id NUMBER) IS
-
 BEGIN 
-
 INSERT INTO Addresses (Address, CityId) VALUES (address_name, city_id);
-
 END add_addresses;
 
 PROCEDURE remove_addresses(address_id NUMBER) IS
-
 BEGIN
-
 DELETE FROM Addresses WHERE AddressId = address_id;
-
 END remove_addresses;
 
-PROCEDURE update_addresses(address_id NUMBER, address_name VARCHAR2) IS
-
+FUNCTION getAddress(address_id NUMBER)
+RETURN VARCHAR2 IS
+address_name VARCHAR2(50);   
 BEGIN
-
-UPDATE Addresses SET Address = address_name WHERE AddressId = address_id;
-
-END update_addresses;
+SELECT
+Address INTO address_name FROM Addresses WHERE AddressId = address_id;
+RETURN address_name;
+END getAddress;
 
 END addresses_package;
 /
 
---Stores
+--Triggers
+
+CREATE OR REPLACE TRIGGER AddressesChange
+AFTER UPDATE ON Addresses
+FOR EACH ROW
+BEGIN
+IF INSERTING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.AddressId, 'INSERT', 'ADDRESSES', SYSDATE);
+ELSIF DELETING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.AddressId, 'REMOVE', 'ADDRESSES', SYSDATE);
+END IF;
+END AddressesChange;
+/
+
+--Anonymous block
+
+SELECT * FROM Addresses;
+SELECT * FROM AuditTable;
+
+DECLARE
+
+address_name VARCHAR2(50);
+
+BEGIN
+
+--addresses_package.add_addresses('1-825 Rue Richmond', 1);
+--addresses_package.remove_addresses();
+address_name := addresses_package.getAddress(13);
+DBMS_OUTPUT.PUT_LINE(address_name);
+  
+END;
+/
+
+-- STORES --
+
+--Specification
 
 CREATE OR REPLACE PACKAGE stores_package AS
 
@@ -132,9 +197,9 @@ CREATE OR REPLACE PACKAGE products_package AS
 
 PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2);
 
-TYPE products_name_varray IS VARRAY(100) OF VARCHAR2(30);
+TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
-FUNCTION getProductNameByCategory(category_name VARCHAR2) RETURN products_name_varray;
+FUNCTION getProductsByCategory(category_name VARCHAR2) RETURN products_name_varray;
 
 PROCEDURE remove_products(product_id NUMBER);
 
@@ -160,20 +225,20 @@ DELETE FROM Products WHERE ProductId = product_id;
 
 END remove_products;
 
-FUNCTION getProductNameByCategory(category_name VARCHAR2)
+FUNCTION getProductsByCategory(category_name VARCHAR2)
 
 RETURN products_name_varray IS
-products_name products_name_varray := products_name_varray();
+products_id products_name_varray := products_name_varray();
 
 BEGIN
 
 SELECT
 
-ProductName BULK COLLECT INTO products_name FROM Products WHERE Category = category_name;
+ProductId BULK COLLECT INTO products_id FROM Products WHERE Category = category_name;
 
-RETURN products_name;
+RETURN products_id;
 
-END getProductNameByCategory;
+END getProductsByCategory;
 
 END products_package;
 /
@@ -215,9 +280,9 @@ AFTER UPDATE ON Products
 FOR EACH ROW
 BEGIN
 IF UPDATING THEN
-INSERT INTO AuditTable (Action, TableChanged) VALUES ('UPDATE', 'PRODUCTS');
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.ProductId, 'UPDATE', 'PRODUCTS', SYSDATE);
 ELSIF DELETING THEN
-INSERT INTO AuditTable (Action, TableChanged) VALUES ('REMOVE', 'PRODUCTS');
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.ProductId, 'REMOVE', 'PRODUCTS', SYSDATE);
 END IF;
 END ProductsUpdate;
 
@@ -311,6 +376,34 @@ vcustomer := customers_type(vcustomerid, vfirstname, vlastname, vemail, vaddress
 RETURN vcustomer;
 END getCustomerByEmail;
 
+FUNCTION getCustomer (customer_id NUMBER)
+    RETURN customers_type AS
+        vwarehousename VARCHAR2(20);
+        vaddressid NUMBER(5);
+        vwarehouse warehouse_typ;
+        
+    vfirstname       VARCHAR2(20);
+    vlastname        VARCHAR2(20);
+    vemail           VARCHAR2(30);
+    vaddressid       NUMBER(5);
+    vcustomers customers_type;
+    BEGIN
+        SELECT
+            Fistname, Lastname, Email, AddressId
+        INTO
+         vfirstname, vlastname, vemail, vaddressid
+            
+        FROM
+            Customers
+        WHERE
+            CustomerId = customer_id;
+        
+        vcustomers := customers_type(vfirstname, vlastname, vemail, vaddressid);
+        RETURN vcustomers;
+    END;
+
+
+
 
 END customers_package;
 /
@@ -320,14 +413,14 @@ AFTER INSERT OR UPDATE OR DELETE ON Customers
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-        INSERT INTO AuditTable (Action, TableChanged)
-        VALUES ('INSERT', 'CUSTOMERS');
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.CustomerId, 'INSERT', 'CUSTOMERS', SYSDATE);
     ELSIF DELETING THEN
-        INSERT INTO AuditTable (Action, TableChanged)
-        VALUES ('DELETE', 'CUSTOMERS');
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:OLD.CustomerId,'DELETE', 'CUSTOMERS', SYSDATE);
     ELSIF UPDATING THEN
-        INSERT INTO AuditTable (Action, TableChanged)
-        VALUES ('UPDATE', 'CUSTOMERS');
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.CustomerId, 'UPDATE', 'CUSTOMERS', SYSDATE);
     END IF;
 END CustomersChange;
 /
@@ -337,9 +430,15 @@ END CustomersChange;
 CREATE TABLE AuditTable (
 
 AuditId         NUMBER(10)      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+ChangedId       NUMBER(5),
+
 Action          CHAR(6)         CHECK (Action IN ('INSERT', 'UPDATE', 'DELETE')),
+
 TableChanged    VARCHAR2(10)    CHECK (TableChanged IN ('PROVINCES', 'CITIES', 'ADDRESSES',
-'STORES', 'PRODUCTS', 'CUSTOMERS', 'WAREHOUSES', 'INVENTORY', 'REVIEWS', 'ORDERS'))
+'STORES', 'PRODUCTS', 'CUSTOMERS', 'WAREHOUSES', 'INVENTORY', 'REVIEWS', 'ORDERS')),
+
+DateModified    Date
 
 );
 
