@@ -98,6 +98,9 @@ CREATE OR REPLACE PACKAGE reviews_package AS
         RETURN reviews_typ;
     FUNCTION get_average_score (vproductid NUMBER)
         RETURN NUMBER;
+    FUNCTION get_flagged_customers 
+        RETURN customer_id_varray;
+    TYPE customer_id_varray IS VARRAY(100) OF NUMBER;
 END reviews_package;
 /
 
@@ -175,6 +178,23 @@ FUNCTION get_average_score (vproductid NUMBER)
             ProductId = vproductid;
         
         return average_score;
+    END;
+    
+FUNCTION get_flagged_customers 
+    RETURN customer_id_varray AS
+        flagged_customers customer_id_varray;
+    BEGIN
+        SELECT
+            CustomerId
+        BULK COLLECT INTO
+            flagged_customers
+        FROM
+            Customers INNER JOIN Reviews
+            USING (CustomerId)
+        GROUP BY
+            CustomerId
+        HAVING
+            SUM(Flag) > 1;
     END;
     
 END reviews_package;
