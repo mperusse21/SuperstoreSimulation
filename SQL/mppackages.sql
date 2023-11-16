@@ -2,12 +2,12 @@
 -- create exceptions for negative price/quantity
 
 CREATE OR REPLACE PACKAGE orders_package AS
-PROCEDURE add_order(vorder IN orders_typ);
-PROCEDURE delete_order(vorderid IN NUMBER);
-FUNCTION get_order(vorderid NUMBER, vproductid NUMBER)
-    RETURN orders_typ;
-FUNCTION get_times_ordered (vproductid NUMBER)
-    RETURN NUMBER;
+    PROCEDURE add_order(vorder IN orders_typ);
+    PROCEDURE delete_order(vorderid IN NUMBER);
+    FUNCTION get_order(vorderid NUMBER, vproductid NUMBER)
+        RETURN orders_typ;
+    FUNCTION get_times_ordered (vproductid NUMBER)
+        RETURN NUMBER;
 END orders_package;
 /
 
@@ -15,293 +15,308 @@ CREATE OR REPLACE PACKAGE BODY orders_package AS
 PROCEDURE add_order (
     vorder IN orders_typ
 ) IS
-BEGIN
-INSERT INTO Orders 
-    VALUES (
-    -- If orderId is null one will be generated
-            vorder.OrderId,
-            vorder.ProductId,
-            vorder.CustomerId,
-            vorder.StoreId, 
-            vorder.Quantity, 
-            vorder.Price,
-            vorder.OrderDate
-    );
-END add_order;
-
+    BEGIN
+    INSERT INTO Orders 
+        VALUES (
+        -- If orderId is null one will be generated
+                vorder.OrderId,
+                vorder.ProductId,
+                vorder.CustomerId,
+                vorder.StoreId, 
+                vorder.Quantity, 
+                vorder.Price,
+                vorder.OrderDate
+        );
+    END;
+    
 -- takes an orderid and deletes all rows with the orderid. (if it has multiple products they will all be deleted)
 PROCEDURE delete_order (
     vorderid IN NUMBER
 ) IS
-BEGIN
-DELETE FROM Orders WHERE OrderId = vorderid;
-END delete_order;
-
+    BEGIN
+    DELETE FROM Orders WHERE OrderId = vorderid;
+    END;
+    
 -- Gets an order with a certain id and product (example order 1 apple)
 FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
-RETURN orders_typ AS
-    vcustomerid      NUMBER(5);
-    vstoreid         NUMBER(5);
-    vquantity        NUMBER(5,0);
-    vprice           NUMBER (10,2);
-    vorderdate       DATE;
-    vorder orders_typ;
-BEGIN
-    SELECT
-        CustomerId,
-        StoreId, 
-        Quantity, 
-        Price,
-        OrderDate
-    INTO
-        vcustomerid,
-        vstoreid,
-        vquantity,
-        vprice,
-        vorderdate 
-    FROM
-        Orders
-    WHERE
-        OrderId = vorderid AND ProductId = vproductid;
+    RETURN orders_typ AS
+        vcustomerid      NUMBER(5);
+        vstoreid         NUMBER(5);
+        vquantity        NUMBER(5,0);
+        vprice           NUMBER (10,2);
+        vorderdate       DATE;
+        vorder orders_typ;
+    BEGIN
+        SELECT
+            CustomerId,
+            StoreId, 
+            Quantity, 
+            Price,
+            OrderDate
+        INTO
+            vcustomerid,
+            vstoreid,
+            vquantity,
+            vprice,
+            vorderdate 
+        FROM
+            Orders
+        WHERE
+            OrderId = vorderid AND ProductId = vproductid;
+        
+        vorder := orders_typ(vorderid, vproductid, vcustomerid, vstoreid, vquantity, vprice, vorderdate);
+        return vorder;
+    END;
     
-    vorder := orders_typ(vorderid, vproductid, vcustomerid, vstoreid, vquantity, vprice, vorderdate);
-    return vorder;
-END get_order;
-
 FUNCTION get_times_ordered (vproductid NUMBER)
-RETURN NUMBER AS
-    times_ordered NUMBER(10);
-BEGIN
-    SELECT
-        COUNT(*)
-    INTO
-        times_ordered
-    FROM
-        Orders
-    WHERE
-        ProductId = vproductid;
-    
-    return times_ordered;
-END get_times_ordered;
+    RETURN NUMBER AS
+        times_ordered NUMBER(10);
+    BEGIN
+        SELECT
+            COUNT(*)
+        INTO
+            times_ordered
+        FROM
+            Orders
+        WHERE
+            ProductId = vproductid;
+        
+        return times_ordered;
+    END;
 
 END orders_package;
 /
 
 -- Reviews 
 -- Add exceptions for negative flag and score over 5 or less than 1
-CREATE OR REPLACE PROCEDURE add_review (
-    vreview IN reviews_typ
-) IS
-BEGIN
-INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description)     
-    VALUES (
-    -- If reviewid will be generated
-            vreview.ProductId,
-            vreview.CustomerId,
-            vreview.Score, 
-            vreview.Flag, 
-            vreview.Description
-    );
-END;
+
+CREATE OR REPLACE PACKAGE reviews_package AS
+    PROCEDURE add_review (vreview IN reviews_typ);
+    PROCEDURE delete_review (vreviewid IN NUMBER);
+    PROCEDURE update_reviews(vreview_id NUMBER, vscore NUMBER, vflag VARCHAR2, vdescription VARCHAR2);
+    FUNCTION get_review (vreviewid NUMBER)
+        RETURN reviews_typ;
+    FUNCTION get_average_score (vproductid NUMBER)
+        RETURN NUMBER;
+END reviews_package;
 /
 
--- takes an reviewid and deletes all rows with the revuewid.
-CREATE OR REPLACE PROCEDURE delete_review (
-    vreviewid IN NUMBER
-) IS
-BEGIN
-DELETE FROM Reviews WHERE ReviewId = vreviewid;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE update_reviews(vreview_id NUMBER, vscore NUMBER, vflag VARCHAR2, vdescription VARCHAR2) IS
-BEGIN
-UPDATE Reviews SET Score = vscore WHERE ReviewId = vreview_id;
-UPDATE Reviews SET Flag = vflag WHERE ReviewId = vreview_id;
-UPDATE Reviews SET Description = vdescription WHERE ReviewId = vreview_id;
-END; 
-/
-
-CREATE OR REPLACE FUNCTION get_review (vreviewid NUMBER)
-RETURN reviews_typ AS
-    vproductid NUMBER(5);
-    vcustomerid NUMBER(5);
-    vscore NUMBER(1,0); 
-    vflag NUMBER(1,0); 
-    vdescription VARCHAR2(200);
-    vreview reviews_typ;
-BEGIN
-    SELECT
-        ProductId,
-        CustomerId,
-        Score, 
-        Flag, 
-        Description
-    INTO
-        vproductid,
-        vcustomerid,
-        vscore, 
-        vflag, 
-        vdescription 
-    FROM
-        Reviews
-    WHERE
-        ReviewId = vreviewid;
+CREATE OR REPLACE PACKAGE BODY reviews_package AS 
+PROCEDURE add_review (
+        vreview IN reviews_typ
+    ) IS
+    BEGIN
+        INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description)     
+            VALUES (
+            -- If reviewid will be generated
+                    vreview.ProductId,
+                    vreview.CustomerId,
+                    vreview.Score, 
+                    vreview.Flag, 
+                    vreview.Description
+            );
+    END;
     
-    vreview := reviews_typ(vreviewid, vproductid, vcustomerid, vscore, vflag, vdescription);
-    return vreview;
-END;
-/
-
-CREATE OR REPLACE FUNCTION get_average_score (vproductid NUMBER)
-RETURN NUMBER AS
-    average_score NUMBER(1,2);
-BEGIN
-    SELECT
-        AVG(Score)
-    INTO
-        average_score
-    FROM
-        Reviews
-    WHERE
-        ProductId = vproductid;
+-- takes an reviewid and deletes all rows with the reviewid.
+PROCEDURE delete_review (
+        vreviewid IN NUMBER
+    ) IS
+    BEGIN
+        DELETE FROM Reviews WHERE ReviewId = vreviewid;
+    END delete_review;
+PROCEDURE update_reviews(vreview_id NUMBER, vscore NUMBER, vflag VARCHAR2, vdescription VARCHAR2) IS
+    BEGIN
+        UPDATE Reviews SET Score = vscore WHERE ReviewId = vreview_id;
+        UPDATE Reviews SET Flag = vflag WHERE ReviewId = vreview_id;
+        UPDATE Reviews SET Description = vdescription WHERE ReviewId = vreview_id;
+    END; 
     
-    return average_score;
-END;
-/
+FUNCTION get_review (vreviewid NUMBER)
+    RETURN reviews_typ AS
+        vproductid NUMBER(5);
+        vcustomerid NUMBER(5);
+        vscore NUMBER(1,0); 
+        vflag NUMBER(1,0); 
+        vdescription VARCHAR2(200);
+        vreview reviews_typ;
+    BEGIN
+        SELECT
+            ProductId,
+            CustomerId,
+            Score, 
+            Flag, 
+            Description
+        INTO
+            vproductid,
+            vcustomerid,
+            vscore, 
+            vflag, 
+            vdescription 
+        FROM
+            Reviews
+        WHERE
+            ReviewId = vreviewid;
+        
+        vreview := reviews_typ(vreviewid, vproductid, vcustomerid, vscore, vflag, vdescription);
+        return vreview;
+    END;
 
+FUNCTION get_average_score (vproductid NUMBER)
+    RETURN NUMBER AS
+        average_score NUMBER(1,2);
+    BEGIN
+        SELECT
+            AVG(Score)
+        INTO
+            average_score
+        FROM
+            Reviews
+        WHERE
+            ProductId = vproductid;
+        
+        return average_score;
+    END;
+    
+END reviews_package;
+/
 
 -- Warehouses
 
-CREATE OR REPLACE PROCEDURE add_warehouse (
+CREATE OR REPLACE PACKAGE warehouses_package AS
+    PROCEDURE add_warehouse (vwarehouse IN warehouse_typ);
+    PROCEDURE delete_warehouse (vwarehouseid IN NUMBER);
+    PROCEDURE updatewarehousename(vwarehouseid NUMBER, vwarehousename IN VARCHAR2);
+    FUNCTION get_warehouse (vwarehouseid NUMBER)
+        RETURN warehouse_typ; 
+END warehouses_package;
+/
+
+CREATE OR REPLACE PACKAGE BODY warehouses_package AS 
+PROCEDURE add_warehouse (
     vwarehouse IN warehouse_typ 
 ) IS
-BEGIN
-INSERT INTO Warehouse (WarehouseName, Address_id)   
-    VALUES (
-    -- If reviewid will be generated
-            vwarehouse.WarehouseName,
-            vwarehouse.Address_id
-    );
-END;
-/
+    BEGIN
+        INSERT INTO Warehouses (WarehouseName, AddressId)   
+            VALUES (
+            -- If reviewid will be generated
+                    vwarehouse.WarehouseName,
+                    vwarehouse.AddressId
+            );
+    END;
 
-CREATE OR REPLACE PROCEDURE delete_warehouse (
-    vwarehouseid IN NUMBER(5)
+PROCEDURE delete_warehouse (
+    vwarehouseid IN NUMBER
 ) IS
-BEGIN
-DELETE FROM Warehouses WHERE WarehouseId= vwarehouseid;
-END;
-/
+    BEGIN
+        DELETE FROM Warehouses WHERE WarehouseId= vwarehouseid;
+    END;
 
-CREATE OR REPLACE PROCEDURE updatewarehousename (
-vwarehouseid IN NUMBER,
-vwarehousename IN VARCHAR2
-) IS
-BEGIN
-    UPDATE Warehouses
-    SET
-        WarehouseName = vwarehousename
-    WHERE
-        WarehouseId = vwarehouseid;
-END;
-/
-
-CREATE OR REPLACE FUNCTION get_warehouse (vwarehouseid NUMBER)
-RETURN warehouse_typ AS
-    vwarehousename VARCHAR2(20);
-    vaddressid NUMBER(5);
-    vwarehouse warehouse_typ;
-BEGIN
-    SELECT
-        WarehouseName,
-        AddressId
-    INTO
-        vwarehousename,
-        vaddressid
-    FROM
-        Warehouses
-    WHERE
-        WarehouseId = vwarehouseid;
+PROCEDURE updatewarehousename (
+    vwarehouseid IN NUMBER,
+    vwarehousename IN VARCHAR2
+    ) IS
+    BEGIN
+        UPDATE Warehouses
+        SET
+            WarehouseName = vwarehousename
+        WHERE
+            WarehouseId = vwarehouseid;
+    END;
     
-    vwarehouse := warehouse_typ(vwarehouseid, vwarehousename, vaddressid);
-    return vwarehouse;
-END;
+
+FUNCTION get_warehouse (vwarehouseid NUMBER)
+    RETURN warehouse_typ AS
+        vwarehousename VARCHAR2(20);
+        vaddressid NUMBER(5);
+        vwarehouse warehouse_typ;
+    BEGIN
+        SELECT
+            WarehouseName,
+            AddressId
+        INTO
+            vwarehousename,
+            vaddressid
+        FROM
+            Warehouses
+        WHERE
+            WarehouseId = vwarehouseid;
+        
+        vwarehouse := warehouse_typ(vwarehouseid, vwarehousename, vaddressid);
+        return vwarehouse;
+    END;
+END warehouses_package;
 /
 
 -- Inventory
 -- Make exception so stock can't be negativc
 
-CREATE OR REPLACE PROCEDURE add_inventory (
+CREATE OR REPLACE PACKAGE inventory_package AS
+    PROCEDURE add_inventory (vinventory IN inventory_typ);
+    PROCEDURE updatestock(vwarehouseid IN NUMBER, vproductid IN NUMBER, vstock IN NUMBER);
+    FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
+        RETURN NUMBER;
+    FUNCTION get_total_inventory (vproductid NUMBER)
+        RETURN NUMBER;
+END inventory_package;
+/
+
+CREATE OR REPLACE PACKAGE BODY inventory_package AS 
+PROCEDURE add_inventory (
     vinventory IN inventory_typ  
+    ) IS
+    BEGIN
+    INSERT INTO Inventory   
+        VALUES (
+        -- If reviewid will be generated
+                vinventory.WarehouseId,
+                vinventory.ProductId,
+                vinventory.Stock           
+        );
+    END;
+PROCEDURE updatestock (
+    vwarehouseid IN NUMBER,
+    vproductid IN NUMBER,
+    vstock IN NUMBER
 ) IS
-BEGIN
-INSERT INTO Inventory   
-    VALUES (
-    -- If reviewid will be generated
-            vinventory.WarehouseId,
-            vinventory.ProductId,
-            vinventory.Stock           
-    );
-END;
-/
-
-CREATE OR REPLACE PROCEDURE delete_inventory (
-    vwarehouseid IN NUMBER(5),
-    vproductid IN NUMBER(5)
-) IS
-BEGIN
-DELETE FROM Inventory WHERE WarehouseId= vwarehouseid AND ProductId = vproductid;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE updatestock (
-vwarehouseid IN NUMBER,
-vproductid IN NUMBER,
-vstock IN NUMBER
-) IS
-BEGIN
-    UPDATE Inventory
-    SET
-        Stock = vstock
-    WHERE
-        WarehouseId = vwarehouseid AND ProductId = vproductid;
-END;
-/
-
-CREATE OR REPLACE FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
-RETURN NUMBER AS
-    vstock NUMBER(10,0);
-BEGIN
-    SELECT
-        Stock
-    INTO
-        vstock
-    FROM
-        Inventory
-    WHERE
-        WarehouseId = vwarehouseid AND ProductId = vproductid;
-    
-    return total_stock;
-END;
-/
-
+    BEGIN
+        UPDATE Inventory
+        SET
+            Stock = vstock
+        WHERE
+            WarehouseId = vwarehouseid AND ProductId = vproductid;
+    END;
+FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
+    RETURN NUMBER AS
+        vstock NUMBER(10,0);
+    BEGIN
+        SELECT
+            Stock
+        INTO
+            vstock
+        FROM
+            Inventory
+        WHERE
+            WarehouseId = vwarehouseid AND ProductId = vproductid;
+        
+        return vstock;
+    END;
 -- Gets the stock of a product in all warehouses combined
-CREATE OR REPLACE FUNCTION get_total_inventory (vproductid NUMBER)
-RETURN NUMBER AS
-    total_stock NUMBER(10,0);
-BEGIN
-    SELECT
-        SUM(Stock)
-    INTO
-        total_stock
-    FROM
-        Inventory
-    WHERE
-        ProductId = vproductid;
-    
-    return total_stock;
-END;
+FUNCTION get_total_inventory (vproductid NUMBER)
+    RETURN NUMBER AS
+        total_stock NUMBER(10,0);
+    BEGIN
+        SELECT
+            SUM(Stock)
+        INTO
+            total_stock
+        FROM
+            Inventory
+        WHERE
+            ProductId = vproductid;
+        
+        return total_stock;
+    END;
+END inventory_package;
 /
 
 

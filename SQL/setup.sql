@@ -55,7 +55,7 @@ CREATE TABLE Warehouses(
 CREATE TABLE Inventory (
     WarehouseId     NUMBER(5)          REFERENCES Warehouses (WarehouseId),
     ProductId       NUMBER(5)          REFERENCES Products (ProductId),
-    Stock           NUMBER(10,0),
+    Stock           NUMBER(10,0) CHECK(Stock >= 0),
     
     CONSTRAINT inventory_pk PRIMARY KEY (WarehouseId, ProductId)
 );
@@ -65,8 +65,8 @@ CREATE TABLE Reviews (
     ReviewId        NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     ProductId       NUMBER(5)          REFERENCES Products (ProductId),
     CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
-    Score           NUMBER(1,0),
-    Flag            NUMBER(1,0),
+    Score           NUMBER(1,0) CHECK(Score > 0 AND Score < 6),
+    Flag            NUMBER(1,0) CHECK(Flag >= 0),
     Description     VARCHAR2(200)
 );
 /
@@ -184,18 +184,18 @@ INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Olivia', 
 
 -- Warehouses 
 
-INSERT INTO Warehouses (WarehouseName, Address_id) 
+INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse A', 13);
 -- This is the weird one
-INSERT INTO Warehouses (WarehouseName, Address_id) 
+INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse B', 14);
-INSERT INTO Warehouses (WarehouseName, Address_id) 
+INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse C', 15);
-INSERT INTO Warehouses (WarehouseName, Address_id) 
+INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse D', 16);
-INSERT INTO Warehouses (WarehouseName, Address_id) 
+INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse E', 17);
-INSERT INTO Warehouses (WarehouseName, Address_id) 
+INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse F', 18);
     
 -- Inventory
@@ -349,7 +349,7 @@ CREATE OR REPLACE TYPE reviews_typ AS OBJECT(
 CREATE OR REPLACE TYPE warehouse_typ AS OBJECT(
     WarehouseId     NUMBER(5),
     WarehouseName   VARCHAR2(20),
-    Address_id      NUMBER(5)
+    AddressId      NUMBER(5)
 );
 /
 
