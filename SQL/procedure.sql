@@ -176,29 +176,38 @@ RETURN products_name;
 END getProductNameByCategory;
 
 END products_package;
-
---
-
-CREATE OR REPLACE TYPE book_info_table_type AS TABLE OF book_info_type;
-
-CREATE OR REPLACE FUNCTION get_scifi_books RETURN book_info_table_type IS
-  v_books book_info_table_type := book_info_table_type(); -- Initialize an empty nested table
-BEGIN
-  FOR book_rec IN (SELECT * FROM books WHERE category = 'Sci-Fi') LOOP
-    v_books.EXTEND;
-    v_books(v_books.LAST) := book_info_type(
-                              book_rec.book_id,
-                              book_rec.title,
-                              book_rec.author,
-                              book_rec.category
-                            );
-  END LOOP;
-
-  RETURN v_books;
-END get_scifi_books;
 /
+-- Alternate Function
+CREATE OR REPLACE FUNCTION getProductsByCategory (category_name VARCHAR2)
 
+RETURN products_info_table_type IS
+v_products products_info_table_type := products_info_table_type(); 
+BEGIN
+FOR product_info IN (SELECT * FROM Products WHERE category = category_name) LOOP
+v_products.EXTEND;
+v_products(v_products.LAST) := products_type(
+product_info.ProductId,
+product_info.ProductName,
+product_info.Category
+);
+END LOOP;
 
+RETURN v_products;
+END getProductsByCategory;
+
+-- Anonymous block for testing alternate function
+
+DECLARE
+v_products products_info_table_type;
+BEGIN
+v_products := getProductsByCategory('Grocery');
+
+FOR i IN 1..v_products.COUNT LOOP
+DBMS_OUTPUT.PUT_LINE('Product ID: ' || v_products(i).ProductId ||
+', Name: ' || v_products(i).ProductName ||
+', Category: ' || v_products(i).Category);
+END LOOP;
+END;
 /
 
 CREATE OR REPLACE TRIGGER ProductsUpdate
@@ -214,6 +223,8 @@ END ProductsUpdate;
 
 --Customers
 
+CREATE OR REPLACE TYPE customers_info_table_type AS TABLE OF customers_type;
+
 CREATE OR REPLACE PACKAGE customers_package AS
 
 PROCEDURE add_customers(vcustomer IN customers_type);
@@ -222,6 +233,8 @@ PROCEDURE remove_customers(customer_id NUMBER);
 
 PROCEDURE update_customers(customer_id NUMBER, first_name VARCHAR2, last_name VARCHAR2,
 customer_email VARCHAR2, address_id NUMBER);
+
+FUNCTION getCustomerByEmail (customer_email VARCHAR2) RETURN customers_type;
 
 END customers_package;
 /
@@ -257,6 +270,48 @@ UPDATE Customers SET AddressId = address_id WHERE CustomerId = customer_id;
 
 END update_customers;
 
+FUNCTION getCustomerByEmail (customer_email VARCHAR2)
+
+RETURN customers_type AS
+
+vcustomerid NUMBER(5);
+vfirstname VARCHAR2(20); 
+vlastname VARCHAR2(20); 
+vemail VARCHAR2(30);
+vaddressid NUMBER(5);
+vcustomer customers_type;
+
+BEGIN
+
+SELECT
+
+CustomerId,
+Firstname, 
+Lastname, 
+Email,
+AddressId
+
+INTO
+
+vcustomerid,
+vfirstname,
+vlastname,
+vemail,
+vaddressid
+
+FROM
+
+Customers
+
+WHERE
+
+Email = customer_email;
+
+vcustomer := customers_type(vcustomerid, vfirstname, vlastname, vemail, vaddressid);
+RETURN vcustomer;
+END getCustomerByEmail;
+
+
 END customers_package;
 /
 
@@ -289,6 +344,8 @@ TableChanged    VARCHAR2(10)    CHECK (TableChanged IN ('PROVINCES', 'CITIES', '
 );
 
 DROP TABLE AuditTable CASCADE CONSTRAINTS;
+
+
 
 
 
