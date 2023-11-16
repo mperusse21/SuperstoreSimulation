@@ -163,7 +163,7 @@ FUNCTION get_review (vreviewid NUMBER)
 
 FUNCTION get_average_score (vproductid NUMBER)
     RETURN NUMBER AS
-        average_score NUMBER(1,2);
+        average_score NUMBER(3,2);
     BEGIN
         SELECT
             AVG(Score)
@@ -267,7 +267,6 @@ PROCEDURE add_inventory (
     BEGIN
     INSERT INTO Inventory   
         VALUES (
-        -- If reviewid will be generated
                 vinventory.WarehouseId,
                 vinventory.ProductId,
                 vinventory.Stock           
@@ -318,6 +317,18 @@ FUNCTION get_total_inventory (vproductid NUMBER)
     END;
 END inventory_package;
 /
+
+/* Preliminary getFlaggedCustomers
+SELECT
+    CustomerId
+FROM
+    Customers INNER JOIN Reviews
+    USING (CustomerId)
+GROUP BY
+    CustomerId
+HAVING
+    SUM(Flag) > 1;
+*/
 
 
 
