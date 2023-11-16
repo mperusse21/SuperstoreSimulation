@@ -126,6 +126,7 @@ END stores_package;
 /
 
 --Products
+CREATE OR REPLACE TYPE products_info_table_type AS TABLE OF products_type;
 
 CREATE OR REPLACE PACKAGE products_package AS
 
@@ -134,6 +135,8 @@ PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_nam
 TYPE products_name_varray IS VARRAY(100) OF VARCHAR2(30);
 
 FUNCTION getProductNameByCategory(category_name VARCHAR2) RETURN products_name_varray;
+
+PROCEDURE remove_products(product_id NUMBER);
 
 END products_package;
 /
@@ -148,6 +151,14 @@ UPDATE Products SET ProductName = product_name WHERE ProductId = product_id;
 UPDATE Products SET Category = category_name WHERE ProductId = product_id;
 
 END update_products;
+
+PROCEDURE remove_products(product_id NUMBER) IS
+
+BEGIN
+
+DELETE FROM Products WHERE ProductId = product_id;
+
+END remove_products;
 
 FUNCTION getProductNameByCategory(category_name VARCHAR2)
 
@@ -164,18 +175,42 @@ RETURN products_name;
 
 END getProductNameByCategory;
 
-CREATE TRIGGER ProductsUpdate
-
-AFTER UPDATE ON Products
-
-FOR EACH ROW
-
-BEGIN
-
-INSERT INTO AuditTable () VALUES ();
-
 END products_package;
+
+--
+
+CREATE OR REPLACE TYPE book_info_table_type AS TABLE OF book_info_type;
+
+CREATE OR REPLACE FUNCTION get_scifi_books RETURN book_info_table_type IS
+  v_books book_info_table_type := book_info_table_type(); -- Initialize an empty nested table
+BEGIN
+  FOR book_rec IN (SELECT * FROM books WHERE category = 'Sci-Fi') LOOP
+    v_books.EXTEND;
+    v_books(v_books.LAST) := book_info_type(
+                              book_rec.book_id,
+                              book_rec.title,
+                              book_rec.author,
+                              book_rec.category
+                            );
+  END LOOP;
+
+  RETURN v_books;
+END get_scifi_books;
 /
+
+
+/
+
+CREATE OR REPLACE TRIGGER ProductsUpdate
+AFTER UPDATE ON Products
+FOR EACH ROW
+BEGIN
+IF UPDATING THEN
+INSERT INTO AuditTable (Action, TableChanged) VALUES ('UPDATE', 'PRODUCTS');
+ELSIF DELETING THEN
+INSERT INTO AuditTable (Action, TableChanged) VALUES ('REMOVE', 'PRODUCTS');
+END IF;
+END ProductsUpdate;
 
 --Customers
 
@@ -225,12 +260,35 @@ END update_customers;
 END customers_package;
 /
 
+CREATE OR REPLACE TRIGGER CustomersChange
+AFTER INSERT OR UPDATE OR DELETE ON Customers
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO AuditTable (Action, TableChanged)
+        VALUES ('INSERT', 'CUSTOMERS');
+    ELSIF DELETING THEN
+        INSERT INTO AuditTable (Action, TableChanged)
+        VALUES ('DELETE', 'CUSTOMERS');
+    ELSIF UPDATING THEN
+        INSERT INTO AuditTable (Action, TableChanged)
+        VALUES ('UPDATE', 'CUSTOMERS');
+    END IF;
+END CustomersChange;
+/
+
+-- Audit Table
+
 CREATE TABLE AuditTable (
 
-AuditId     NUMBER(10)      GENERATED ALWAYS AS IDENTITY,
-Action      CHAR(6)         CHECK (Action IN ('INSERT', 'UPDATE', 'DELETE')),
-
+AuditId         NUMBER(10)      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+Action          CHAR(6)         CHECK (Action IN ('INSERT', 'UPDATE', 'DELETE')),
+TableChanged    VARCHAR2(10)    CHECK (TableChanged IN ('PROVINCES', 'CITIES', 'ADDRESSES',
+'STORES', 'PRODUCTS', 'CUSTOMERS', 'WAREHOUSES', 'INVENTORY', 'REVIEWS', 'ORDERS'))
 
 );
+
+DROP TABLE AuditTable CASCADE CONSTRAINTS;
+
 
 
