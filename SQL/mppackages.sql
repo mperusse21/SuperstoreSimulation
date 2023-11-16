@@ -87,6 +87,23 @@ FUNCTION get_times_ordered (vproductid NUMBER)
 END orders_package;
 /
 
+CREATE OR REPLACE TRIGGER OrdersChange
+AFTER INSERT OR UPDATE OR DELETE ON Orders
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.OrderId, 'INSERT', 'ORDERS', SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:OLD.OrderId, 'DELETE', 'ORDERS', SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.OrderId, 'UPDATE', 'ORDERS', SYSDATE);
+    END IF;
+END;
+/
+
 -- Reviews 
 -- Add exceptions for negative flag and score over 5 or less than 1
 
@@ -98,9 +115,9 @@ CREATE OR REPLACE PACKAGE reviews_package AS
         RETURN reviews_typ;
     FUNCTION get_average_score (vproductid NUMBER)
         RETURN NUMBER;
+    TYPE customer_id_varray IS VARRAY(100) OF NUMBER;
     FUNCTION get_flagged_customers 
         RETURN customer_id_varray;
-    TYPE customer_id_varray IS VARRAY(100) OF NUMBER;
 END reviews_package;
 /
 
@@ -195,9 +212,27 @@ FUNCTION get_flagged_customers
             CustomerId
         HAVING
             SUM(Flag) > 1;
+        RETURN flagged_customers;
     END;
     
 END reviews_package;
+/
+
+CREATE OR REPLACE TRIGGER ReviewsChange
+AFTER INSERT OR UPDATE OR DELETE ON Reviews
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.ReviewId, 'INSERT', 'REVIEWS', SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:OLD.ReviewId, 'DELETE', 'REVIEWS', SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.ReviewId, 'UPDATE', 'REVIEWS', SYSDATE);
+    END IF;
+END;
 /
 
 -- Warehouses
@@ -218,7 +253,6 @@ PROCEDURE add_warehouse (
     BEGIN
         INSERT INTO Warehouses (WarehouseName, AddressId)   
             VALUES (
-            -- If reviewid will be generated
                     vwarehouse.WarehouseName,
                     vwarehouse.AddressId
             );
@@ -266,6 +300,24 @@ FUNCTION get_warehouse (vwarehouseid NUMBER)
     END;
 END warehouses_package;
 /
+
+CREATE OR REPLACE TRIGGER WarehousesChange
+AFTER INSERT OR UPDATE OR DELETE ON Warehouses
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.WarehouseId, 'INSERT', 'WAREHOUSES', SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:OLD.WarehouseId, 'DELETE', 'WAREHOUSES', SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.WarehouseId, 'UPDATE', 'WAREHOUSES', SYSDATE);
+    END IF;
+END;
+/
+
 
 -- Inventory
 -- Make exception so stock can't be negativc
@@ -338,17 +390,24 @@ FUNCTION get_total_inventory (vproductid NUMBER)
 END inventory_package;
 /
 
-/* Preliminary getFlaggedCustomers
-SELECT
-    CustomerId
-FROM
-    Customers INNER JOIN Reviews
-    USING (CustomerId)
-GROUP BY
-    CustomerId
-HAVING
-    SUM(Flag) > 1;
-*/
+CREATE OR REPLACE TRIGGER InventoryChange
+AFTER INSERT OR UPDATE OR DELETE ON Inventory
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO AuditTable (ChangedId, ChangedId2, Action, TableChanged, DateModified)
+        VALUES (:NEW.WarehouseId, :NEW.ProductId, 'INSERT', 'INVENTORY', SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO AuditTable (ChangedId, ChangedId2, Action, TableChanged, DateModified)
+        VALUES (:OLD.WarehouseId, :OLD.ProductId, 'DELETE', 'INVENTORY', SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO AuditTable (ChangedId, ChangedId2, Action, TableChanged, DateModified)
+        VALUES (:NEW.WarehouseId, :NEW.ProductId, 'UPDATE', 'INVENTORY', SYSDATE);
+    END IF;
+END;
+/
+
+DROP TRIGGER InventoryChange;
 
 
 
