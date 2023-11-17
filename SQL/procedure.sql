@@ -1,8 +1,12 @@
 -- CITIES --
 
+--Package containing all subprograms related to Cities:
+
 --Specification
 
 CREATE OR REPLACE PACKAGE cities_package AS
+
+INVALID_CITY_ID EXCEPTION;
 
 PROCEDURE add_cities(city_name VARCHAR2, province_name VARCHAR2);
 
@@ -17,16 +21,25 @@ END cities_package;
 
 CREATE OR REPLACE PACKAGE BODY cities_package AS 
 
+--Procedure that inserts a new row (the values of the parameter) in Cities
 PROCEDURE add_cities(city_name VARCHAR2, province_name VARCHAR2) IS 
 BEGIN
 INSERT INTO Cities (City, Province) VALUES (city_name, province_name);
 END add_cities;
 
+--Procedure that deletes the row corresponding to the parammeter value in Cities
 PROCEDURE remove_cities(city_id NUMBER) IS
 BEGIN
 DELETE FROM Cities WHERE CityId = city_id;
+IF SQL%NOTFOUND THEN
+RAISE INVALID_CITY_ID;
+END IF;
+EXCEPTION
+WHEN INVALID_CITY_ID THEN
+DBMS_OUTPUT.PUT_LINE('City does not exist');
 END remove_cities;
 
+--Function that returns the city corresponding to the CityId value inside the parameter
 FUNCTION getCity(city_id NUMBER)
 RETURN VARCHAR2 IS
 city_name VARCHAR2(50);   
@@ -34,17 +47,12 @@ BEGIN
 SELECT
 City INTO city_name FROM Cities WHERE CityId = city_id;
 RETURN city_name;
-EXCEPTION
-WHEN no_data_found THEN
-DBMS_OUTPUT.PUT_LINE('City does not exist');
-WHEN OTHERS THEN
-DBMS_OUTPUT.PUT_LINE('An error occured');
 END getCity;
 
 END cities_package;
 /
 
---Triggers (not working)
+--Triggers 
 
 CREATE OR REPLACE TRIGGER CitiesChange
 AFTER INSERT OR DELETE ON Cities
@@ -58,7 +66,7 @@ END IF;
 END CitiesChange;
 /
 
---Anonymous block
+--Anonymous block (for testing)
 
 SELECT * FROM Cities;
 SELECT * FROM AuditTable;
@@ -70,8 +78,8 @@ city_name VARCHAR2(50);
 BEGIN
 
 --cities_package.add_cities('Dorval', 'Quebec');
---cities_package.remove_cities();
-city_name := cities_package.getCity(10);
+--cities_package.remove_cities(10);
+--city_name := cities_package.getCity(10);
 DBMS_OUTPUT.PUT_LINE(city_name);
   
 END;
@@ -79,9 +87,13 @@ END;
 
 -- ADDRESSES --
 
+--Package containing all subprograms related to Addresses:
+
 --Specification
 
 CREATE OR REPLACE PACKAGE addresses_package AS
+
+INVALID_ADDRESS_ID EXCEPTION;
 
 PROCEDURE add_addresses(address_name VARCHAR2, city_id NUMBER);
 
@@ -96,16 +108,25 @@ END addresses_package;
 
 CREATE OR REPLACE PACKAGE BODY addresses_package AS 
 
+--Procedure that inserts a new row (the values of the parameter) in Addresses
 PROCEDURE add_addresses(address_name VARCHAR2, city_id NUMBER) IS
 BEGIN 
 INSERT INTO Addresses (Address, CityId) VALUES (address_name, city_id);
 END add_addresses;
 
+--Procedure that deletes the row corresponding to the parammeter value in Addresses
 PROCEDURE remove_addresses(address_id NUMBER) IS
 BEGIN
 DELETE FROM Addresses WHERE AddressId = address_id;
+IF SQL%NOTFOUND THEN
+RAISE INVALID_ADDRESS_ID;
+END IF;
+EXCEPTION
+WHEN INVALID_ADDRESS_ID THEN
+DBMS_OUTPUT.PUT_LINE('Address does not exist');
 END remove_addresses;
 
+--Function that returns the address corresponding to the AddressId value in the parameter
 FUNCTION getAddress(address_id NUMBER)
 RETURN VARCHAR2 IS
 address_name VARCHAR2(50);   
@@ -113,11 +134,6 @@ BEGIN
 SELECT
 Address INTO address_name FROM Addresses WHERE AddressId = address_id;
 RETURN address_name;
-EXCEPTION
-WHEN no_data_found THEN
-DBMS_OUTPUT.PUT_LINE('Address does not exist');
-WHEN OTHERS THEN
-DBMS_OUTPUT.PUT_LINE('An error occured');
 END getAddress;
 
 END addresses_package;
@@ -137,7 +153,7 @@ END IF;
 END AddressesChange;
 /
 
---Anonymous block
+--Anonymous block (for testing)
 
 SELECT * FROM Addresses;
 SELECT * FROM AuditTable;
@@ -149,14 +165,16 @@ address_name VARCHAR2(50);
 BEGIN
 
 --addresses_package.add_addresses('1-825 Rue Richmond', 1);
---addresses_package.remove_addresses(21);
-address_name := addresses_package.getAddress(19);
+addresses_package.remove_addresses(19);
+--address_name := addresses_package.getAddress(19);
 DBMS_OUTPUT.PUT_LINE(address_name);
   
 END;
 /
 
 -- STORES --
+
+--Package containing all subprograms related to Stores:
 
 --Specification
 
@@ -175,16 +193,19 @@ END stores_package;
 
 CREATE OR REPLACE PACKAGE BODY stores_package AS 
 
+--Procedure that inserts a new row (the values of the parameter) in Stores
 PROCEDURE add_stores(store_name VARCHAR2) IS
 BEGIN
 INSERT INTO Stores (StoreName) VALUES (store_name);
 END add_stores;
 
+--Procedure that deletes the row corresponding to the parammeter value in Stores
 PROCEDURE remove_stores(store_id NUMBER) IS
 BEGIN
 DELETE FROM Stores WHERE StoreId = store_id;
 END remove_stores;
 
+--Function that returns the store name corresponding to the StoreId value in the parameter
 FUNCTION getStore(store_id NUMBER)
 RETURN VARCHAR2 IS
 store_name VARCHAR2(50);   
@@ -192,17 +213,12 @@ BEGIN
 SELECT
 StoreName INTO store_name FROM Stores WHERE StoreId = store_id;
 RETURN store_name;
-EXCEPTION
-WHEN no_data_found THEN
-DBMS_OUTPUT.PUT_LINE('Store does not exist');
-WHEN OTHERS THEN
-DBMS_OUTPUT.PUT_LINE('An error occured');
 END getStore;
 
 END stores_package;
 /
 
---Anonymous block
+--Anonymous block (for testing)
 
 SELECT * FROM Stores;
 
@@ -220,11 +236,9 @@ DBMS_OUTPUT.PUT_LINE(store_name);
 END;
 /
 
---PRODUCTS--
+-- PRODUCTS --
 
---Alternate type:
-
-CREATE OR REPLACE TYPE products_info_table_type AS TABLE OF products_type;
+--Package containing all subprograms related to Products:
 
 --Specification
 
@@ -234,30 +248,43 @@ PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_nam
 
 TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
+CATEGORY_NOT_FOUND EXCEPTION;
+
 FUNCTION getProductsByCategory(category_name VARCHAR2) RETURN products_name_varray;
 
-FUNCTION getProduct (vproductid NUMBER) RETURN products_type; 
+FUNCTION getProduct(vproductid NUMBER) RETURN products_type; 
 
 END products_package;
 /
 
+--Body
+
 CREATE OR REPLACE PACKAGE BODY products_package AS 
 
+--Procedure that updates the row corresponding to the ProductId value in the parameter with the new values given in the parameter
 PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2) IS
 BEGIN
 UPDATE Products SET ProductName = product_name WHERE ProductId = product_id;
 UPDATE Products SET Category = category_name WHERE ProductId = product_id;
 END update_products;
 
+--Function that returns all the ProductIds that are in a certain category (the parameter value)
 FUNCTION getProductsByCategory(category_name VARCHAR2)
 RETURN products_name_varray IS
 products_id products_name_varray := products_name_varray();
 BEGIN
 SELECT
 ProductId BULK COLLECT INTO products_id FROM Products WHERE Category = category_name;
+IF products_id.COUNT < 1 THEN
+RAISE CATEGORY_NOT_FOUND;
+END IF;
 RETURN products_id;
+EXCEPTION
+WHEN CATEGORY_NOT_FOUND THEN
+DBMS_OUTPUT.PUT_LINE('Category does not exist');
 END getProductsByCategory;
 
+--Function that returns a products_type corresponding to the ProductId value in the parameter
 FUNCTION getProduct (vproductid NUMBER)
 RETURN products_type AS
 vproductname VARCHAR2(30);
@@ -288,7 +315,7 @@ BEGIN
 INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.ProductId, 'UPDATE', 'PRODUCTS', SYSDATE);
 END ProductsUpdate;
 
---Anonymous block
+--Anonymous block (for testing)
 
 SELECT * FROM Products;
 SELECT * FROM AuditTable;
@@ -296,11 +323,14 @@ SELECT * FROM AuditTable;
 DECLARE
 
 product_ids products_package.products_name_varray;
+product products_type;
 
 BEGIN
 
 --products_package.update_products(17, 'Train X745', 'Vehicle');
-product_ids := products_package.getProductsByCategory('Grocery');
+product := products_package.getProduct(14);
+DBMS_OUTPUT.PUT_LINE(product.ProductName || ' ' || product.Category);
+product_ids := products_package.getProductsByCategory('Grocerry');
 FOR i IN 1..product_ids.COUNT LOOP
 DBMS_OUTPUT.PUT_LINE(product_ids(i));
 END LOOP;
@@ -308,43 +338,15 @@ END LOOP;
 END;
 /
 
---Alternate function
+-- CUSTOMERS --
 
-CREATE OR REPLACE FUNCTION getProductsByCategory (category_name VARCHAR2)
-RETURN products_info_table_type IS
-v_products products_info_table_type := products_info_table_type(); 
-BEGIN
-FOR product_info IN (SELECT * FROM Products WHERE category = category_name) LOOP
-v_products.EXTEND;
-v_products(v_products.LAST) := products_type(
-product_info.ProductId,
-product_info.ProductName,
-product_info.Category
-);
-END LOOP;
-RETURN v_products;
-END getProductsByCategory;
-/
-
---Anonymous block for testing alternate function
-
-DECLARE
-v_products products_info_table_type;
-BEGIN
-v_products := getProductsByCategory('Grocery');
-FOR i IN 1..v_products.COUNT LOOP
-DBMS_OUTPUT.PUT_LINE('Product ID: ' || v_products(i).ProductId ||
-', Name: ' || v_products(i).ProductName ||
-', Category: ' || v_products(i).Category);
-END LOOP;
-END;
-/
-
---CUSTOMERS--
+--Package containing all subprograms related to Customers
 
 --Specification
 
 CREATE OR REPLACE PACKAGE customers_package AS
+
+EMAIL_IN_USE EXCEPTION;
 
 PROCEDURE add_customers(vcustomer IN customers_type);
 
@@ -364,17 +366,33 @@ END customers_package;
 
 CREATE OR REPLACE PACKAGE BODY customers_package AS 
 
+--Procedure that inserts a new row (the values of the given products_type in the parameter) in Customers
 PROCEDURE add_customers(vcustomer IN customers_type) IS 
+v_existing_email customers.email%TYPE; 
 BEGIN
+SELECT Email INTO v_existing_email
+FROM Customers
+WHERE Email = vcustomer.Email;
+-- If the SELECT statement does not raise NO_DATA_FOUND, it means the email is already associated
+-- Raise the custom exception in that case
+RAISE EMAIL_IN_USE;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+-- Email is not associated, proceed with the insertion
 INSERT INTO Customers (Firstname, Lastname, Email, AddressId)
 VALUES (vcustomer.Firstname, vcustomer.Lastname, vcustomer.Email, vcustomer.AddressId);
+WHEN EMAIL_IN_USE THEN
+-- Handle the "Email Already Associated" scenario
+DBMS_OUTPUT.PUT_LINE('Email is already associated with a customer.');
 END add_customers;
 
+--Procedure that deletes the row corresponding to the parammeter value in Customers
 PROCEDURE remove_customers(customer_id NUMBER) IS 
 BEGIN
 DELETE FROM Customers WHERE CustomerId = customer_id;
 END remove_customers;
 
+--Procedure that updates the row corresponding to the CustomerId value in the parameter with the new values given in the parameter
 PROCEDURE update_customers(customer_id NUMBER, first_name VARCHAR2, last_name VARCHAR2,
 customer_email VARCHAR2, address_id NUMBER) IS
 BEGIN
@@ -384,6 +402,7 @@ UPDATE Customers SET Email = customer_email WHERE CustomerId = customer_id;
 UPDATE Customers SET AddressId = address_id WHERE CustomerId = customer_id;
 END update_customers;
 
+--Function that returns a customers_type with corresponding email with the parameter value
 FUNCTION getCustomerByEmail (customer_email VARCHAR2)
 RETURN customers_type AS
 vcustomerid NUMBER(5);
@@ -405,6 +424,7 @@ vcustomer := customers_type(vcustomerid, vfirstname, vlastname, vemail, vaddress
 RETURN vcustomer;
 END getCustomerByEmail;
 
+--Function that returns  a customers_type corresponding with the given CustomerId in the parameter
 FUNCTION getCustomer (vcustomerid NUMBER)
 RETURN customers_type AS
 vfirstname VARCHAR2(20);
@@ -447,7 +467,7 @@ END IF;
 END CustomersChange;
 /
 
---Anonymous block
+--Anonymous block (for testing)
 
 SELECT * FROM Customers;
 SELECT * FROM AuditTable;
@@ -463,9 +483,9 @@ customers_package.add_customers(new_customer);
 --customers_package.remove_customers();
 --customers_package.update_customers(14, 'Johnatahan', 'Doe', 'john.doe@email.com', 1);
 --new_customer := customers_package.getCustomerByEmail('msadeghi@dawsoncollege.qc.ca');
-DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
-new_customer := customers_package.getCustomer(1);
-DBMS_OUTPUT.PUT_LINE('getCustomer function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
+--DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
+--new_customer := customers_package.getCustomer(1);
+--DBMS_OUTPUT.PUT_LINE('getCustomer function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
   
 END;
 /
