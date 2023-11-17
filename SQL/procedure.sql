@@ -208,6 +208,7 @@ END;
 --PRODUCTS--
 
 --Alternate type:
+
 CREATE OR REPLACE TYPE products_info_table_type AS TABLE OF products_type;
 
 --Specification
@@ -262,15 +263,15 @@ SELECT * FROM AuditTable;
 DECLARE
 
 TYPE products_name_varray IS VARRAY(100) OF NUMBER;
-product_ids products_name_varray;
+product_ids products_package.products_name_varray;
 
 BEGIN
 
 products_package.update_products(17, 'Train X745', 'Vehicle');
---product_ids := products_package.getProductsByCategory('Video Games');
---FOR i IN 1..product_ids.COUNT LOOP
---DBMS_OUTPUT.PUT_LINE(product_ids(i));
---END LOOP;
+product_ids := products_package.getProductsByCategory('Grocery');
+FOR i IN 1..product_ids.COUNT LOOP
+DBMS_OUTPUT.PUT_LINE(product_ids(i));
+END LOOP;
   
 END;
 /
@@ -291,6 +292,7 @@ product_info.Category
 END LOOP;
 RETURN v_products;
 END getProductsByCategory;
+/
 
 --Anonymous block for testing alternate function
 
@@ -308,6 +310,8 @@ END;
 
 --CUSTOMERS--
 
+--Specification
+
 CREATE OR REPLACE PACKAGE customers_package AS
 
 PROCEDURE add_customers(vcustomer IN customers_type);
@@ -319,10 +323,12 @@ customer_email VARCHAR2, address_id NUMBER);
 
 FUNCTION getCustomerByEmail (customer_email VARCHAR2) RETURN customers_type;
 
-FUNCTION getCustomer (customer_id NUMBER) RETURN customers_type;
+FUNCTION getCustomer (vcustomerid NUMBER) RETURN customers_type;
 
 END customers_package;
 /
+
+--Body
 
 CREATE OR REPLACE PACKAGE BODY customers_package AS 
 
@@ -367,7 +373,7 @@ vcustomer := customers_type(vcustomerid, vfirstname, vlastname, vemail, vaddress
 RETURN vcustomer;
 END getCustomerByEmail;
 
-FUNCTION getCustomer (customer_id NUMBER)
+FUNCTION getCustomer (vcustomerid NUMBER)
 RETURN customers_type AS
 vfirstname VARCHAR2(20);
 vlastname VARCHAR2(20);
@@ -382,29 +388,54 @@ vfirstname, vlastname, vemail, vaddressid
 FROM
 Customers
 WHERE
-CustomerId = customer_id;
-vcustomers := customers_type(vfirstname, vlastname, vemail, vaddressid);
+CustomerId = vcustomerid;
+vcustomers := customers_type(vcustomerid, vfirstname, vlastname, vemail, vaddressid);
 RETURN vcustomers;
 END getCustomer;
 
 END customers_package;
 /
 
+--Triggers
+
 CREATE OR REPLACE TRIGGER CustomersChange
 AFTER INSERT OR UPDATE OR DELETE ON Customers
 FOR EACH ROW
 BEGIN
-    IF INSERTING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.CustomerId, 'INSERT', 'CUSTOMERS', SYSDATE);
-    ELSIF DELETING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:OLD.CustomerId,'DELETE', 'CUSTOMERS', SYSDATE);
-    ELSIF UPDATING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.CustomerId, 'UPDATE', 'CUSTOMERS', SYSDATE);
-    END IF;
+IF INSERTING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+VALUES (:NEW.CustomerId, 'INSERT', 'CUSTOMERS', SYSDATE);
+ELSIF DELETING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+VALUES (:OLD.CustomerId,'DELETE', 'CUSTOMERS', SYSDATE);
+ELSIF UPDATING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+VALUES (:NEW.CustomerId, 'UPDATE', 'CUSTOMERS', SYSDATE);
+END IF;
 END CustomersChange;
+/
+
+--Anonymous block
+
+SELECT * FROM Customers;
+SELECT * FROM AuditTable;
+
+DECLARE
+
+new_customer customers_package.customers_type;
+
+BEGIN
+
+new_customer := customers_package.customers_type(14, 'John', 'Doe', 'john.doe@email.com', 3);
+customers_package.add_customers(new_customer);
+--customers_package.remove_customers(14);
+--customers_package.update_customers(14, 'Johnatahan', 'Doe', 'john.doe@email.com', 1);
+new_customer := customers_package.getCustomerByEmail('john.doe@email.com');
+DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
+new_customer := customers_package.getCustomer(1);
+DBMS_OUTPUT.PUT_LINE('getCustomer function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
+  
+END;
 /
 
 -- Audit Table
