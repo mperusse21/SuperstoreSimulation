@@ -156,52 +156,71 @@ PROCEDURE add_stores(store_name VARCHAR2);
 
 PROCEDURE remove_stores(store_id NUMBER);
 
-PROCEDURE update_stores(store_id NUMBER, store_name VARCHAR2);
+FUNCTION getStore(store_id NUMBER) RETURN VARCHAR2;
 
 END stores_package;
 /
+
+--Body
 
 CREATE OR REPLACE PACKAGE BODY stores_package AS 
 
 PROCEDURE add_stores(store_name VARCHAR2) IS
-
 BEGIN
-
 INSERT INTO Stores (StoreName) VALUES (store_name);
-
 END add_stores;
 
 PROCEDURE remove_stores(store_id NUMBER) IS
-
 BEGIN
-
 DELETE FROM Stores WHERE StoreId = store_id;
-
 END remove_stores;
 
-PROCEDURE update_stores(store_id NUMBER, store_name VARCHAR2) IS
-
+FUNCTION getStore(store_id NUMBER)
+RETURN VARCHAR2 IS
+store_name VARCHAR2(50);   
 BEGIN
-
-UPDATE Stores SET StoreName = store_name WHERE StoreId = store_id;
-
-END update_stores;
+SELECT
+StoreName INTO store_name FROM Stores WHERE StoreId = store_id;
+RETURN store_name;
+END getStore;
 
 END stores_package;
 /
 
---Products
+--Anonymous block
+
+SELECT * FROM Stores;
+
+DECLARE
+
+store_name VARCHAR2(50);
+
+BEGIN
+
+stores_package.add_stores('Best Buy');
+--stores_package.remove_stores();
+store_name := stores_package.getStore(10);
+DBMS_OUTPUT.PUT_LINE(store_name);
+  
+END;
+/
+
+--PRODUCTS--
+
+--Alternate type:
 CREATE OR REPLACE TYPE products_info_table_type AS TABLE OF products_type;
+
+--Specification
 
 CREATE OR REPLACE PACKAGE products_package AS
 
 PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2);
 
+PROCEDURE remove_products(product_id NUMBER);
+
 TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
 FUNCTION getProductsByCategory(category_name VARCHAR2) RETURN products_name_varray;
-
-PROCEDURE remove_products(product_id NUMBER);
 
 END products_package;
 /
@@ -209,42 +228,56 @@ END products_package;
 CREATE OR REPLACE PACKAGE BODY products_package AS 
 
 PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2) IS
-
 BEGIN
-
 UPDATE Products SET ProductName = product_name WHERE ProductId = product_id;
 UPDATE Products SET Category = category_name WHERE ProductId = product_id;
-
 END update_products;
 
-PROCEDURE remove_products(product_id NUMBER) IS
-
-BEGIN
-
-DELETE FROM Products WHERE ProductId = product_id;
-
-END remove_products;
-
 FUNCTION getProductsByCategory(category_name VARCHAR2)
-
 RETURN products_name_varray IS
 products_id products_name_varray := products_name_varray();
-
 BEGIN
-
 SELECT
-
 ProductId BULK COLLECT INTO products_id FROM Products WHERE Category = category_name;
-
 RETURN products_id;
-
 END getProductsByCategory;
 
 END products_package;
 /
--- Alternate Function
-CREATE OR REPLACE FUNCTION getProductsByCategory (category_name VARCHAR2)
 
+--Triggers
+
+CREATE OR REPLACE TRIGGER ProductsUpdate
+AFTER UPDATE ON Products
+FOR EACH ROW
+BEGIN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.ProductId, 'UPDATE', 'PRODUCTS', SYSDATE);
+END ProductsUpdate;
+
+--Anonymous block
+
+SELECT * FROM Products;
+SELECT * FROM AuditTable;
+
+DECLARE
+
+TYPE products_name_varray IS VARRAY(100) OF NUMBER;
+product_ids products_name_varray;
+
+BEGIN
+
+products_package.update_products(17, 'Train X745', 'Vehicle');
+--product_ids := products_package.getProductsByCategory('Video Games');
+--FOR i IN 1..product_ids.COUNT LOOP
+--DBMS_OUTPUT.PUT_LINE(product_ids(i));
+--END LOOP;
+  
+END;
+/
+
+--Alternate function
+
+CREATE OR REPLACE FUNCTION getProductsByCategory (category_name VARCHAR2)
 RETURN products_info_table_type IS
 v_products products_info_table_type := products_info_table_type(); 
 BEGIN
@@ -256,17 +289,15 @@ product_info.ProductName,
 product_info.Category
 );
 END LOOP;
-
 RETURN v_products;
 END getProductsByCategory;
 
--- Anonymous block for testing alternate function
+--Anonymous block for testing alternate function
 
 DECLARE
 v_products products_info_table_type;
 BEGIN
 v_products := getProductsByCategory('Grocery');
-
 FOR i IN 1..v_products.COUNT LOOP
 DBMS_OUTPUT.PUT_LINE('Product ID: ' || v_products(i).ProductId ||
 ', Name: ' || v_products(i).ProductName ||
@@ -275,20 +306,7 @@ END LOOP;
 END;
 /
 
-CREATE OR REPLACE TRIGGER ProductsUpdate
-AFTER UPDATE ON Products
-FOR EACH ROW
-BEGIN
-IF UPDATING THEN
-INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.ProductId, 'UPDATE', 'PRODUCTS', SYSDATE);
-ELSIF DELETING THEN
-INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.ProductId, 'REMOVE', 'PRODUCTS', SYSDATE);
-END IF;
-END ProductsUpdate;
-
---Customers
-
-CREATE OR REPLACE TYPE customers_info_table_type AS TABLE OF customers_type;
+--CUSTOMERS--
 
 CREATE OR REPLACE PACKAGE customers_package AS
 
@@ -301,109 +319,73 @@ customer_email VARCHAR2, address_id NUMBER);
 
 FUNCTION getCustomerByEmail (customer_email VARCHAR2) RETURN customers_type;
 
+FUNCTION getCustomer (customer_id NUMBER) RETURN customers_type;
+
 END customers_package;
 /
 
 CREATE OR REPLACE PACKAGE BODY customers_package AS 
 
 PROCEDURE add_customers(vcustomer IN customers_type) IS 
-
 BEGIN
-
 INSERT INTO Customers VALUES (vcustomer.CustomerId, vcustomer.Firstname, vcustomer.Lastname,
 vcustomer.Email, vcustomer.AddressId);
-
 END add_customers;
 
 PROCEDURE remove_customers(customer_id NUMBER) IS 
-
 BEGIN
-
 DELETE FROM Customers WHERE CustomerId = customer_id;
-
 END remove_customers;
 
 PROCEDURE update_customers(customer_id NUMBER, first_name VARCHAR2, last_name VARCHAR2,
 customer_email VARCHAR2, address_id NUMBER) IS
-
 BEGIN
-
 UPDATE Customers SET Firstname = first_name WHERE CustomerId = customer_id;
 UPDATE Customers SET Lastname = last_name WHERE CustomerId = customer_id;
 UPDATE Customers SET Email = customer_email WHERE CustomerId = customer_id;
 UPDATE Customers SET AddressId = address_id WHERE CustomerId = customer_id;
-
 END update_customers;
 
 FUNCTION getCustomerByEmail (customer_email VARCHAR2)
-
 RETURN customers_type AS
-
 vcustomerid NUMBER(5);
 vfirstname VARCHAR2(20); 
 vlastname VARCHAR2(20); 
 vemail VARCHAR2(30);
 vaddressid NUMBER(5);
 vcustomer customers_type;
-
 BEGIN
-
 SELECT
-
-CustomerId,
-Firstname, 
-Lastname, 
-Email,
-AddressId
-
+CustomerId, Firstname,  Lastname,  Email, AddressId
 INTO
-
-vcustomerid,
-vfirstname,
-vlastname,
-vemail,
-vaddressid
-
+vcustomerid, vfirstname, vlastname, vemail, vaddressid
 FROM
-
 Customers
-
 WHERE
-
 Email = customer_email;
-
 vcustomer := customers_type(vcustomerid, vfirstname, vlastname, vemail, vaddressid);
 RETURN vcustomer;
 END getCustomerByEmail;
 
 FUNCTION getCustomer (customer_id NUMBER)
-    RETURN customers_type AS
-        vwarehousename VARCHAR2(20);
-        vaddressid NUMBER(5);
-        vwarehouse warehouse_typ;
-        
-    vfirstname       VARCHAR2(20);
-    vlastname        VARCHAR2(20);
-    vemail           VARCHAR2(30);
-    vaddressid       NUMBER(5);
-    vcustomers customers_type;
-    BEGIN
-        SELECT
-            Fistname, Lastname, Email, AddressId
-        INTO
-         vfirstname, vlastname, vemail, vaddressid
-            
-        FROM
-            Customers
-        WHERE
-            CustomerId = customer_id;
-        
-        vcustomers := customers_type(vfirstname, vlastname, vemail, vaddressid);
-        RETURN vcustomers;
-    END;
-
-
-
+RETURN customers_type AS
+vfirstname VARCHAR2(20);
+vlastname VARCHAR2(20);
+vemail VARCHAR2(30);
+vaddressid NUMBER(5);
+vcustomers customers_type;
+BEGIN
+SELECT
+Firstname, Lastname, Email, AddressId
+INTO
+vfirstname, vlastname, vemail, vaddressid
+FROM
+Customers
+WHERE
+CustomerId = customer_id;
+vcustomers := customers_type(vfirstname, vlastname, vemail, vaddressid);
+RETURN vcustomers;
+END getCustomer;
 
 END customers_package;
 /
