@@ -330,9 +330,20 @@ END customers_package;
 CREATE OR REPLACE PACKAGE BODY customers_package AS 
 
 PROCEDURE add_customers(vcustomer IN customers_type) IS 
+v_existing_email customers.email%TYPE;
 BEGIN
-INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES (vcustomer.Firstname, vcustomer.Lastname,
-vcustomer.Email, vcustomer.AddressId);
+SELECT Email INTO v_existing_email
+FROM Customers
+WHERE Email = vcustomer.Email;
+-- If the SELECT statement does not raise NO_DATA_FOUND, it means the email is already associated
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+-- Email is not associated, proceed with the insertion
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId)
+VALUES (vcustomer.Firstname, vcustomer.Lastname, vcustomer.Email, vcustomer.AddressId);
+WHEN OTHERS THEN
+-- Handle other exceptions if needed
+DBMS_OUTPUT.PUT_LINE('Email is already associated with a customer.');
 END add_customers;
 
 PROCEDURE remove_customers(customer_id NUMBER) IS 
@@ -423,12 +434,12 @@ new_customer customers_type;
 
 BEGIN
 
-new_customer := customers_type(NULL, 'John', 'Doe', 'john.doe@email.com', 3);
+new_customer := customers_type(NULL, 'John', 'Doe', 'john.doe2@email.com', 3);
 customers_package.add_customers(new_customer);
---customers_package.remove_customers(14);
+--customers_package.remove_customers();
 --customers_package.update_customers(14, 'Johnatahan', 'Doe', 'john.doe@email.com', 1);
---new_customer := customers_package.getCustomerByEmail('john.doe@email.com');
---DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
+--new_customer := customers_package.getCustomerByEmail('msadeghi@dawsoncollege.qc.ca');
+DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
 new_customer := customers_package.getCustomer(1);
 DBMS_OUTPUT.PUT_LINE('getCustomer function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
   
@@ -453,7 +464,6 @@ DateModified    Date
 );
 
 DROP TABLE AuditTable CASCADE CONSTRAINTS;
-
 
 
 
