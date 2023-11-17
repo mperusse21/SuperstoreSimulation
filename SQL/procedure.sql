@@ -34,6 +34,11 @@ BEGIN
 SELECT
 City INTO city_name FROM Cities WHERE CityId = city_id;
 RETURN city_name;
+EXCEPTION
+WHEN no_data_found THEN
+DBMS_OUTPUT.PUT_LINE('City does not exist');
+WHEN OTHERS THEN
+DBMS_OUTPUT.PUT_LINE('An error occured');
 END getCity;
 
 END cities_package;
@@ -66,7 +71,7 @@ BEGIN
 
 --cities_package.add_cities('Dorval', 'Quebec');
 --cities_package.remove_cities();
-city_name := cities_package.getCity(7);
+city_name := cities_package.getCity(10);
 DBMS_OUTPUT.PUT_LINE(city_name);
   
 END;
@@ -108,6 +113,11 @@ BEGIN
 SELECT
 Address INTO address_name FROM Addresses WHERE AddressId = address_id;
 RETURN address_name;
+EXCEPTION
+WHEN no_data_found THEN
+DBMS_OUTPUT.PUT_LINE('Address does not exist');
+WHEN OTHERS THEN
+DBMS_OUTPUT.PUT_LINE('An error occured');
 END getAddress;
 
 END addresses_package;
@@ -139,8 +149,8 @@ address_name VARCHAR2(50);
 BEGIN
 
 --addresses_package.add_addresses('1-825 Rue Richmond', 1);
-addresses_package.remove_addresses(21);
-address_name := addresses_package.getAddress(13);
+--addresses_package.remove_addresses(21);
+address_name := addresses_package.getAddress(19);
 DBMS_OUTPUT.PUT_LINE(address_name);
   
 END;
@@ -182,6 +192,11 @@ BEGIN
 SELECT
 StoreName INTO store_name FROM Stores WHERE StoreId = store_id;
 RETURN store_name;
+EXCEPTION
+WHEN no_data_found THEN
+DBMS_OUTPUT.PUT_LINE('Store does not exist');
+WHEN OTHERS THEN
+DBMS_OUTPUT.PUT_LINE('An error occured');
 END getStore;
 
 END stores_package;
@@ -198,8 +213,8 @@ store_name VARCHAR2(50);
 BEGIN
 
 --stores_package.add_stores('Best Buy');
-stores_package.remove_stores(15);
-store_name := stores_package.getStore(10);
+--stores_package.remove_stores(15);
+store_name := stores_package.getStore(15);
 DBMS_OUTPUT.PUT_LINE(store_name);
   
 END;
@@ -221,6 +236,8 @@ TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
 FUNCTION getProductsByCategory(category_name VARCHAR2) RETURN products_name_varray;
 
+FUNCTION getProduct (vproductid NUMBER) RETURN products_type; 
+
 END products_package;
 /
 
@@ -240,6 +257,24 @@ SELECT
 ProductId BULK COLLECT INTO products_id FROM Products WHERE Category = category_name;
 RETURN products_id;
 END getProductsByCategory;
+
+FUNCTION getProduct (vproductid NUMBER)
+RETURN products_type AS
+vproductname VARCHAR2(30);
+vcategory VARCHAR2(20);
+vproducts products_type;
+BEGIN
+SELECT
+ProductName, Category
+INTO
+vproductname, vcategory
+FROM
+Products
+WHERE
+ProductId = vproductid;
+vproducts := products_type(vproductid, vproductname, vcategory);
+RETURN vproducts;
+END getProduct;
 
 END products_package;
 /
@@ -264,7 +299,7 @@ product_ids products_package.products_name_varray;
 
 BEGIN
 
-products_package.update_products(17, 'Train X745', 'Vehicle');
+--products_package.update_products(17, 'Train X745', 'Vehicle');
 product_ids := products_package.getProductsByCategory('Grocery');
 FOR i IN 1..product_ids.COUNT LOOP
 DBMS_OUTPUT.PUT_LINE(product_ids(i));
@@ -330,20 +365,9 @@ END customers_package;
 CREATE OR REPLACE PACKAGE BODY customers_package AS 
 
 PROCEDURE add_customers(vcustomer IN customers_type) IS 
-v_existing_email customers.email%TYPE;
 BEGIN
-SELECT Email INTO v_existing_email
-FROM Customers
-WHERE Email = vcustomer.Email;
--- If the SELECT statement does not raise NO_DATA_FOUND, it means the email is already associated
-EXCEPTION
-WHEN NO_DATA_FOUND THEN
--- Email is not associated, proceed with the insertion
 INSERT INTO Customers (Firstname, Lastname, Email, AddressId)
 VALUES (vcustomer.Firstname, vcustomer.Lastname, vcustomer.Email, vcustomer.AddressId);
-WHEN OTHERS THEN
--- Handle other exceptions if needed
-DBMS_OUTPUT.PUT_LINE('Email is already associated with a customer.');
 END add_customers;
 
 PROCEDURE remove_customers(customer_id NUMBER) IS 
@@ -434,7 +458,7 @@ new_customer customers_type;
 
 BEGIN
 
-new_customer := customers_type(NULL, 'John', 'Doe', 'john.doe2@email.com', 3);
+new_customer := customers_type(NULL, 'John', 'Doe', 'john.doe@email.com', 3);
 customers_package.add_customers(new_customer);
 --customers_package.remove_customers();
 --customers_package.update_customers(14, 'Johnatahan', 'Doe', 'john.doe@email.com', 1);
