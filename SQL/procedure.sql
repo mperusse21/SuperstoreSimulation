@@ -42,13 +42,13 @@ END cities_package;
 --Triggers (not working)
 
 CREATE OR REPLACE TRIGGER CitiesChange
-AFTER UPDATE ON Cities
+AFTER INSERT OR DELETE ON Cities
 FOR EACH ROW
 BEGIN
 IF INSERTING THEN
 INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.CityId, 'INSERT', 'CITIES', SYSDATE);
 ELSIF DELETING THEN
-INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.CityId, 'REMOVE', 'CITIES', SYSDATE);
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.CityId, 'DELETE', 'CITIES', SYSDATE);
 END IF;
 END CitiesChange;
 /
@@ -116,13 +116,13 @@ END addresses_package;
 --Triggers
 
 CREATE OR REPLACE TRIGGER AddressesChange
-AFTER UPDATE ON Addresses
+AFTER INSERT OR DELETE ON Addresses
 FOR EACH ROW
 BEGIN
 IF INSERTING THEN
 INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.AddressId, 'INSERT', 'ADDRESSES', SYSDATE);
 ELSIF DELETING THEN
-INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.AddressId, 'REMOVE', 'ADDRESSES', SYSDATE);
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.AddressId, 'DELETE', 'ADDRESSES', SYSDATE);
 END IF;
 END AddressesChange;
 /
@@ -139,7 +139,7 @@ address_name VARCHAR2(50);
 BEGIN
 
 --addresses_package.add_addresses('1-825 Rue Richmond', 1);
---addresses_package.remove_addresses();
+addresses_package.remove_addresses(21);
 address_name := addresses_package.getAddress(13);
 DBMS_OUTPUT.PUT_LINE(address_name);
   
@@ -197,8 +197,8 @@ store_name VARCHAR2(50);
 
 BEGIN
 
-stores_package.add_stores('Best Buy');
---stores_package.remove_stores();
+--stores_package.add_stores('Best Buy');
+stores_package.remove_stores(15);
 store_name := stores_package.getStore(10);
 DBMS_OUTPUT.PUT_LINE(store_name);
   
@@ -216,8 +216,6 @@ CREATE OR REPLACE TYPE products_info_table_type AS TABLE OF products_type;
 CREATE OR REPLACE PACKAGE products_package AS
 
 PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2);
-
-PROCEDURE remove_products(product_id NUMBER);
 
 TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
@@ -262,7 +260,6 @@ SELECT * FROM AuditTable;
 
 DECLARE
 
-TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 product_ids products_package.products_name_varray;
 
 BEGIN
@@ -334,7 +331,7 @@ CREATE OR REPLACE PACKAGE BODY customers_package AS
 
 PROCEDURE add_customers(vcustomer IN customers_type) IS 
 BEGIN
-INSERT INTO Customers VALUES (vcustomer.CustomerId, vcustomer.Firstname, vcustomer.Lastname,
+INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES (vcustomer.Firstname, vcustomer.Lastname,
 vcustomer.Email, vcustomer.AddressId);
 END add_customers;
 
@@ -399,7 +396,7 @@ END customers_package;
 --Triggers
 
 CREATE OR REPLACE TRIGGER CustomersChange
-AFTER INSERT OR UPDATE OR DELETE ON Customers
+AFTER INSERT OR DELETE OR UPDATE ON Customers
 FOR EACH ROW
 BEGIN
 IF INSERTING THEN
@@ -422,16 +419,16 @@ SELECT * FROM AuditTable;
 
 DECLARE
 
-new_customer customers_package.customers_type;
+new_customer customers_type;
 
 BEGIN
 
-new_customer := customers_package.customers_type(14, 'John', 'Doe', 'john.doe@email.com', 3);
+new_customer := customers_type(NULL, 'John', 'Doe', 'john.doe@email.com', 3);
 customers_package.add_customers(new_customer);
 --customers_package.remove_customers(14);
 --customers_package.update_customers(14, 'Johnatahan', 'Doe', 'john.doe@email.com', 1);
-new_customer := customers_package.getCustomerByEmail('john.doe@email.com');
-DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
+--new_customer := customers_package.getCustomerByEmail('john.doe@email.com');
+--DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
 new_customer := customers_package.getCustomer(1);
 DBMS_OUTPUT.PUT_LINE('getCustomer function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
   
