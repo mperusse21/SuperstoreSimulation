@@ -1,5 +1,4 @@
 -- Orders
--- create exceptions for negative price/quantity
 
 CREATE OR REPLACE PACKAGE orders_package AS
     PROCEDURE add_order(vorder IN orders_typ);
@@ -12,7 +11,10 @@ CREATE OR REPLACE PACKAGE orders_package AS
     -- Not sure if necessary, added for now
     FUNCTION get_all_order_products (vorderid NUMBER)
         RETURN products_id_varray;
+    FUNCTION get_total_inventory (vproductid NUMBER)
+        RETURN NUMBER;
     ORDER_NOT_FOUND EXCEPTION;
+    OUT_OF_STOCK EXCEPTION;
 END orders_package;
 /
 
@@ -20,7 +22,14 @@ CREATE OR REPLACE PACKAGE BODY orders_package AS
 PROCEDURE add_order (
     vorder IN orders_typ
 ) IS
+    total_stock NUMBER(10, 0);
     BEGIN
+    total_stock := get_total_inventory(vorder.ProductId);
+    -- if there is no stock in any warehouse raises an exception
+    IF total_stock = 0 THEN
+        RAISE OUT_OF_STOCK;
+    END IF;
+    
     INSERT INTO Orders 
         VALUES (
         -- If orderId is null one will be generated
@@ -43,10 +52,6 @@ PROCEDURE delete_order (
     IF SQL%NOTFOUND THEN
         RAISE ORDER_NOT_FOUND;
     END IF;
-    EXCEPTION
-    WHEN ORDER_NOT_FOUND THEN
-    DBMS_OUTPUT.PUT_LINE('No order with this id found');
-
     END;
     
 -- Gets an order with a certain id and product (example order 1 apple)
@@ -76,15 +81,8 @@ FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
         WHERE
             OrderId = vorderid AND ProductId = vproductid;
         
-        IF SQL%NOTFOUND THEN
-            RAISE ORDER_NOT_FOUND;
-        END IF;
-        
         vorder := orders_typ(vorderid, vproductid, vcustomerid, vstoreid, vquantity, vprice, vorderdate);
         return vorder;
-    EXCEPTION
-        WHEN ORDER_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No order with this id found');
     END;
     
 -- Gets the number of times a product was ordered
@@ -106,9 +104,6 @@ FUNCTION get_times_ordered (vproductid NUMBER)
         END IF;
         
         return times_ordered;
-    EXCEPTION
-        WHEN ORDER_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No orders found for this product');
     END;
     
 --Function that returns all the Product Ids that are in a certain order 
@@ -130,10 +125,25 @@ FUNCTION get_all_order_products(vorderid NUMBER)
         END IF;
         
         RETURN product_id;
-    EXCEPTION
-        WHEN ORDER_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No order with this id found');
     END ;
+    
+-- Gets the stock of a product in all warehouses combined (used for validation)
+FUNCTION get_total_inventory (vproductid NUMBER)
+    RETURN NUMBER AS
+        total_stock NUMBER(10,0);
+    BEGIN
+        SELECT
+        -- Null is the same as having no stock
+            NVL(SUM(Stock), 0)
+        INTO
+            total_stock
+        FROM
+            Inventory
+        WHERE
+            ProductId = vproductid;
+        
+        return total_stock;
+    END;
 END orders_package;
 /
 
@@ -197,9 +207,7 @@ PROCEDURE delete_review (
         IF SQL%NOTFOUND THEN
             RAISE REVIEW_NOT_FOUND;
         END IF;
-    EXCEPTION
-        WHEN REVIEW_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No review with this id found');
+
     END delete_review;
     
 -- Takes necessary information and updates a review
@@ -211,9 +219,7 @@ PROCEDURE update_reviews(vreview_id NUMBER, vscore NUMBER, vflag VARCHAR2, vdesc
         IF SQL%NOTFOUND THEN
             RAISE REVIEW_NOT_FOUND;
         END IF;
-    EXCEPTION
-        WHEN REVIEW_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No review with this id found');
+
     END; 
     
 -- Gets and returns a review object
@@ -242,16 +248,10 @@ FUNCTION get_review (vreviewid NUMBER)
             Reviews
         WHERE
             ReviewId = vreviewid;
-            
-        IF SQL%NOTFOUND THEN
-            RAISE REVIEW_NOT_FOUND;
-        END IF;
         
         vreview := reviews_typ(vreviewid, vproductid, vcustomerid, vscore, vflag, vdescription);
         return vreview;
-    EXCEPTION
-        WHEN REVIEW_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No review with this id found');
+
     END;
     
 -- Gets the average review score for a specific product
@@ -273,9 +273,7 @@ FUNCTION get_average_score (vproductid NUMBER)
         END IF;
         
         return average_score;
-    EXCEPTION
-        WHEN REVIEW_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No review for products with this id found');
+
     END;
     
 -- Gets customers whose reviews have been flagged more than once
@@ -352,10 +350,7 @@ PROCEDURE delete_warehouse (
         IF SQL%NOTFOUND THEN
             RAISE WAREHOUSE_NOT_FOUND;
         END IF;
-        
-    EXCEPTION
-        WHEN WAREHOUSE_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No warehouses with this id found');
+
     END;
 
 -- updates a specified warehouses name
@@ -373,10 +368,7 @@ PROCEDURE updatewarehousename (
         IF SQL%NOTFOUND THEN
             RAISE WAREHOUSE_NOT_FOUND;
         END IF;
-        
-    EXCEPTION
-        WHEN WAREHOUSE_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No warehouses with this id found');
+
     END;
     
 
@@ -396,18 +388,10 @@ FUNCTION get_warehouse (vwarehouseid NUMBER)
             Warehouses
         WHERE
             WarehouseId = vwarehouseid;
-            
-        IF SQL%NOTFOUND THEN
-            RAISE WAREHOUSE_NOT_FOUND;
-        END IF;
         
         vwarehouse := warehouse_typ(vwarehouseid, vwarehousename, vaddressid);
         return vwarehouse;
-    EXCEPTION
-        WHEN WAREHOUSE_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No warehouses with this id found');
     END;
-    
 END warehouses_package;
 /
 
@@ -430,14 +414,11 @@ END;
 
 
 -- Inventory
--- Make exception so stock can't be negativc
 
 CREATE OR REPLACE PACKAGE inventory_package AS
     PROCEDURE add_inventory (vinventory IN inventory_typ);
     PROCEDURE updatestock(vwarehouseid IN NUMBER, vproductid IN NUMBER, vstock IN NUMBER);
     FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
-        RETURN NUMBER;
-    FUNCTION get_total_inventory (vproductid NUMBER)
         RETURN NUMBER;
     INVENTORY_NOT_FOUND EXCEPTION;
 END inventory_package;
@@ -473,10 +454,7 @@ PROCEDURE updatestock (
         IF SQL%NOTFOUND THEN
             RAISE INVENTORY_NOT_FOUND;
         END IF;
-        
-    EXCEPTION
-        WHEN INVENTORY_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No inventory found in this warehouse');
+
     END;
 
 -- Gets the stock of products in a warehouse
@@ -492,41 +470,12 @@ FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
             Inventory
         WHERE
             WarehouseId = vwarehouseid AND ProductId = vproductid;
-            
+        
         IF SQL%NOTFOUND THEN
             RAISE INVENTORY_NOT_FOUND;
         END IF;
         
         return vstock;
-        
-    EXCEPTION
-        WHEN INVENTORY_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No inventory found in this warehouse');
-    END;
-    
--- Gets the stock of a product in all warehouses combined
-FUNCTION get_total_inventory (vproductid NUMBER)
-    RETURN NUMBER AS
-        total_stock NUMBER(10,0);
-    BEGIN
-        SELECT
-            SUM(Stock)
-        INTO
-            total_stock
-        FROM
-            Inventory
-        WHERE
-            ProductId = vproductid;
-        
-        IF SQL%NOTFOUND THEN
-            RAISE INVENTORY_NOT_FOUND;
-        END IF;
-        
-        return total_stock;
-        
-    EXCEPTION
-        WHEN INVENTORY_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No inventory found for this product');
     END;
     
 END inventory_package;
@@ -551,5 +500,33 @@ END;
 
 -- DROP TRIGGER InventoryChange;
 
+/* Testing 
 
+DECLARE
+    warehouse warehouse_typ;
+BEGIN
+    -- This exception doesn't work dbms_output.put_line(inventory_package.get_stock(1000,9));
+    -- dbms_output.put_line(inventory_package.get_total_inventory(100));
+    --inventory_package.updatestock(1003230,1,214492);
+    -- dbms_output.put_line(orders_package.get_total_inventory(100));
+   warehouse := warehouses_package.get_warehouse(100);
+/*EXCEPTION
+     WHEN ORDER_NOT_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No order with this id found');
+     WHEN REVIEW_NOT_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No order with this id found');     
+    WHEN WAREHOUSE_NOT_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No order with this id found');     
+    WHEN INVENTORY_NOT_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No order with this id found');
+END;
+
+
+ Got rid of all these, might re-add
+    EXCEPTION
+        WHEN ORDER_NOT_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No order with this id found');
+    
+*/
+  
 
