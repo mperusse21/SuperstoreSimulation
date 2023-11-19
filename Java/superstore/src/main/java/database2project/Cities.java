@@ -1,5 +1,4 @@
 package database2project;
-
 public class Cities {
 
     //Private fields for all fields of the Cities table
@@ -7,7 +6,7 @@ public class Cities {
     private String city;
     private String province;
 
-    //Getters for the private field
+    //Getters for the private fields
     public int getCityId(){
         return this.cityId;
     }

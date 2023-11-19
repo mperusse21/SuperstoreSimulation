@@ -1,0 +1,43 @@
+package database2project;
+
+import java.sql.*;
+
+public class CustomersServices {
+
+    private Connection connection;
+
+    //Constructor that establishes a connection
+    public CustomersServices(String username, String password) throws SQLException {
+        //Establish the database connection using the provided username and password
+        String url = "jdbc:oracle:thin:@198.168.52.211:1521/pdbora19c.dawsoncollege.qc.ca"; 
+        this.connection = DriverManager.getConnection(url, username, password);
+    }
+
+    //Method to close the database connection
+    public void close() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
+    }
+
+    public void addCustomer(Customers newCustomer){
+
+    }
+
+    public void removeCustomer(int customerId){
+
+    }
+
+    public void updateCustomer(int customerId, String firstname, String lastname, String email, int addressId){
+
+    }
+
+    public Customers getCustomerByEmail(String email){
+        throw new UnsupportedOperationException();
+    }
+
+    public Customers getCustomerById(int customerId){
+        throw new UnsupportedOperationException();
+    }
+
+}
