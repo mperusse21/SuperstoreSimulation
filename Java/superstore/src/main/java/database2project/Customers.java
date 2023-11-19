@@ -2,7 +2,7 @@ package database2project;
 
 public class Customers {
 
-    //Private fields for all fields of the Addresses table
+    //Private fields for all fields of the Customers table
     private int customerId;
     private String firstname;
     private String lastname;
@@ -41,7 +41,4 @@ public class Customers {
         this.addressId = addressId;
     }
 
-
-
-    
 }
