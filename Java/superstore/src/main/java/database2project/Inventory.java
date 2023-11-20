@@ -87,4 +87,8 @@ public class Inventory implements SQLData {
         stream.writeInt(getProductId());
         stream.writeInt(getStock());
     }
+
+    public String toString (){
+        return "Warehouse Id " + this.warehouseId + " Product Id " + this.productId + "/n Stock" + this.stock;
+    }   
 }

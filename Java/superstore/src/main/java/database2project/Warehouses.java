@@ -78,5 +78,10 @@ public class Warehouses implements SQLData {
         stream.writeString(getWarehouseName());
         stream.writeInt(getAddressId());
     }
+
+    // toString method which returns a string representation of a Warehouse (preliminary)
+    public String toString (){
+        return "Warehouse Id: " + this.warehouseId + ", " + this.warehouseName + ", Address Id:" + this.addressId;
+    }   
 }
 

@@ -122,4 +122,10 @@ public class Reviews implements SQLData {
         stream.writeInt(getFlag());
         stream.writeString(getDescription());
     }
+
+    // toString method which returns a string representation of a Review (preliminary)
+    public String toString (){
+        return "Review " + this.reviewId + " by customer " + this.customerId + " for " + this.product.getProductName() +
+        ". Score: " + this.score + " Number of Flags:" + this.flag + "/n Description:" + this.description;
+    }   
 }

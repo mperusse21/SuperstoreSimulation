@@ -131,4 +131,13 @@ public class Orders implements SQLData {
         stream.writeDouble(getPrice());
         stream.writeDate(getOrderDate());
     }
+
+    //Not sure what to do here yet, might make product into an array of products 
+    /*public String toString (){
+        String returnString = "Order Id: " + this.orderId + " Customer Id " + this.customerId + " Store Id: " + this.storeId;
+
+        for (Products product : products){
+            returnString "/n" + 
+        }
+    }  */ 
 }
