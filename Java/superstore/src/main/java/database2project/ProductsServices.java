@@ -21,7 +21,7 @@ public class ProductsServices {
         }
     }
 
-    public void updateProduct(int productId, String productName, String category) throws SQLException, ClassNotFoundException {
+    public void updateProduct(int productId, String productName, String category) throws SQLException {
 
             String sql = "{call products_package.update_products(?,?,?)}";
             try(CallableStatement stmt = this.connection.prepareCall(sql)){
@@ -32,12 +32,38 @@ public class ProductsServices {
             }
     }
 
-    public Products getProductByCategory(String category){
-        throw new UnsupportedOperationException();
-    }
+    /*public Products getProductByCategory(String category) throws SQLException, ClassNotFoundException {
 
-    public Products getProductById(int productId){
-        throw new UnsupportedOperationException();
+        //Products product = new Products();
+
+        Map map = this.connection.getTypeMap();
+        map.put("PRODUCTS_TYPE", Class.forName("database2project.Products"));
+        this.connection.setTypeMap(map);
+        
+        String sql = "{ ? = call products_package.getProductsByCategory(?)}";
+        try(CallableStatement stmt = this.connection.prepareCall(sql)){
+            //stmt.setObject(1, );
+            stmt.setObject(2, category);
+            stmt.execute();
+        }
+    }*/
+
+    public Products getProductById(int productId) throws SQLException, ClassNotFoundException {
+
+        Map map = this.connection.getTypeMap();
+        map.put("PRODUCTS_TYPE", Class.forName("database2project.Products"));
+        this.connection.setTypeMap(map);
+        
+        String sql = "{ ? = call products_package.getProduct(?)}";
+        try(CallableStatement stmt = this.connection.prepareCall(sql)){
+            stmt.registerOutParameter(1, Types.STRUCT,"PRODUCTS_TYPE");
+            stmt.setObject(2, productId);
+            stmt.execute();
+            Products newProduct = (Products)stmt.getObject(1);
+            return newProduct;
+            //
+
+        } 
     }
     
 }
