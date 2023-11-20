@@ -1,6 +1,7 @@
 package database2project;
 
 import java.sql.*;
+import java.util.Map;
 
 public class ProductsServices {
 
@@ -20,8 +21,15 @@ public class ProductsServices {
         }
     }
 
-    public void updateProduct(int productId, String productName, String category){
+    public void updateProduct(int productId, String productName, String category) throws SQLException, ClassNotFoundException {
 
+            String sql = "{call products_package.update_products(?,?,?)}";
+            try(CallableStatement stmt = this.connection.prepareCall(sql)){
+                stmt.setInt(1, productId);
+                stmt.setString(2, productName);
+                stmt.setString(3, category);
+                stmt.execute();
+            }
     }
 
     public Products getProductByCategory(String category){

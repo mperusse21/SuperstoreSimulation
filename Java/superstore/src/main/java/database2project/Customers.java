@@ -10,7 +10,7 @@ public class Customers implements SQLData {
     private String lastname;
     private String email;
     private int addressId;
-    private String typeName;
+    public static final String TYPENAME = "CUSTOMERS_TYPE";
     //Optional private field (may not be used)
     private Addresses address;
 
@@ -62,17 +62,15 @@ public class Customers implements SQLData {
         this.lastname = lastname;
         this.email = email;
         this.addressId = addressId;
-        this.typeName = "courses_type";
     }
 
     @Override
     public String getSQLTypeName() throws SQLException {
-        return typeName;
+        return Customers.TYPENAME;
     }
 
     @Override
     public void readSQL(SQLInput stream, String typeName) throws SQLException {
-        this.typeName = typeName;
         setCustomerId(stream.readInt());
         setFirstname(stream.readString());
         setLastname(stream.readString());
