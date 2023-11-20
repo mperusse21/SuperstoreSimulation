@@ -13,6 +13,8 @@ CREATE OR REPLACE PACKAGE orders_package AS
         RETURN products_id_varray;
     FUNCTION get_total_inventory (vproductid NUMBER)
         RETURN NUMBER;
+    FUNCTION validate_order (vproductid NUMBER)
+        RETURN BOOLEAN;
     ORDER_NOT_FOUND EXCEPTION;
     OUT_OF_STOCK EXCEPTION;
 END orders_package;
@@ -21,12 +23,10 @@ END orders_package;
 CREATE OR REPLACE PACKAGE BODY orders_package AS 
 PROCEDURE add_order (
     vorder IN orders_typ
-) IS
-    total_stock NUMBER(10, 0);
+) AS
     BEGIN
-    total_stock := get_total_inventory(vorder.ProductId);
     -- if there is no stock in any warehouse raises an exception
-    IF total_stock = 0 THEN
+    IF validate_order(vorder.productid) = false THEN
         RAISE OUT_OF_STOCK;
     END IF;
     
@@ -143,6 +143,19 @@ FUNCTION get_total_inventory (vproductid NUMBER)
             ProductId = vproductid;
         
         return total_stock;
+    END;
+    
+FUNCTION validate_order (vproductid NUMBER)
+    RETURN BOOLEAN AS
+       total_stock NUMBER(10, 0);
+    BEGIN
+        total_stock := get_total_inventory(vproductid);
+        
+        IF total_stock = 0 THEN
+            return false;
+        ELSE
+            return true;
+        END IF;
     END;
 END orders_package;
 /
@@ -340,11 +353,12 @@ PROCEDURE add_warehouse (
             );
     END;
 
--- Deletes a warehouse with a specified Id 
+-- Deletes a warehouse (and all it's inventory) with a specified Id 
 PROCEDURE delete_warehouse (
     vwarehouseid IN NUMBER
 ) IS
     BEGIN
+        DELETE FROM Inventory WHERE WarehouseId = vwarehouseid;
         DELETE FROM Warehouses WHERE WarehouseId= vwarehouseid;
         
         IF SQL%NOTFOUND THEN
@@ -352,7 +366,7 @@ PROCEDURE delete_warehouse (
         END IF;
 
     END;
-
+/*
 -- updates a specified warehouses name
 PROCEDURE updatewarehousename (
     vwarehouseid IN NUMBER,
@@ -370,7 +384,7 @@ PROCEDURE updatewarehousename (
         END IF;
 
     END;
-    
+    */
 
 FUNCTION get_warehouse (vwarehouseid NUMBER)
     RETURN warehouse_typ AS
@@ -529,4 +543,6 @@ END;
     
 */
   
+
+-- Audit 
 
