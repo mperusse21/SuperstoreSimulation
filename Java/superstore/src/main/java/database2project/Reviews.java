@@ -1,6 +1,11 @@
 package database2project;
 
-public class Reviews {
+import java.sql.SQLData;
+import java.sql.SQLException;
+import java.sql.SQLInput;
+import java.sql.SQLOutput;
+
+public class Reviews implements SQLData {
     
     //Private fields for all fields of the Inventory table
     private int reviewId;
@@ -12,6 +17,8 @@ public class Reviews {
     //Optional private fields (may not be used)
     private Products product;
     private Customers customer;
+    public static final String TYPENAME = "REVIEWS_TYP";
+
 
     //Getters for the private fields
     public int getReviewId(){
@@ -84,5 +91,35 @@ public class Reviews {
         this.score = score;
         this.flag = flag;
         this.description = description;
+    }
+
+    //empty constructor to be used for getReview
+    public Reviews (){};
+
+
+    // SQL methods
+    @Override 
+    public String getSQLTypeName () throws SQLException {
+        return Reviews.TYPENAME;
+    }
+    
+    @Override
+    public void readSQL (SQLInput stream, String typeName) throws SQLException {
+        setReviewId(stream.readInt());
+        setProductId(stream.readInt());
+        setCustomerId(stream.readInt());
+        setScore(stream.readInt());
+        setFlag(stream.readInt());
+        setDescription(stream.readString());
+        }
+    
+    @Override
+    public void writeSQL (SQLOutput stream) throws SQLException {
+        stream.writeInt(getReviewId());
+        stream.writeInt(getProductId());
+        stream.writeInt(getCustomerId());
+        stream.writeInt(getScore());
+        stream.writeInt(getFlag());
+        stream.writeString(getDescription());
     }
 }

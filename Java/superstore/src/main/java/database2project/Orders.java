@@ -2,7 +2,7 @@ package database2project;
 
 import java.sql.*;
 
-public class Orders {
+public class Orders implements SQLData {
     
     //Private fields for all fields of the Customers table
     private int orderId;
@@ -16,6 +16,8 @@ public class Orders {
     private Products product;
     private Customers customer;
     // private Stores store;
+    public static final String TYPENAME = "ORDERS_TYP";
+
 
     //Getters for the private fields
     public int getOrderId(){
@@ -97,5 +99,36 @@ public class Orders {
         this.quantity = quantity;
         this.price = price;
         this.orderDate = orderDate;
+    }
+
+    //empty constructor to be used for getOrder
+    public Orders (){};
+
+    // SQL methods
+    @Override 
+    public String getSQLTypeName () throws SQLException {
+        return Orders.TYPENAME;
+    }
+    
+    @Override
+    public void readSQL (SQLInput stream, String typeName) throws SQLException {
+        setOrderId(stream.readInt());
+        setProductId(stream.readInt());
+        setCustomerId(stream.readInt());
+        setStoreId(stream.readInt());
+        setQuantity(stream.readInt());
+        setPrice(stream.readDouble());
+        setOrderDate(stream.readDate());
+    }
+    
+    @Override
+    public void writeSQL (SQLOutput stream) throws SQLException {
+        stream.writeInt(getOrderId());
+        stream.writeInt(getProductId());
+        stream.writeInt(getCustomerId());
+        stream.writeInt(getStoreId());
+        stream.writeInt(getQuantity());
+        stream.writeDouble(getPrice());
+        stream.writeDate(getOrderDate());
     }
 }
