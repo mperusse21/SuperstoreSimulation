@@ -1,13 +1,6 @@
-DROP TABLE Provinces CASCADE CONSTRAINTS;
-DROP TABLE Cities CASCADE CONSTRAINTS;
-DROP TABLE Addresses CASCADE CONSTRAINTS;
-DROP TABLE Stores CASCADE CONSTRAINTS;
-DROP TABLE Products CASCADE CONSTRAINTS;
-DROP TABLE Customers CASCADE CONSTRAINTS;
-DROP TABLE Warehouses CASCADE CONSTRAINTS;
-DROP TABLE Inventory CASCADE CONSTRAINTS;
-DROP TABLE Reviews CASCADE CONSTRAINTS;
-DROP TABLE Orders CASCADE CONSTRAINTS;
+-- This file creates all tables and relationships of our superstore database, inserts all sample datas and creates all types
+
+--Creating tables:
 
 CREATE TABLE Cities (
     CityId          NUMBER(5)       GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
@@ -84,7 +77,19 @@ CREATE TABLE Orders (
 );
 /
 
--- Insert statements 
+CREATE TABLE AuditTable (
+
+    AuditId         NUMBER(10)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ChangedId       NUMBER(5),
+    Action          CHAR(6)             CHECK (Action IN ('INSERT', 'UPDATE', 'DELETE')),
+    TableChanged    VARCHAR2(10)        CHECK (TableChanged IN ('PROVINCES', 'ADDRESSES', 'PRODUCTS', 'CUSTOMERS', 'WAREHOUSES', 'INVENTORY', 'REVIEWS', 'ORDERS')),
+    DateModified    DATE
+
+);
+/
+
+-- Insert statements for sample datas:
+
 -- Cities
 INSERT INTO Cities (City, Province) VALUES ('Montreal', 'Quebec');
 INSERT INTO Cities (City, Province) VALUES ('Toronto', 'Ontatio');
@@ -318,23 +323,9 @@ INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate)
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (15, 13, 8, 1, 15, '2021-12-29');
 
--- SQL types for tables with more than 3 columns (and products because it's important)
-/*
-JUST IN CASE!
-CREATE OR REPLACE TYPE addresses_typ AS OBJECT(
-    AddressId       NUMBER(5), 
-    Address         VARCHAR2(50),
-    CityId          NUMBER(5)
-);
-/
 
-CREATE OR REPLACE TYPE cities_typ AS OBJECT(
-    CityId          NUMBER(5), 
-    City            VARCHAR2(50),
-    Province        VARCHAR2(20)
-);
-/
-*/
+-- Create types for the necessary tables:
+
 CREATE OR REPLACE TYPE reviews_typ AS OBJECT(
     ReviewId        NUMBER(5),
     ProductId       NUMBER(5),
@@ -386,7 +377,6 @@ CREATE OR REPLACE TYPE orders_typ AS OBJECT(
     OrderDate       DATE
 );
 /
-
 
 COMMIT;
 

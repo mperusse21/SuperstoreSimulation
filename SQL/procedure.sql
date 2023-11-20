@@ -490,24 +490,6 @@ customers_package.add_customers(new_customer);
 END;
 /
 
--- Audit Table
-
-CREATE TABLE AuditTable (
-
-AuditId         NUMBER(10)      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-ChangedId       NUMBER(5),
-
-Action          CHAR(6)         CHECK (Action IN ('INSERT', 'UPDATE', 'DELETE')),
-
-TableChanged    VARCHAR2(10)    CHECK (TableChanged IN ('PROVINCES', 'CITIES', 'ADDRESSES',
-'STORES', 'PRODUCTS', 'CUSTOMERS', 'WAREHOUSES', 'INVENTORY', 'REVIEWS', 'ORDERS')),
-
-DateModified    Date
-
-);
-
-DROP TABLE AuditTable CASCADE CONSTRAINTS;
 
 
 
