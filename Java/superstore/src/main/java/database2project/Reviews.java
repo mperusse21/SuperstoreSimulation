@@ -39,6 +39,42 @@ public class Reviews {
     public Customers getCustomer(){
         return this.customer;
     }
+
+    //Set methods
+
+    public void setReviewId(int reviewId) {
+        this.reviewId = reviewId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    //Optional for now
+    public void setProduct(Products product) {
+        this.product = product;
+    }
+
+    public void setCustomer(Customers customer) {
+        this.customer = customer;
+    }
+
     
     //Constructor initializing all private fields
     public Reviews(int reviewId, int productId, int customerId, int score, int flag, String description){

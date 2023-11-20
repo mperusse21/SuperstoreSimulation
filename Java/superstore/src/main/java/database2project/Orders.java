@@ -15,7 +15,7 @@ public class Orders {
     //Optional private fields (may not be used)
     private Products product;
     private Customers customer;
-    private Stores store;
+    // private Stores store;
 
     //Getters for the private fields
     public int getOrderId(){
@@ -46,8 +46,46 @@ public class Orders {
     public Customers getCustomer(){
         return this.customer;
     }
-    public Stores getStore(){
+/*     public Stores getStore(){
         return this.store;
+    }*/
+
+    // Set methods
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
+
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public void setOrderDate(Date orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    // Optional for now
+    public void setProduct(Products product) {
+        this.product = product;
+    }
+
+    public void setCustomer(Customers customer) {
+        this.customer = customer;
     }
  
     //Constructor initializing all private fields

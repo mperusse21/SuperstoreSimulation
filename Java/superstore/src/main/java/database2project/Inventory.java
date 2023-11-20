@@ -28,6 +28,29 @@ public class Inventory {
         return this.product;
     }
 
+    // Set methods
+
+    public void setWarehouseId(int warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    // Optional for now
+    public void setWarehouse(Warehouses warehouse) {
+        this.warehouse = warehouse;
+    }
+
+    public void setProduct(Products product) {
+        this.product = product;
+    }
+
     //Constructor initializing all private fields
     public Inventory(int warehouseId, int productId, int stock){
         this.warehouseId = warehouseId;
