@@ -1,5 +1,5 @@
 -- Orders
-
+-- when order placed: check if any warehouse has enough quantity, add the order, update quantity
 CREATE OR REPLACE PACKAGE orders_package AS
     PROCEDURE add_order(vorder IN orders_typ);
     PROCEDURE delete_order(vorderid IN NUMBER);
@@ -8,9 +8,10 @@ CREATE OR REPLACE PACKAGE orders_package AS
     FUNCTION get_times_ordered (vproductid NUMBER)
         RETURN NUMBER;
     TYPE products_id_varray IS VARRAY(100) OF NUMBER;
+    TYPE order_varray IS VARRAY(100) OF orders_typ;
     -- Not sure if necessary, added for now
     FUNCTION get_all_order_products (vorderid NUMBER)
-        RETURN products_id_varray;
+        RETURN order_varray;
     FUNCTION get_total_inventory (vproductid NUMBER)
         RETURN NUMBER;
     FUNCTION validate_order (vproductid NUMBER)

@@ -40,7 +40,7 @@ CREATE TABLE Customers (
     CustomerId      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     Firstname       VARCHAR2(20),
     Lastname        VARCHAR2(20),
-    Email           VARCHAR2(30),
+    Email           VARCHAR2(30) NOT NULL,
     Addressid       NUMBER(5)          REFERENCES Addresses (AddressId)
 );
 /
