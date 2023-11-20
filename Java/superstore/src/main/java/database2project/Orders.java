@@ -2,7 +2,7 @@ package database2project;
 
 import java.sql.*;
 
-public class Orders {
+public class Orders implements SQLData {
     
     //Private fields for all fields of the Customers table
     private int orderId;
@@ -15,7 +15,9 @@ public class Orders {
     //Optional private fields (may not be used)
     private Products product;
     private Customers customer;
-    private Stores store;
+    // private Stores store;
+    public static final String TYPENAME = "ORDERS_TYP";
+
 
     //Getters for the private fields
     public int getOrderId(){
@@ -46,8 +48,46 @@ public class Orders {
     public Customers getCustomer(){
         return this.customer;
     }
-    public Stores getStore(){
+/*     public Stores getStore(){
         return this.store;
+    }*/
+
+    // Set methods
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
+
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public void setOrderDate(Date orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    // Optional for now
+    public void setProduct(Products product) {
+        this.product = product;
+    }
+
+    public void setCustomer(Customers customer) {
+        this.customer = customer;
     }
  
     //Constructor initializing all private fields
@@ -60,4 +100,44 @@ public class Orders {
         this.price = price;
         this.orderDate = orderDate;
     }
+
+    //empty constructor to be used for getOrder
+    public Orders (){};
+
+    // SQL methods
+    @Override 
+    public String getSQLTypeName () throws SQLException {
+        return Orders.TYPENAME;
+    }
+    
+    @Override
+    public void readSQL (SQLInput stream, String typeName) throws SQLException {
+        setOrderId(stream.readInt());
+        setProductId(stream.readInt());
+        setCustomerId(stream.readInt());
+        setStoreId(stream.readInt());
+        setQuantity(stream.readInt());
+        setPrice(stream.readDouble());
+        setOrderDate(stream.readDate());
+    }
+    
+    @Override
+    public void writeSQL (SQLOutput stream) throws SQLException {
+        stream.writeInt(getOrderId());
+        stream.writeInt(getProductId());
+        stream.writeInt(getCustomerId());
+        stream.writeInt(getStoreId());
+        stream.writeInt(getQuantity());
+        stream.writeDouble(getPrice());
+        stream.writeDate(getOrderDate());
+    }
+
+    //Not sure what to do here yet, might make product into an array of products 
+    /*public String toString (){
+        String returnString = "Order Id: " + this.orderId + " Customer Id " + this.customerId + " Store Id: " + this.storeId;
+
+        for (Products product : products){
+            returnString "/n" + 
+        }
+    }  */ 
 }
