@@ -16,6 +16,10 @@ public class App
 
             // Creating the connection using the SuperStoreServices object
             connection = new SuperStoreServices(user, password);
+
+            /* Testing validate order */
+            Orders order = new Orders(1,1,1,1,41,20.50,"2023-01-01");
+            System.out.println(order.validateOrder(connection.retrievConnection()));
         }
         
         // Catches any possible exceptions

@@ -18,6 +18,10 @@ public class SuperStoreServices {
         System.out.println("Disconnected");
     }
 
+    public Connection retrievConnection (){
+        return this.conn;
+    }
+
     // Potentially put various methods like add in here as well
 }
 

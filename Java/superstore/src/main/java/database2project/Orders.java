@@ -2,6 +2,7 @@ package database2project;
 
 import java.sql.*;
 
+
 public class Orders implements SQLData {
     
     //Private fields for all fields of the Customers table
@@ -11,7 +12,7 @@ public class Orders implements SQLData {
     private int storeId;
     private int quantity;
     private Double price;
-    private Date orderDate;
+    private String orderDate;
     //Optional private fields (may not be used)
     private Products product;
     private Customers customer;
@@ -38,7 +39,7 @@ public class Orders implements SQLData {
     public Double getPrice(){
         return this.price;
     }
-    public Date getOrderDate(){
+    public String getOrderDate(){
         return this.orderDate;
     }
     //Optional
@@ -77,7 +78,7 @@ public class Orders implements SQLData {
         this.price = price;
     }
 
-    public void setOrderDate(Date orderDate) {
+    public void setOrderDate(String orderDate) {
         this.orderDate = orderDate;
     }
 
@@ -91,7 +92,7 @@ public class Orders implements SQLData {
     }
  
     //Constructor initializing all private fields
-    public Orders(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate){
+    public Orders(int orderId, int productId, int customerId, int storeId, int quantity, Double price, String orderDate){
         this.orderId = orderId;
         this.productId = productId;
         this.customerId = customerId;
@@ -118,7 +119,7 @@ public class Orders implements SQLData {
         setStoreId(stream.readInt());
         setQuantity(stream.readInt());
         setPrice(stream.readDouble());
-        setOrderDate(stream.readDate());
+        setOrderDate(stream.readString());
     }
     
     @Override
@@ -129,7 +130,7 @@ public class Orders implements SQLData {
         stream.writeInt(getStoreId());
         stream.writeInt(getQuantity());
         stream.writeDouble(getPrice());
-        stream.writeDate(getOrderDate());
+        stream.writeString(getOrderDate());
     }
 
     //Not sure what to do here yet, might make product into an array of products 
@@ -140,4 +141,15 @@ public class Orders implements SQLData {
             returnString "/n" + 
         }
     }  */ 
+
+    public String validateOrder (Connection conn) throws SQLException {
+        String sql = "{ ? = call orders_package.validate_order(?, ?)}";
+        CallableStatement stmt = conn.prepareCall(sql);
+        stmt.registerOutParameter(1, Types.VARCHAR);
+        stmt.setInt(2, productId);
+        stmt.setInt(3, quantity);
+        stmt.execute();
+        String result = stmt.getString(1);
+        return result;
+    }
 }

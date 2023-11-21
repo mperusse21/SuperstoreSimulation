@@ -15,7 +15,7 @@ CREATE OR REPLACE PACKAGE orders_package AS
     FUNCTION get_max_inventory (vproductid NUMBER)
         RETURN NUMBER;
     FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
-        RETURN BOOLEAN;
+        RETURN VARCHAR2;
     ORDER_NOT_FOUND EXCEPTION;
     OUT_OF_STOCK EXCEPTION;
 END orders_package;
@@ -27,7 +27,7 @@ PROCEDURE add_order (
 ) AS
     BEGIN
     -- if there is not enough stock in any warehouse raises an exception
-    IF validate_order(vorder.ProductId, vorder.Quantity) = false THEN
+    IF validate_order(vorder.ProductId, vorder.Quantity) = 'false' THEN
         RAISE OUT_OF_STOCK;
     END IF;
     
@@ -145,17 +145,17 @@ FUNCTION get_max_inventory (vproductid NUMBER)
         
         return total_stock;
     END;
-    
+-- Was originally a boolean but couldn't get the boolean to work in JDBC
 FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
-    RETURN BOOLEAN AS
+    RETURN VARCHAR2 AS
        max_stock NUMBER(10, 0);
     BEGIN
         max_stock := get_max_inventory(vproductid);
         
         IF max_stock < quantity THEN
-            return false;
+            return 'false';
         ELSE
-            return true;
+            return 'true';
         END IF;
     END;
 END orders_package;
@@ -562,6 +562,16 @@ PROCEDURE display_orders (vcustomerid IN NUMBER) IS
     END;
 END tests;
     
+    
+    DECLARE
+BEGIN
+IF orders_package.validate_order(2, 41) THEN
+    dbms_output.put_line('true');
+ELSE
+    dbms_output.put_line('false');
+END If;
+END;
+/0001
 */
   
 
