@@ -90,21 +90,35 @@ public class Warehouses implements SQLData {
 
     public static Warehouses getWarehouse(Connection conn, int warehouse_id) {
         String sql = "{ ? = call warehouses_package.get_warehouse(?) }";
-        try (CallableStatement stmt = conn.prepareCall(sql)) {
-            // Couldn't get it working without mapping so added 
+        CallableStatement stmt = null;
+        Warehouses foundWarehouse = null;
+        try {
+            // Couldn't get it working without mapping so added
             Map map = conn.getTypeMap();
             conn.setTypeMap(map);
             map.put(Warehouses.TYPENAME,
-            Class.forName("database2project.Warehouses")
-            );
+                    Class.forName("database2project.Warehouses"));
+            stmt = conn.prepareCall(sql);
             stmt.registerOutParameter(1, Types.STRUCT, Warehouses.TYPENAME);
             stmt.setInt(2, warehouse_id);
             stmt.execute();
-            Warehouses found = (Warehouses)stmt.getObject(1);
-            return found;
-        } catch (Exception e) {
+            foundWarehouse = (Warehouses) stmt.getObject(1);
+            return foundWarehouse;
+        } 
+        catch (Exception e) {
             e.printStackTrace();
-            return null;
+            // If an error occurs returns null
+            return foundWarehouse;
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

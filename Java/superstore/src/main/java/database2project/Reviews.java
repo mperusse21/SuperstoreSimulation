@@ -106,56 +106,95 @@ public class Reviews implements SQLData {
         return "Review " + this.reviewId + " by customer " + this.customerId + " for product with the id " + this.productId +
         ". Score: " + this.score + " Number of Flags: " + this.flag + "\nDescription: " + this.description;
     }
-
-        
+       
     // Method which adds an review using the add_review procedure
-    public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException {
-        Map map = conn.getTypeMap();
-        conn.setTypeMap(map);
-        map.put(Reviews.TYPENAME,
-                Class.forName("database2project.Reviews"));
-        Reviews newReview = new Reviews(this.reviewId, this.productId, this.customerId, this.score, this.flag,
-                this.description);
-        String sql = "{ call reviews_package.add_review(?)}";
-        CallableStatement stmt = conn.prepareCall(sql);
-        stmt.setObject(1, newReview);
-        stmt.execute();
-        System.out.println("Successfully added review to the database");
-
-        if (!stmt.isClosed() && stmt != null) {
-            stmt.close();
+    public void AddToDatabase(Connection conn) throws ClassNotFoundException {
+        CallableStatement stmt = null;
+        try {
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Reviews.TYPENAME,
+                    Class.forName("database2project.Reviews"));
+            Reviews newReview = new Reviews(this.reviewId, this.productId, this.customerId, this.score, this.flag,
+                    this.description);
+            String sql = "{ call reviews_package.add_review(?)}";
+            stmt = conn.prepareCall(sql);
+            stmt.setObject(1, newReview);
+            stmt.execute();
+            System.out.println("Successfully added review to the database");
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
         }
     }
 
-    public static void deleteReview(Connection conn, int review_id) throws SQLException {
+    public static void deleteReview(Connection conn, int review_id){
         String sql = "{ call reviews_package.delete_review(?)}";
-        CallableStatement stmt = conn.prepareCall(sql);
+        CallableStatement stmt = null;
+        try{
+        stmt = conn.prepareCall(sql);
         stmt.setInt(1, review_id);
         stmt.execute();
         System.out.println("Removed review with id: " + review_id + " from the database");
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
     }
     
-    
-    public static Reviews getReview (Connection conn, int review_id) {
+    public static Reviews getReview(Connection conn, int review_id) {
         String sql = "{ ? = call reviews_package.get_review(?)}";
         Reviews foundReview = null;
-        try (CallableStatement stmt = conn.prepareCall(sql)){
-                // Couldn't get it working without mapping so added 
-                Map map = conn.getTypeMap();
-                conn.setTypeMap(map);
-                map.put(Reviews.TYPENAME,
-                Class.forName("database2project.Reviews")
-            );
+        CallableStatement stmt = null;
+        try {
+            // Couldn't get it working without mapping so added
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Reviews.TYPENAME,
+                    Class.forName("database2project.Reviews"));
+            stmt = conn.prepareCall(sql);
             stmt.registerOutParameter(1, Types.STRUCT, "REVIEWS_TYP");
             stmt.setInt(2, review_id);
             stmt.execute();
-            foundReview = (Reviews)stmt.getObject(1);
+            foundReview = (Reviews) stmt.getObject(1);
             return foundReview;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             // Will return a null found order if an error occurs
             return foundReview;
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
         }
     }
 }

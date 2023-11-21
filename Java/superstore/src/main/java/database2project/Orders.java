@@ -117,72 +117,99 @@ public class Orders implements SQLData {
     //Not sure what to do here yet, might make product into an array of products 
     /*public String toString (){
         String returnString = "Order Id: " + this.orderId + " Customer Id " + this.customerId + " Store Id: " + this.storeId;
-
-        for (Products product : products){
-            returnString "/n" + 
-        }
     }  */ 
 
-    public String validateOrder (Connection conn) throws SQLException {
-        String sql = "{ ? = call orders_package.validate_order(?, ?)}";
-        CallableStatement stmt = conn.prepareCall(sql);
-        stmt.registerOutParameter(1, Types.VARCHAR);
-        stmt.setInt(2, productId);
-        stmt.setInt(3, quantity);
-        stmt.execute();
-        String result = stmt.getString(1);
-        return result;
-    }
-
     // Method which adds an order using the add_order procedure
-    public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException{
-        Map map = conn.getTypeMap();
-        conn.setTypeMap(map);
-        map.put(Orders.TYPENAME,
-        Class.forName("database2project.Orders")
-        );
-        Orders newOrder = new Orders(this.orderId, this.productId, this.customerId, this.storeId, this.quantity, this.price, this.orderDate);
+    public void AddToDatabase(Connection conn) throws ClassNotFoundException{
         String sql = "{ call orders_package.add_order(?)}";
-        CallableStatement stmt = conn.prepareCall(sql);
-        stmt.setObject(1, newOrder);
-        stmt.execute();
-        System.out.println("Successfully added order information to the database");                
-
-        if (!stmt.isClosed() && stmt != null){
-            stmt.close();
-        } 
-    }
-
-    public static void deleteOrder (Connection conn, int order_id) throws SQLException{
-        String sql = "{ call orders_package.delete_order(?)}";
-        CallableStatement stmt = conn.prepareCall(sql);
-        stmt.setInt(1, order_id);
-        stmt.execute();
-        System.out.println("Removed order " + order_id + " from the database");
-    }
-
-    /* Gets an order using the composite primary key (orderid and productid) and calling the sql get order function*/
-    public static Orders getOrder (Connection conn, int order_id, int product_id) {
-        String sql = "{ ? = call orders_package.get_order(?, ?)}";
-        try (CallableStatement stmt = conn.prepareCall(sql)){
-             // Couldn't get it working without mapping so added 
+        CallableStatement stmt = null;
+        try {
             Map map = conn.getTypeMap();
             conn.setTypeMap(map);
             map.put(Orders.TYPENAME,
             Class.forName("database2project.Orders")
             );
+            Orders newOrder = new Orders(this.orderId, this.productId, this.customerId, 
+                this.storeId, this.quantity, this.price, this.orderDate);
+            stmt = conn.prepareCall(sql);
+            stmt.setObject(1, newOrder);
+            stmt.execute();
+            System.out.println("Successfully added order information to the database"); 
+        }      
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
+        }         
+    }
+
+    public static void deleteOrder (Connection conn, int order_id){
+        String sql = "{ call orders_package.delete_order(?)}";
+        CallableStatement stmt = null;
+        try {
+            stmt = conn.prepareCall(sql);
+            stmt.setInt(1, order_id);
+            stmt.execute();
+            System.out.println("Removed order " + order_id + " from the database");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /* Gets an order using the composite primary key (orderid and productid) and calling the sql get order function*/
+    public static Orders getOrder(Connection conn, int order_id, int product_id) {
+        String sql = "{ ? = call orders_package.get_order(?, ?)}";
+        Orders foundOrder = null;
+        CallableStatement stmt = null;
+        try {
+            // Couldn't get it working without mapping so added
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Orders.TYPENAME,
+                    Class.forName("database2project.Orders"));
+            stmt = conn.prepareCall(sql);
             stmt.registerOutParameter(1, Types.STRUCT, "ORDERS_TYP");
             stmt.setInt(2, order_id);
             stmt.setInt(3, product_id);
             stmt.execute();
-            Orders foundOrder = (Orders)stmt.getObject(1);
+            foundOrder = (Orders) stmt.getObject(1);
             return foundOrder;
-        }
-        catch (Exception e){
+        } 
+        catch (Exception e) {
             e.printStackTrace();
             // Will return a null found order if an error occurs
-            return null;
+            return foundOrder;
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
-
 }
