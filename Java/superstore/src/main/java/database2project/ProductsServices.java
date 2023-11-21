@@ -57,23 +57,8 @@ public class ProductsServices {
         }
     }*/
 
-    public void getProductById(int productId) throws SQLException, ClassNotFoundException {
-
-        Map map = this.connection.getTypeMap();
-        map.put(Products.TYPENAME, Class.forName("database2project.Products"));
-        this.connection.setTypeMap(map);
-        
-        String sql = "{ ? = call products_package.getProduct(?)}";
-        try(CallableStatement stmt = this.connection.prepareCall(sql)){
-            stmt.registerOutParameter(1, Types.STRUCT, Products.TYPENAME);
-            stmt.setInt(2, productId);
-            stmt.execute();
-            System.out.println(stmt.getObject(1));
-            //Products newProduct = (Products)stmt.getObject(1);
-            //System.out.println(newProduct.toString());
-            //return newProduct;
-
-        } 
+    public Products getProductById(int productId) throws SQLException, ClassNotFoundException {
+        return Products.getProduct(this.connection, productId);
     }
     
 }

@@ -2,11 +2,11 @@ package database2project;
 
 import java.sql.*;
 import java.util.Scanner;
-public class App 
-{
+
+public class MohTests {
     public static void main( String[] args ) {
-        /*Scanner reader = new Scanner(System.in);
-        SuperStoreServices connection = null;
+        Scanner reader = new Scanner(System.in);
+        ProductsServices conn = null;
 
         try {
             // Prompt user for username and password
@@ -14,8 +14,11 @@ public class App
             String user = reader.next();
             String password = new String(System.console().readPassword("Password: "));
 
-            // Creating the connection using the SuperStoreServices object
-            connection = new SuperStoreServices(user, password);
+            conn = new ProductsServices(user, password);
+            //conn.updateProductName(1, "Apple");
+            //conn.updateProductCategory(1, "Grocery");
+            Products product = conn.getProductById(14);
+            System.out.println(product);
         }
         
         // Catches any possible exceptions
@@ -26,14 +29,15 @@ public class App
         // Closes the connection and the Scanner
         finally {
             try {
-                connection.close();
+                conn.close();
             } 
             catch (SQLException e) {
                 e.printStackTrace();
             }
 
             reader.close();
-        }*/
+        }
      
     }
 }
+
