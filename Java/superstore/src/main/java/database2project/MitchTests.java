@@ -2,7 +2,7 @@ package database2project;
 
 import java.sql.*;
 import java.util.Scanner;
-public class App 
+public class MitchTests 
 {
     public static void main( String[] args ) {
         Scanner reader = new Scanner(System.in);
@@ -16,6 +16,22 @@ public class App
 
             // Creating the connection using the SuperStoreServices object
             connection = new SuperStoreServices(user, password);
+
+            /* Testing validate order */
+            //connection.addOrder(0, 2,1,1,40,42.50,Date.valueOf("2020-01-01"));
+            //System.out.println(order.validateOrder(connection.retrievConnection()));
+            //order.AddToDatabase(connection.retrievConnection());
+
+           // Orders order = connection.getOrder(2, 3);
+
+          //Warehouses warehouse = Warehouses.getWarehouse(connection.retrievConnection(), 1);
+           //System.out.println(warehouse);
+
+           //Reviews review = connection.getReview(1);
+           //System.out.println(review);
+
+           Orders order = connection.getOrder(2, 3);
+           System.out.println("Order Id: " + order.getOrderId() + " Customer Id " + order.getCustomerId() + " Store Id: " + order.getStoreId());
         }
         
         // Catches any possible exceptions

@@ -3,15 +3,11 @@
 CREATE OR REPLACE PACKAGE orders_package AS
     PROCEDURE add_order(vorder IN orders_typ);
     PROCEDURE delete_order(vorderid IN NUMBER);
-    FUNCTION get_order(vorderid NUMBER, vproductid NUMBER)
+    FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
         RETURN orders_typ;
-    FUNCTION get_times_ordered (vproductid NUMBER)
-        RETURN NUMBER;
-    TYPE products_id_varray IS VARRAY(100) OF NUMBER;
-    TYPE order_varray IS VARRAY(100) OF orders_typ;
-    -- Not sure if necessary, added for now
-    FUNCTION get_all_order_products (vorderid NUMBER)
-        RETURN products_id_varray;
+    TYPE product_id_varray IS VARRAY(100) OF NUMBER;
+    FUNCTION get_all_products(vorderid NUMBER)
+        RETURN product_id_varray;
     FUNCTION get_max_inventory (vproductid NUMBER)
         RETURN NUMBER;
     FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
@@ -92,47 +88,21 @@ FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
         return vorder;
     END;
     
--- Gets the number of times a product was ordered
-FUNCTION get_times_ordered (vproductid NUMBER)
-    RETURN NUMBER AS
-        times_ordered NUMBER(10);
+-- Gets an order with a certain id (returns an varray of orders)
+FUNCTION get_all_products (vorderid IN NUMBER)
+    RETURN product_id_varray AS
+        products product_id_varray;
     BEGIN
         SELECT
-            COUNT(*)
-        INTO
-            times_ordered
+            ProductId
+        BULK COLLECT INTO
+            products
         FROM
             Orders
         WHERE
-            ProductId = vproductid;
-        
-        IF times_ordered = 0 THEN
-            RAISE ORDER_NOT_FOUND;
-        END IF;
-        
-        return times_ordered;
-    END;
-    
---Function that returns all the Product Ids that are in a certain order 
-FUNCTION get_all_order_products(vorderid NUMBER)
-    RETURN products_id_varray IS
-    product_id products_id_varray;
-    BEGIN
-        SELECT
-            ProductId 
-        BULK COLLECT INTO 
-            product_id 
-        FROM 
-            Orders 
-        WHERE 
             OrderId = vorderid;
-        
-        IF product_id.COUNT = 0 THEN
-                RAISE ORDER_NOT_FOUND;
-        END IF;
-        
-        RETURN product_id;
-    END ;
+        return products;
+    END;
     
 -- Gets the stock of a product in all warehouses combined (used for validation)
 FUNCTION get_max_inventory (vproductid NUMBER)
@@ -577,9 +547,65 @@ ELSE
     dbms_output.put_line('false');
 END If;
 END;
-/0001
+/
+
+--Function that returns all the Product Ids that are in a certain order 
+FUNCTION get_all_order_products(vorderid NUMBER)
+    RETURN products_id_varray IS
+    product_id products_id_varray;
+    BEGIN
+        SELECT
+            ProductId 
+        BULK COLLECT INTO 
+            product_id 
+        FROM 
+            Orders 
+        WHERE 
+            OrderId = vorderid;
+        
+        IF product_id.COUNT = 0 THEN
+                RAISE ORDER_NOT_FOUND;
+        END IF;
+        
+        RETURN product_id;
+    END ;
+    
+    -- Gets the number of times a product was ordered
+FUNCTION get_times_ordered (vproductid NUMBER)
+    RETURN NUMBER AS
+        times_ordered NUMBER(10);
+    BEGIN
+        SELECT
+            COUNT(*)
+        INTO
+            times_ordered
+        FROM
+            Orders
+        WHERE
+            ProductId = vproductid;
+        
+        IF times_ordered = 0 THEN
+            RAISE ORDER_NOT_FOUND;
+        END IF;
+        
+        return times_ordered;
+    END;
 */
   
+/*
+TEST (works)
+DECLARE
+    products orders_package.product_id_varray;
+    vorder orders_typ;
+BEGIN
+    products := orders_package.get_all_products(2);
+    for i in 1 .. products.COUNT loop
+        vorder := orders_package.get_order(2 , products(i));
+        dbms_output.put_line(vorder.OrderID || vorder.ProductId);
+    end loop;
+END;
+/
+*/
 
 -- Audit 
 

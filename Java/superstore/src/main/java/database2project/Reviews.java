@@ -1,9 +1,7 @@
 package database2project;
 
-import java.sql.SQLData;
-import java.sql.SQLException;
-import java.sql.SQLInput;
-import java.sql.SQLOutput;
+import java.sql.*;
+import java.util.Map;
 
 public class Reviews implements SQLData {
     
@@ -40,12 +38,12 @@ public class Reviews implements SQLData {
         return this.description;
     }
     //Optional
-    public Products getProduct(){
+    /*public Products getProduct(){
         return this.product;
     }
     public Customers getCustomer(){
         return this.customer;
-    }
+    }*/
 
     //Set methods
 
@@ -74,13 +72,13 @@ public class Reviews implements SQLData {
     }
 
     //Optional for now
-    public void setProduct(Products product) {
+    /*public void setProduct(Products product) {
         this.product = product;
     }
 
     public void setCustomer(Customers customer) {
         this.customer = customer;
-    }
+    }*/
 
     
     //Constructor initializing all private fields
@@ -125,7 +123,30 @@ public class Reviews implements SQLData {
 
     // toString method which returns a string representation of a Review (preliminary)
     public String toString (){
-        return "Review " + this.reviewId + " by customer " + this.customerId + " for " + this.product.getProductName() +
-        ". Score: " + this.score + " Number of Flags:" + this.flag + "/n Description:" + this.description;
-    }   
+        return "Review " + this.reviewId + " by customer " + this.customerId + " for product with the id " + this.productId +
+        ". Score: " + this.score + " Number of Flags: " + this.flag + "\nDescription: " + this.description;
+    } 
+    
+    public static Reviews getReview (Connection conn, int review_id) {
+        String sql = "{ ? = call reviews_package.get_review(?)}";
+        Reviews foundReview = null;
+        try (CallableStatement stmt = conn.prepareCall(sql)){
+                // Couldn't get it working without mapping so added 
+                Map map = conn.getTypeMap();
+                conn.setTypeMap(map);
+                map.put(Reviews.TYPENAME,
+                Class.forName("database2project.Reviews")
+            );
+            stmt.registerOutParameter(1, Types.STRUCT, "REVIEWS_TYP");
+            stmt.setInt(2, review_id);
+            stmt.execute();
+            foundReview = (Reviews)stmt.getObject(1);
+            return foundReview;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            // Will return a null found order if an error occurs
+            return foundReview;
+        }
+    }
 }

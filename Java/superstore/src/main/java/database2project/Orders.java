@@ -18,9 +18,6 @@ public class Orders implements SQLData {
     private int quantity;
     private Double price;
     private Date orderDate;
-    //Optional private fields (may not be used)
-    private Products product;
-    private Customers customer;
     // private Stores store;
     public static final String TYPENAME = "ORDERS_TYP";
 
@@ -46,13 +43,6 @@ public class Orders implements SQLData {
     }
     public Date getOrderDate(){
         return this.orderDate;
-    }
-    //Optional
-    public Products getProduct(){
-        return this.product;
-    }
-    public Customers getCustomer(){
-        return this.customer;
     }
 /*     public Stores getStore(){
         return this.store;
@@ -87,14 +77,6 @@ public class Orders implements SQLData {
         this.orderDate = orderDate;
     }
 
-    // Optional for now
-    public void setProduct(Products product) {
-        this.product = product;
-    }
-
-    public void setCustomer(Customers customer) {
-        this.customer = customer;
-    }
  
     //Constructor initializing all private fields
     public Orders(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate){
@@ -160,14 +142,13 @@ public class Orders implements SQLData {
 
     // Method which adds an order using the add order procedure, along with parameter to generate a key or not
     public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException{
-
         Map map = conn.getTypeMap();
         conn.setTypeMap(map);
         map.put(Orders.TYPENAME,
         Class.forName("database2project.Orders")
         );
         Orders newOrder = new Orders(this.orderId, this.productId, this.customerId, this.storeId, this.quantity, this.price, this.orderDate);
-        String sql = "{call orders_package.add_order(?)}";
+        String sql = "{ call orders_package.add_order(?)}";
         CallableStatement stmt = conn.prepareCall(sql);
         stmt.setObject(1, newOrder);
         stmt.execute();
@@ -176,6 +157,29 @@ public class Orders implements SQLData {
         if (!stmt.isClosed() && stmt != null){
             stmt.close();
         } 
+    }
+
+    public static Orders getOrder (Connection conn, int order_id, int product_id) {
+        String sql = "{ ? = call orders_package.get_order(?, ?)}";
+        try (CallableStatement stmt = conn.prepareCall(sql)){
+             // Couldn't get it working without mapping so added 
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Orders.TYPENAME,
+            Class.forName("database2project.Orders")
+            );
+            stmt.registerOutParameter(1, Types.STRUCT, "ORDERS_TYP");
+            stmt.setInt(2, order_id);
+            stmt.setInt(3, product_id);
+            stmt.execute();
+            Orders foundOrder = (Orders)stmt.getObject(1);
+            return foundOrder;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            // Will return a null found order if an error occurs
+            return null;
+        }
     }
 
 }

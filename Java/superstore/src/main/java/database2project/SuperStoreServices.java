@@ -40,10 +40,22 @@ public class SuperStoreServices {
     // (All products for the order will be deleted)
     public void DeleteOrder (int order_id) throws SQLException{
         String sql = "{ call orders_package.delete_order(?)}";
-        CallableStatement stmt = conn.prepareCall(sql);
+        CallableStatement stmt = this.conn.prepareCall(sql);
         stmt.setInt(1, order_id);
         stmt.execute();
         System.out.println("Removed order " + order_id + " from the database");
+    }
+
+    public Orders getOrder (int order_id, int product_id) {
+        return Orders.getOrder(this.conn, order_id, product_id);
+    }
+
+    public Reviews getReview (int review_id) {
+        return Reviews.getReview(this.conn, review_id);
+    }
+
+    public Warehouses getWarehouse (int warehouse_id){
+        return Warehouses.getWarehouse(this.conn, warehouse_id);
     }
 }
 

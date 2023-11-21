@@ -1,9 +1,13 @@
 package database2project;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.SQLData;
 import java.sql.SQLException;
 import java.sql.SQLInput;
 import java.sql.SQLOutput;
+import java.sql.Types;
+import java.util.Map;
 
 public class Warehouses implements SQLData {
  
@@ -83,5 +87,25 @@ public class Warehouses implements SQLData {
     public String toString (){
         return "Warehouse Id: " + this.warehouseId + ", " + this.warehouseName + ", Address Id:" + this.addressId;
     }   
+
+    public static Warehouses getWarehouse(Connection conn, int warehouse_id) {
+        String sql = "{ ? = call warehouses_package.get_warehouse(?) }";
+        try (CallableStatement stmt = conn.prepareCall(sql)) {
+            // Couldn't get it working without mapping so added 
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Warehouses.TYPENAME,
+            Class.forName("database2project.Warehouses")
+            );
+            stmt.registerOutParameter(1, Types.STRUCT, Warehouses.TYPENAME);
+            stmt.setInt(2, warehouse_id);
+            stmt.execute();
+            Warehouses found = (Warehouses)stmt.getObject(1);
+            return found;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
 
