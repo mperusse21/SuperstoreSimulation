@@ -25,16 +25,22 @@ CREATE OR REPLACE PACKAGE BODY orders_package AS
 PROCEDURE add_order (
     vorder IN orders_typ
 ) AS
+    vorder_id NUMBER(5) := vorder.OrderId;
     BEGIN
     -- if there is not enough stock in any warehouse raises an exception
     IF validate_order(vorder.ProductId, vorder.Quantity) = 'false' THEN
         RAISE OUT_OF_STOCK;
     END IF;
     
+    -- Handles when JDBC id is 0 (or null)
+    IF vorder_id = 0 THEN
+        vorder_id := NULL;
+    END IF;
+    
     INSERT INTO Orders 
         VALUES (
         -- If orderId is null one will be generated
-                vorder.OrderId,
+                vorder_id,
                 vorder.ProductId,
                 vorder.CustomerId,
                 vorder.StoreId, 

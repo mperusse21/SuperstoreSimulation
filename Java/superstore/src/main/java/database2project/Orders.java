@@ -1,18 +1,23 @@
 package database2project;
 
+import java.lang.reflect.Constructor;
 import java.sql.*;
+import java.util.Map;
+
+import javax.lang.model.type.NullType;
 
 
 public class Orders implements SQLData {
     
     //Private fields for all fields of the Customers table
-    private int orderId;
+    // Used integer to allow nulls
+    private Integer orderId;
     private int productId;
     private int customerId;
     private int storeId;
     private int quantity;
     private Double price;
-    private String orderDate;
+    private Date orderDate;
     //Optional private fields (may not be used)
     private Products product;
     private Customers customer;
@@ -39,7 +44,7 @@ public class Orders implements SQLData {
     public Double getPrice(){
         return this.price;
     }
-    public String getOrderDate(){
+    public Date getOrderDate(){
         return this.orderDate;
     }
     //Optional
@@ -78,7 +83,7 @@ public class Orders implements SQLData {
         this.price = price;
     }
 
-    public void setOrderDate(String orderDate) {
+    public void setOrderDate(Date orderDate) {
         this.orderDate = orderDate;
     }
 
@@ -92,7 +97,7 @@ public class Orders implements SQLData {
     }
  
     //Constructor initializing all private fields
-    public Orders(int orderId, int productId, int customerId, int storeId, int quantity, Double price, String orderDate){
+    public Orders(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate){
         this.orderId = orderId;
         this.productId = productId;
         this.customerId = customerId;
@@ -119,7 +124,7 @@ public class Orders implements SQLData {
         setStoreId(stream.readInt());
         setQuantity(stream.readInt());
         setPrice(stream.readDouble());
-        setOrderDate(stream.readString());
+        setOrderDate(stream.readDate());
     }
     
     @Override
@@ -130,7 +135,7 @@ public class Orders implements SQLData {
         stream.writeInt(getStoreId());
         stream.writeInt(getQuantity());
         stream.writeDouble(getPrice());
-        stream.writeString(getOrderDate());
+        stream.writeDate(getOrderDate());
     }
 
     //Not sure what to do here yet, might make product into an array of products 
@@ -151,5 +156,25 @@ public class Orders implements SQLData {
         stmt.execute();
         String result = stmt.getString(1);
         return result;
+    }
+
+    // Method which adds an order using the add order procedure, along with parameter to generate a key or not
+        public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException{
+
+                Map map = conn.getTypeMap();
+                conn.setTypeMap(map);
+                map.put(Orders.TYPENAME,
+                Class.forName("database2project.Orders")
+                );
+                Orders newOrder = new Orders(this.orderId, this.productId, this.customerId, this.storeId, this.quantity, this.price, this.orderDate);
+                String sql = "{call orders_package.add_order(?)}";
+                CallableStatement stmt = conn.prepareCall(sql);
+                stmt.setObject(1, newOrder);
+                stmt.execute();                
+
+                if (!stmt.isClosed() && stmt != null){
+                    stmt.close();
+                }
+      
     }
 }
