@@ -21,13 +21,22 @@ public class ProductsServices {
         }
     }
 
-    public void updateProduct(int productId, String productName, String category) throws SQLException {
+    public void updateProductName(int productId, String productName) throws SQLException {
 
-            String sql = "{call products_package.update_products(?,?,?)}";
+            String sql = "{call products_package.update_product_name(?,?)}";
             try(CallableStatement stmt = this.connection.prepareCall(sql)){
                 stmt.setInt(1, productId);
                 stmt.setString(2, productName);
-                stmt.setString(3, category);
+                stmt.execute();
+            }
+    }
+
+    public void updateProductCategory(int productId, String category) throws SQLException {
+
+            String sql = "{call products_package.update_product_category(?,?)}";
+            try(CallableStatement stmt = this.connection.prepareCall(sql)){
+                stmt.setInt(1, productId);
+                stmt.setString(2, category);
                 stmt.execute();
             }
     }
@@ -48,20 +57,21 @@ public class ProductsServices {
         }
     }*/
 
-    public Products getProductById(int productId) throws SQLException, ClassNotFoundException {
+    public void getProductById(int productId) throws SQLException, ClassNotFoundException {
 
         Map map = this.connection.getTypeMap();
-        map.put("PRODUCTS_TYPE", Class.forName("database2project.Products"));
+        map.put(Products.TYPENAME, Class.forName("database2project.Products"));
         this.connection.setTypeMap(map);
         
         String sql = "{ ? = call products_package.getProduct(?)}";
         try(CallableStatement stmt = this.connection.prepareCall(sql)){
-            stmt.registerOutParameter(1, Types.STRUCT,"PRODUCTS_TYPE");
-            stmt.setObject(2, productId);
+            stmt.registerOutParameter(1, Types.STRUCT, Products.TYPENAME);
+            stmt.setInt(2, productId);
             stmt.execute();
-            Products newProduct = (Products)stmt.getObject(1);
-            return newProduct;
-            //
+            System.out.println(stmt.getObject(1));
+            //Products newProduct = (Products)stmt.getObject(1);
+            //System.out.println(newProduct.toString());
+            //return newProduct;
 
         } 
     }

@@ -8,7 +8,8 @@ public class Products implements SQLData {
     private int productId;
     private String productName;
     private String category; 
-    private String typeName;
+    //private String TYPENAME;
+    public static final String TYPENAME = "PRODUCTS_TYPE";
 
     //Getters for the private fields
     public int getProductId(){
@@ -41,12 +42,11 @@ public class Products implements SQLData {
 
     @Override
     public String getSQLTypeName() throws SQLException {
-        return typeName;
+        return Products.TYPENAME;
     }
 
     @Override
     public void readSQL(SQLInput stream, String typeName) throws SQLException {
-        this.typeName = typeName;
         setProductId(stream.readInt());
         setProductName(stream.readString());
         setCategory(stream.readString());
@@ -64,4 +64,5 @@ public class Products implements SQLData {
     public String toString(){
         return "Product Id: " + this.productId + ", Product Name: " + this.productName + ", Category: " + this.category;
     }
+
 }

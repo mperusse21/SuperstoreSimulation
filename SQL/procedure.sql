@@ -244,7 +244,9 @@ END;
 
 CREATE OR REPLACE PACKAGE products_package AS
 
-PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2);
+PROCEDURE update_product_name(product_id NUMBER, product_name VARCHAR2);
+
+PROCEDURE update_product_category(product_id NUMBER, category_name VARCHAR2);
 
 TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
@@ -261,12 +263,17 @@ END products_package;
 
 CREATE OR REPLACE PACKAGE BODY products_package AS 
 
---Procedure that updates the row corresponding to the ProductId value in the parameter with the new values given in the parameter
-PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2) IS
+--Procedure that updates the product name corresponding to the ProductId value in the parameter with the new value given in the parameter
+PROCEDURE update_product_name(product_id NUMBER, product_name VARCHAR2) IS
 BEGIN
 UPDATE Products SET ProductName = product_name WHERE ProductId = product_id;
+END update_product_name;
+
+--Procedure that updates the category corresponding to the ProductId value in the parameter with the new value given in the parameter
+PROCEDURE update_product_category(product_id NUMBER, category_name VARCHAR2) IS
+BEGIN
 UPDATE Products SET Category = category_name WHERE ProductId = product_id;
-END update_products;
+END update_product_category;
 
 --Function that returns all the ProductIds that are in a certain category (the parameter value)
 FUNCTION getProductsByCategory(category_name VARCHAR2)
