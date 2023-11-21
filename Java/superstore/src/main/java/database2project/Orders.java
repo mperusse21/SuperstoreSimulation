@@ -18,9 +18,7 @@ public class Orders implements SQLData {
     private int quantity;
     private Double price;
     private Date orderDate;
-    // private Stores store;
     public static final String TYPENAME = "ORDERS_TYP";
-
 
     //Getters for the private fields
     public int getOrderId(){
@@ -44,9 +42,6 @@ public class Orders implements SQLData {
     public Date getOrderDate(){
         return this.orderDate;
     }
-/*     public Stores getStore(){
-        return this.store;
-    }*/
 
     // Set methods
     public void setOrderId(int orderId) {
@@ -77,7 +72,6 @@ public class Orders implements SQLData {
         this.orderDate = orderDate;
     }
 
- 
     //Constructor initializing all private fields
     public Orders(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate){
         this.orderId = orderId;
@@ -140,7 +134,7 @@ public class Orders implements SQLData {
         return result;
     }
 
-    // Method which adds an order using the add order procedure, along with parameter to generate a key or not
+    // Method which adds an order using the add_order procedure
     public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException{
         Map map = conn.getTypeMap();
         conn.setTypeMap(map);
@@ -152,13 +146,22 @@ public class Orders implements SQLData {
         CallableStatement stmt = conn.prepareCall(sql);
         stmt.setObject(1, newOrder);
         stmt.execute();
-        System.out.println("Successfully added order information");                
+        System.out.println("Successfully added order information to the database");                
 
         if (!stmt.isClosed() && stmt != null){
             stmt.close();
         } 
     }
 
+    public static void deleteOrder (Connection conn, int order_id) throws SQLException{
+        String sql = "{ call orders_package.delete_order(?)}";
+        CallableStatement stmt = conn.prepareCall(sql);
+        stmt.setInt(1, order_id);
+        stmt.execute();
+        System.out.println("Removed order " + order_id + " from the database");
+    }
+
+    /* Gets an order using the composite primary key (orderid and productid) and calling the sql get order function*/
     public static Orders getOrder (Connection conn, int order_id, int product_id) {
         String sql = "{ ? = call orders_package.get_order(?, ?)}";
         try (CallableStatement stmt = conn.prepareCall(sql)){

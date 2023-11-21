@@ -1,6 +1,7 @@
 package database2project;
 import java.sql.*;
 
+// The plan is to do the try catch here mostly, maybe with some more in the app
 public class SuperStoreServices {
     private String url = "jdbc:oracle:thin:@198.168.52.211:1521/pdbora19c.dawsoncollege.qc.ca";
     private Connection conn;
@@ -28,22 +29,28 @@ public class SuperStoreServices {
     public void addOrder(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate) 
         throws SQLException, ClassNotFoundException{            
             Orders newOrder = new Orders(orderId, productId, customerId, storeId, quantity, price, orderDate);
-            if (newOrder.validateOrder(conn).equals("true")){
-            newOrder.AddToDatabase(conn);
+            if (newOrder.validateOrder(this.conn).equals("true")){
+            newOrder.AddToDatabase(this.conn);
             }
             else {
                 System.out.println("Unable to add order due to lack of stock");
             }
         }
+    // Method which takes input needed to add a review, creates a Review object and uses it's built in AddToDatabase method.
+    public void addReview (int reviewId, int productId, int customerId, int score, 
+    int flag, String description) throws SQLException, ClassNotFoundException{
+        Reviews newReview = new Reviews(reviewId, productId, customerId, score, flag, description);
+        newReview.AddToDatabase(this.conn);
+    }
 
     // Method which deletes an order from the database using the delete_order procedure
     // (All products for the order will be deleted)
-    public void DeleteOrder (int order_id) throws SQLException{
-        String sql = "{ call orders_package.delete_order(?)}";
-        CallableStatement stmt = this.conn.prepareCall(sql);
-        stmt.setInt(1, order_id);
-        stmt.execute();
-        System.out.println("Removed order " + order_id + " from the database");
+    public void deleteOrder (int order_id) throws SQLException{
+        Orders.deleteOrder(this.conn, order_id);
+    }
+
+    public void deleteReview (int review_id) throws SQLException{
+        Reviews.deleteReview(this.conn, review_id);
     }
 
     public Orders getOrder (int order_id, int product_id) {

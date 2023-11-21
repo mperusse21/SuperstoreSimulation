@@ -12,9 +12,6 @@ public class Reviews implements SQLData {
     private int score;
     private int flag;
     private String description;
-    //Optional private fields (may not be used)
-    private Products product;
-    private Customers customer;
     public static final String TYPENAME = "REVIEWS_TYP";
 
 
@@ -37,13 +34,6 @@ public class Reviews implements SQLData {
     public String getDescription(){
         return this.description;
     }
-    //Optional
-    /*public Products getProduct(){
-        return this.product;
-    }
-    public Customers getCustomer(){
-        return this.customer;
-    }*/
 
     //Set methods
 
@@ -70,16 +60,6 @@ public class Reviews implements SQLData {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    //Optional for now
-    /*public void setProduct(Products product) {
-        this.product = product;
-    }
-
-    public void setCustomer(Customers customer) {
-        this.customer = customer;
-    }*/
-
     
     //Constructor initializing all private fields
     public Reviews(int reviewId, int productId, int customerId, int score, int flag, String description){
@@ -125,7 +105,36 @@ public class Reviews implements SQLData {
     public String toString (){
         return "Review " + this.reviewId + " by customer " + this.customerId + " for product with the id " + this.productId +
         ". Score: " + this.score + " Number of Flags: " + this.flag + "\nDescription: " + this.description;
-    } 
+    }
+
+        
+    // Method which adds an review using the add_review procedure
+    public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException {
+        Map map = conn.getTypeMap();
+        conn.setTypeMap(map);
+        map.put(Reviews.TYPENAME,
+                Class.forName("database2project.Reviews"));
+        Reviews newReview = new Reviews(this.reviewId, this.productId, this.customerId, this.score, this.flag,
+                this.description);
+        String sql = "{ call reviews_package.add_review(?)}";
+        CallableStatement stmt = conn.prepareCall(sql);
+        stmt.setObject(1, newReview);
+        stmt.execute();
+        System.out.println("Successfully added review to the database");
+
+        if (!stmt.isClosed() && stmt != null) {
+            stmt.close();
+        }
+    }
+
+    public static void deleteReview(Connection conn, int review_id) throws SQLException {
+        String sql = "{ call reviews_package.delete_review(?)}";
+        CallableStatement stmt = conn.prepareCall(sql);
+        stmt.setInt(1, review_id);
+        stmt.execute();
+        System.out.println("Removed review with id: " + review_id + " from the database");
+    }
+    
     
     public static Reviews getReview (Connection conn, int review_id) {
         String sql = "{ ? = call reviews_package.get_review(?)}";

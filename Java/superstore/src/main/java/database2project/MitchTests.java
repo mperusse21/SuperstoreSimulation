@@ -30,8 +30,12 @@ public class MitchTests
            //Reviews review = connection.getReview(1);
            //System.out.println(review);
 
-           Orders order = connection.getOrder(2, 3);
-           System.out.println("Order Id: " + order.getOrderId() + " Customer Id " + order.getCustomerId() + " Store Id: " + order.getStoreId());
+           /*Orders order = connection.getOrder(2, 3);
+           System.out.println("Order Id: " + order.getOrderId() + " Customer Id " + order.getCustomerId() + " Store Id: " + order.getStoreId());*/
+
+        
+           //connection.addReview(0, 1, 1, 2, 0, "This is most test review ever");
+            connection.deleteReview(41);
         }
         
         // Catches any possible exceptions
