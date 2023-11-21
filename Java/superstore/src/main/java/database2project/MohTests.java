@@ -2,6 +2,7 @@ package database2project;
 
 import java.sql.*;
 import java.util.Scanner;
+import java.util.*;
 
 public class MohTests {
     public static void main( String[] args ) {
@@ -19,6 +20,8 @@ public class MohTests {
             //conn.updateProductCategory(1, "Grocery");
             Products product = conn.getProductById(14);
             System.out.println(product);
+            List<Products> products = conn.getProductByCategory("Grocery");
+            System.out.println(products);
         }
         
         // Catches any possible exceptions

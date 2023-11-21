@@ -1,6 +1,8 @@
 package database2project;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Products implements SQLData {
@@ -84,6 +86,34 @@ public class Products implements SQLData {
         }
 
     }
+
+    public static List<Products> getProductsByCategory(Connection conn, String category) throws SQLException, ClassNotFoundException {
+        String sql = "{ call ? := products_package.getProductsByCategory(?)}";
+        try (CallableStatement stmt = conn.prepareCall(sql)) {
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Products.TYPENAME, Class.forName("database2project.Products"));
+            stmt.registerOutParameter(1, Types.REF_CURSOR);
+            stmt.setString(2, category);
+            stmt.execute();
+    
+            ResultSet resultSet = (ResultSet) stmt.getObject(1);
+            List<Products> productList = new ArrayList<>();
+    
+            while (resultSet.next()) {
+                Products product = new Products(
+                    resultSet.getInt("ProductId"),
+                    resultSet.getString("ProductName"),
+                    resultSet.getString("Category")
+                );
+                productList.add(product);
+            }
+    
+            return productList;
+        }
+    }
+    
+
 
 
 }

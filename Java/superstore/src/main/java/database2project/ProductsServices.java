@@ -2,6 +2,7 @@ package database2project;
 
 import java.sql.*;
 import java.util.Map;
+import java.util.*;
 
 public class ProductsServices {
 
@@ -41,21 +42,9 @@ public class ProductsServices {
             }
     }
 
-    /*public Products getProductByCategory(String category) throws SQLException, ClassNotFoundException {
-
-        //Products product = new Products();
-
-        Map map = this.connection.getTypeMap();
-        map.put("PRODUCTS_TYPE", Class.forName("database2project.Products"));
-        this.connection.setTypeMap(map);
-        
-        String sql = "{ ? = call products_package.getProductsByCategory(?)}";
-        try(CallableStatement stmt = this.connection.prepareCall(sql)){
-            //stmt.setObject(1, );
-            stmt.setObject(2, category);
-            stmt.execute();
-        }
-    }*/
+    public List<Products> getProductByCategory(String category) throws SQLException, ClassNotFoundException {
+        return Products.getProductsByCategory(this.connection, category);
+    }
 
     public Products getProductById(int productId) throws SQLException, ClassNotFoundException {
         return Products.getProduct(this.connection, productId);
