@@ -18,9 +18,9 @@ public class App
             connection = new SuperStoreServices(user, password);
 
             /* Testing validate order */
-            Orders order = new Orders(0, 1,1,1,40,42.50,Date.valueOf("2020-01-01"));
+            connection.addOrder(0, 2,1,1,40,42.50,Date.valueOf("2020-01-01"));
             //System.out.println(order.validateOrder(connection.retrievConnection()));
-            order.AddToDatabase(connection.retrievConnection());
+            //order.AddToDatabase(connection.retrievConnection());
         }
         
         // Catches any possible exceptions

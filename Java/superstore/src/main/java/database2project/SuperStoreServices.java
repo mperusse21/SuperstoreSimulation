@@ -23,5 +23,27 @@ public class SuperStoreServices {
     }
 
     // Potentially put various methods like add in here as well
+    // Method which takes input needed to add an order, creates an Orders object and uses it's built in AddToDatabase method.
+    // Also performs validation.
+    public void addOrder(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate) 
+        throws SQLException, ClassNotFoundException{            
+            Orders newOrder = new Orders(orderId, productId, customerId, storeId, quantity, price, orderDate);
+            if (newOrder.validateOrder(conn).equals("true")){
+            newOrder.AddToDatabase(conn);
+            }
+            else {
+                System.out.println("Unable to add order due to lack of stock");
+            }
+        }
+
+    // Method which deletes an order from the database using the delete_order procedure
+    // (All products for the order will be deleted)
+    public void DeleteOrder (int order_id) throws SQLException{
+        String sql = "{ call orders_package.delete_order(?)}";
+        CallableStatement stmt = conn.prepareCall(sql);
+        stmt.setInt(1, order_id);
+        stmt.execute();
+        System.out.println("Removed order " + order_id + " from the database");
+    }
 }
 

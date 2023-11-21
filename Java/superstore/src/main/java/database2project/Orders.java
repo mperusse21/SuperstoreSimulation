@@ -159,22 +159,23 @@ public class Orders implements SQLData {
     }
 
     // Method which adds an order using the add order procedure, along with parameter to generate a key or not
-        public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException{
+    public void AddToDatabase(Connection conn) throws SQLException, ClassNotFoundException{
 
-                Map map = conn.getTypeMap();
-                conn.setTypeMap(map);
-                map.put(Orders.TYPENAME,
-                Class.forName("database2project.Orders")
-                );
-                Orders newOrder = new Orders(this.orderId, this.productId, this.customerId, this.storeId, this.quantity, this.price, this.orderDate);
-                String sql = "{call orders_package.add_order(?)}";
-                CallableStatement stmt = conn.prepareCall(sql);
-                stmt.setObject(1, newOrder);
-                stmt.execute();                
+        Map map = conn.getTypeMap();
+        conn.setTypeMap(map);
+        map.put(Orders.TYPENAME,
+        Class.forName("database2project.Orders")
+        );
+        Orders newOrder = new Orders(this.orderId, this.productId, this.customerId, this.storeId, this.quantity, this.price, this.orderDate);
+        String sql = "{call orders_package.add_order(?)}";
+        CallableStatement stmt = conn.prepareCall(sql);
+        stmt.setObject(1, newOrder);
+        stmt.execute();
+        System.out.println("Successfully added order information");                
 
-                if (!stmt.isClosed() && stmt != null){
-                    stmt.close();
-                }
-      
+        if (!stmt.isClosed() && stmt != null){
+            stmt.close();
+        } 
     }
+
 }
