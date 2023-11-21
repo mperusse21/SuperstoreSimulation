@@ -3,7 +3,7 @@
 CREATE OR REPLACE PACKAGE orders_package AS
     PROCEDURE add_order(vorder IN orders_typ);
     PROCEDURE delete_order(vorderid IN NUMBER);
-    FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
+    FUNCTION get_order (vorderid NUMBER, vproductid NUMBER)
         RETURN orders_typ;
     TYPE product_id_varray IS VARRAY(100) OF NUMBER;
     FUNCTION get_all_products(vorderid NUMBER)
