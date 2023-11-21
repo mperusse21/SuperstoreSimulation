@@ -11,9 +11,9 @@ CREATE OR REPLACE PACKAGE orders_package AS
     -- Not sure if necessary, added for now
     FUNCTION get_all_order_products (vorderid NUMBER)
         RETURN products_id_varray;
-    FUNCTION get_total_inventory (vproductid NUMBER)
+    FUNCTION get_max_inventory (vproductid NUMBER)
         RETURN NUMBER;
-    FUNCTION validate_order (vproductid NUMBER)
+    FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
         RETURN BOOLEAN;
     ORDER_NOT_FOUND EXCEPTION;
     OUT_OF_STOCK EXCEPTION;
@@ -25,8 +25,8 @@ PROCEDURE add_order (
     vorder IN orders_typ
 ) AS
     BEGIN
-    -- if there is no stock in any warehouse raises an exception
-    IF validate_order(vorder.productid) = false THEN
+    -- if there is not enough stock in any warehouse raises an exception
+    IF validate_order(vorder.ProductId, vorder.Quantity) = false THEN
         RAISE OUT_OF_STOCK;
     END IF;
     
@@ -128,13 +128,13 @@ FUNCTION get_all_order_products(vorderid NUMBER)
     END ;
     
 -- Gets the stock of a product in all warehouses combined (used for validation)
-FUNCTION get_total_inventory (vproductid NUMBER)
+FUNCTION get_max_inventory (vproductid NUMBER)
     RETURN NUMBER AS
         total_stock NUMBER(10,0);
     BEGIN
         SELECT
         -- Null is the same as having no stock
-            NVL(SUM(Stock), 0)
+            NVL(MAX(Stock), 0)
         INTO
             total_stock
         FROM
@@ -145,13 +145,13 @@ FUNCTION get_total_inventory (vproductid NUMBER)
         return total_stock;
     END;
     
-FUNCTION validate_order (vproductid NUMBER)
+FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
     RETURN BOOLEAN AS
-       total_stock NUMBER(10, 0);
+       max_stock NUMBER(10, 0);
     BEGIN
-        total_stock := get_total_inventory(vproductid);
+        max_stock := get_max_inventory(vproductid);
         
-        IF total_stock = 0 THEN
+        IF max_stock < quantity THEN
             return false;
         ELSE
             return true;
