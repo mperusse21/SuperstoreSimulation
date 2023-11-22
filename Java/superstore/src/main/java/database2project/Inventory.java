@@ -11,9 +11,6 @@ public class Inventory implements SQLData {
     private int warehouseId;
     private int productId;
     private int stock;
-    //Optional private fields (may not be used)
-    /*private Warehouses warehouse;
-    private Products product;*/
     public static final String TYPENAME = "INVENTORY_TYP";
 
 
@@ -27,13 +24,6 @@ public class Inventory implements SQLData {
     public int getStock(){
         return this.stock;
     }
-    //Optional
-    /*public Warehouses getWarehouse(){
-        return this.warehouse;
-    }
-    public Products getProduct(){
-        return this.product;
-    }*/
 
     // Set methods
 
@@ -48,15 +38,6 @@ public class Inventory implements SQLData {
     public void setStock(int stock) {
         this.stock = stock;
     }
-
-    // Optional for now
-    /*public void setWarehouse(Warehouses warehouse) {
-        this.warehouse = warehouse;
-    }
-
-    public void setProduct(Products product) {
-        this.product = product;
-    }*/
 
     //Constructor initializing all private fields
     public Inventory(int warehouseId, int productId, int stock){
@@ -90,5 +71,6 @@ public class Inventory implements SQLData {
 
     public String toString (){
         return "Warehouse Id " + this.warehouseId + " Product Id " + this.productId + "\nStock" + this.stock;
-    }   
+    }
+       
 }

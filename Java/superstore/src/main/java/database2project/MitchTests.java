@@ -51,9 +51,14 @@ public class MitchTests
             //connection.updateFlag(61,8);
             //connection.updateDescription(61, "Revenge of the test");
 
-            List<Reviews> reviews = connection.getFlaggedReviews();
+            /*List<Reviews> reviews = connection.getFlaggedReviews();
             for (Reviews review : reviews){
                 System.out.println(review);
+            }*/
+
+            List<Orders> orders = connection.getCustomerOrders(1);
+            for (Orders order : orders){
+                System.out.println(order);
             }
         }
         

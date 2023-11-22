@@ -271,52 +271,52 @@ INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description)
 -- Orders
 
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate)
-    VALUES (1, 1, 13, 2, 10, '2023-10-23');
+    VALUES (1, 1, 13, 2, 10.00, '2023-10-23');
 -- same order
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (2, 1, 6, 1, 30, '2023-10-23');
-INSERT INTO Orders VALUES (2, 3, 1, 6, 1, 16, '2023-10-23');
+    VALUES (2, 1, 6, 1, 30.00, '2023-10-23');
+INSERT INTO Orders VALUES (2, 3, 1, 6, 1, 16.00, '2023-10-23');
 --
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (2, 1, 11, 1, 45, '2023-10-02');
+    VALUES (2, 1, 11, 1, 45.00, '2023-10-02');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (4, 2, 5, 3, 50, NULL);
+    VALUES (4, 2, 5, 3, 50.00, NULL);
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (5, 3, 2, 1, 856600, NULL);
+    VALUES (5, 3, 2, 1, 856600.00, NULL);
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (6, 4, 9, 1, 2, '2023-10-23');
+    VALUES (6, 4, 9, 1, 2.00, '2023-10-23');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (7, 5, 14, 6, 10, '2020-05-06');
+    VALUES (7, 5, 14, 6, 10.00, '2020-05-06');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (8, 6, 3, 1, 50000, '2023-10-10');
+    VALUES (8, 6, 3, 1, 50000.00, '2023-10-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (8, 7, 3, 1, 50000, '2023-08-10');
+    VALUES (8, 7, 3, 1, 50000.00, '2023-08-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (9, 8, 4, 1, 970, '2023-04-21');
+    VALUES (9, 8, 4, 1, 970.00, '2023-04-21');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (10, 8, 11, 1, 40, '2023-10-11');
+    VALUES (10, 8, 11, 1, 40.00, '2023-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (11, 8, 11, 1, 40, '2010-10-11');
+    VALUES (11, 8, 11, 1, 40.00, '2010-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (7, 8, 14, 7, 10, '2022-05-06');
+    VALUES (7, 8, 14, 7, 10.00, '2022-05-06');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (11, 9, 12, 2, 80, '2023-10-07');
+    VALUES (11, 9, 12, 2, 80.00, '2023-10-07');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (10, 8, 11, 1, 38, '2022-10-11');
+    VALUES (10, 8, 11, 1, 38.00, '2022-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (3, 10, 1, 3, 50, '2023-10-01');
+    VALUES (3, 10, 1, 3, 50.00, '2023-10-01');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (12, 10, 10, 1, 10, '2023-10-10');
+    VALUES (12, 10, 10, 1, 10.00, '2023-10-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (12, 10, 10, 3, 30, '2019-09-12');
+    VALUES (12, 10, 10, 3, 30.00, '2019-09-12');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (13, 11, 4, 1, 9.5, '2019-04-03');
+    VALUES (13, 11, 4, 1, 9.50, '2019-04-03');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (14, 12, 7, 1, 200, '2020-01-20');
+    VALUES (14, 12, 7, 1, 200.00, '2020-01-20');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (15, 13, 13, 1, 13.5, '2021-12-29');
+    VALUES (15, 13, 13, 1, 13.50, '2021-12-29');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (15, 13, 8, 1, 15, '2021-12-29');
+    VALUES (15, 13, 8, 1, 15.00, '2021-12-29');
 
 -- SQL types for tables with more than 3 columns (and products because it's important)
 /*

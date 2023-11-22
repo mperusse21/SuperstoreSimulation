@@ -101,5 +101,9 @@ public class SuperStoreServices {
     public List<Reviews> getFlaggedReviews (){
          return ReviewsUtilities.getFlaggedReviews(this.conn);
     }
+
+    public List<Orders> getCustomerOrders (int customer_id){
+         return OrdersUtilities.getCustomerOrders(this.conn, customer_id);
+    }
 }
 

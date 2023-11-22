@@ -11,7 +11,7 @@ public class Orders implements SQLData {
     
     //Private fields for all fields of the Customers table
     // Used integer to allow nulls
-    private Integer orderId;
+    private int orderId;
     private int productId;
     private int customerId;
     private int storeId;
@@ -114,10 +114,11 @@ public class Orders implements SQLData {
         stream.writeDate(getOrderDate());
     }
 
-    //Not sure what to do here yet, might make product into an array of products 
-    /*public String toString (){
-        String returnString = "Order Id: " + this.orderId + " Customer Id " + this.customerId + " Store Id: " + this.storeId;
-    }  */ 
+    public String toString (){
+        return "Order Id: " + this.orderId + " Customer Id: " + this.customerId + " Store Id: " + this.storeId
+        + "\nProduct Id: " + this.productId + " Quantity: " + this.quantity + " Price: " + this.price + " Order Date: "
+        + this.orderDate + "\n" ;
+    }  
 
     // Method which adds an order using the add_order procedure
     public void AddToDatabase(Connection conn) throws ClassNotFoundException{

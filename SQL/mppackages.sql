@@ -12,6 +12,8 @@ CREATE OR REPLACE PACKAGE orders_package AS
         RETURN NUMBER;
     FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
         RETURN VARCHAR2;
+FUNCTION get_customer_orders (vcustomerid NUMBER)
+        RETURN SYS_REFCURSOR;
     ORDER_NOT_FOUND EXCEPTION;
     OUT_OF_STOCK EXCEPTION;
 END orders_package;
@@ -104,7 +106,7 @@ FUNCTION get_all_products (vorderid IN NUMBER)
         return products;
     END;
     
--- Gets the stock of a product in all warehouses combined (used for validation)
+-- Gets and returns the max stock in any warehouse
 FUNCTION get_max_inventory (vproductid NUMBER)
     RETURN NUMBER AS
         total_stock NUMBER(10,0);
@@ -134,6 +136,21 @@ FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
             return 'true';
         END IF;
     END;
+    
+FUNCTION get_customer_orders (vcustomerid NUMBER)
+    RETURN SYS_REFCURSOR AS
+        customer_orders SYS_REFCURSOR;
+    BEGIN
+        OPEN customer_orders FOR 
+        SELECT 
+            *
+        FROM
+            Orders
+        WHERE
+            CustomerId = vcustomerid; 
+        RETURN customer_orders;
+    END;
+
 END orders_package;
 /
 

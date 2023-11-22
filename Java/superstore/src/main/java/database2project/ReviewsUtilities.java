@@ -139,8 +139,6 @@ public class ReviewsUtilities {
         } 
         catch (SQLException e) {
             e.printStackTrace();
-            // If an error occurs returns null
-            return null;
         }
         // Always tries to close stmt
         finally {
@@ -152,6 +150,10 @@ public class ReviewsUtilities {
                 e.printStackTrace();
             }
         }
+
+        // If an error occurs or no customers are flagged returns null and prints a message
+        System.out.println("Unable to find any flagged customers");
+        return null;
     }
 
     // Returns an ArrayList of Reviews with more than 1 flag.
@@ -174,8 +176,6 @@ public class ReviewsUtilities {
         } 
         catch (SQLException e) {
             e.printStackTrace();
-            // If an error occurs returns null
-            return null;
         }
         // Always tries to close stmt
         finally {
@@ -187,37 +187,9 @@ public class ReviewsUtilities {
                 e.printStackTrace();
             }
         }
+        
+        // If an error occurs or no reviews are flagged returns null and prints a message
+        System.out.println("Unable to find any flagged reviews");
+        return null;
     }
 }
-
-
-/*    // Returns an array of Strings representing the customer ids of flagged customers
-    public static String[] getFlaggedCustomers (Connection conn){
-        String sql = "{ ? = call reviews_package.get_flagged_customers()}";
-        CallableStatement stmt = null;
-        Array results = null;
-        String[] resultStrings = null;
-        try {
-            stmt = conn.prepareCall(sql);
-            stmt.registerOutParameter(1, Types.ARRAY, "CUSTOMER_ID_VARRAY");
-            stmt.execute();
-            results = stmt.getArray(1);
-            resultStrings = (String[])results.getArray();
-            return resultStrings;
-        }
-        catch (SQLException e){
-            e.printStackTrace();
-            return resultStrings;
-        }
-        // Always tries to close stmt
-        finally {
-            try{
-                if (!stmt.isClosed() && stmt != null) {
-                    stmt.close();
-                }
-            }
-            catch (SQLException e){
-                e.printStackTrace();
-            }
-        }
-    } */
