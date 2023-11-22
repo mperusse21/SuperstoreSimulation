@@ -159,14 +159,17 @@ END;
 CREATE OR REPLACE PACKAGE reviews_package AS
     PROCEDURE add_review (vreview IN reviews_typ);
     PROCEDURE delete_review (vreviewid IN NUMBER);
-    PROCEDURE update_reviews(vreview_id NUMBER, vscore NUMBER, vflag VARCHAR2, vdescription VARCHAR2);
+    PROCEDURE update_score(vreview_id NUMBER, vscore NUMBER);
+    PROCEDURE update_flag(vreview_id NUMBER, vflag VARCHAR2);
+    PROCEDURE update_description(vreview_id NUMBER, vdescription VARCHAR2);
     FUNCTION get_review (vreviewid NUMBER)
         RETURN reviews_typ;
     FUNCTION get_average_score (vproductid NUMBER)
         RETURN NUMBER;
-    TYPE customer_id_varray IS VARRAY(100) OF NUMBER;
     FUNCTION get_flagged_customers 
-        RETURN customer_id_varray;
+        RETURN SYS_REFCURSOR;
+    FUNCTION get_flagged_reviews 
+        RETURN SYS_REFCURSOR;
     REVIEW_NOT_FOUND EXCEPTION;
 END reviews_package;
 /
@@ -200,11 +203,28 @@ PROCEDURE delete_review (
 
     END delete_review;
     
--- Takes necessary information and updates a review
-PROCEDURE update_reviews(vreview_id NUMBER, vscore NUMBER, vflag VARCHAR2, vdescription VARCHAR2) IS
+-- Takes necessary information and updates a review score
+PROCEDURE update_score(vreview_id NUMBER, vscore NUMBER) AS
     BEGIN
         UPDATE Reviews SET Score = vscore WHERE ReviewId = vreview_id;
+        IF SQL%NOTFOUND THEN
+            RAISE REVIEW_NOT_FOUND;
+        END IF;
+    END; 
+
+-- Takes necessary information and updates a review flag
+PROCEDURE update_flag(vreview_id NUMBER, vflag VARCHAR2) AS
+    BEGIN
         UPDATE Reviews SET Flag = vflag WHERE ReviewId = vreview_id;
+        IF SQL%NOTFOUND THEN
+            RAISE REVIEW_NOT_FOUND;
+        END IF;
+
+    END; 
+    
+-- Takes necessary information and updates a review description
+PROCEDURE update_description(vreview_id NUMBER, vdescription VARCHAR2) AS 
+    BEGIN
         UPDATE Reviews SET Description = vdescription WHERE ReviewId = vreview_id;
         IF SQL%NOTFOUND THEN
             RAISE REVIEW_NOT_FOUND;
@@ -268,25 +288,48 @@ FUNCTION get_average_score (vproductid NUMBER)
     
 -- Gets customers whose reviews have been flagged more than once
 FUNCTION get_flagged_customers 
-    RETURN customer_id_varray AS
-        flagged_customers customer_id_varray;
+    RETURN SYS_REFCURSOR AS
+        flagged_customers SYS_REFCURSOR;
     BEGIN
-        SELECT
-            CustomerId
-        BULK COLLECT INTO
-            flagged_customers
+        OPEN flagged_customers FOR 
+        SELECT 
+            CustomerId,
+            Firstname,
+            Lastname,
+            Email,
+            Addressid 
         FROM
             Customers INNER JOIN Reviews
             USING (CustomerId)
         GROUP BY
-            CustomerId
+            CustomerId,
+            Firstname,
+            Lastname,
+            Email,
+            Addressid 
         HAVING
-            SUM(Flag) > 1;
+            SUM(Flag) > 1; 
         RETURN flagged_customers;
+    END;
+    
+-- Returns a cursor containing all reviews with one or more flags
+FUNCTION get_flagged_reviews 
+    RETURN SYS_REFCURSOR AS
+        flagged_reviews SYS_REFCURSOR;
+    BEGIN
+        OPEN flagged_reviews FOR 
+        SELECT 
+            *
+        FROM
+            Reviews
+        WHERE
+            Flag > 0; 
+        RETURN flagged_reviews;
     END;
     
 END reviews_package;
 /
+
 
 CREATE OR REPLACE TRIGGER ReviewsChange
 AFTER INSERT OR UPDATE OR DELETE ON Reviews
@@ -480,61 +523,12 @@ END;
 
 /* Testing 
 
-DECLARE
-    warehouse warehouse_typ;
-BEGIN
-    -- This exception doesn't work dbms_output.put_line(inventory_package.get_stock(1000,9));
-    -- dbms_output.put_line(inventory_package.get_total_inventory(100));
-    --inventory_package.updatestock(1003230,1,214492);
-    -- dbms_output.put_line(orders_package.get_total_inventory(100));
-   warehouse := warehouses_package.get_warehouse(100);
-/*EXCEPTION
-     WHEN ORDER_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No order with this id found');
-     WHEN REVIEW_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No order with this id found');     
-    WHEN WAREHOUSE_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No order with this id found');     
-    WHEN INVENTORY_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No order with this id found');
-END;
-
 
  Got rid of all these, might re-add
     EXCEPTION
         WHEN ORDER_NOT_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('No order with this id found');
         
-        
-CREATE OR REPLACE PACKAGE tests AS
-    TYPE orders_id_varray IS VARRAY(100) OF NUMBER;
-    FUNCTION display_orders (vcustomerid NUMBER)
-        RETURN orders_id_varray;
-END tests;
-/
-
-CREATE OR REPLACE PACKAGE BODY orders_package AS 
-PROCEDURE display_orders (vcustomerid IN NUMBER) IS
-    BEGIN
-        SELECT
-            OrderID
-        FROM
-            Orders
-        WHERE
-            CustomerId = vcustomerid;
-    END;
-END tests;
-    
-    
-    DECLARE
-BEGIN
-IF orders_package.validate_order(2, 41) THEN
-    dbms_output.put_line('true');
-ELSE
-    dbms_output.put_line('false');
-END If;
-END;
-/
 
 --Function that returns all the Product Ids that are in a certain order 
 FUNCTION get_all_order_products(vorderid NUMBER)
@@ -577,33 +571,20 @@ FUNCTION get_times_ordered (vproductid NUMBER)
         
         return times_ordered;
     END;
-*/
-  
-/*
-TEST (works)
-DECLARE
-    products orders_package.product_id_varray;
-    vorder orders_typ;
-BEGIN
-    products := orders_package.get_all_products(2);
-    for i in 1 .. products.COUNT loop
-        vorder := orders_package.get_order(2 , products(i));
-        dbms_output.put_line(vorder.OrderID || vorder.ProductId);
-    end loop;
-END;
-/
 
-Bad way of doing it if we don't find anything else
-DECLARE
-    id VARCHAR2(10000);
-BEGIN
-    for row IN (SELECT * FROM Customers) loop
-        id := id || row.customerid || ',';
-    end loop;
-    
-    dbms_output.put_line(id);
-END;
-/
+-- Adds inventory for a specific product in a specific warehouse from an object
+PROCEDURE add_inventory (
+    vinventory IN inventory_typ  
+    ) IS
+    BEGIN
+    INSERT INTO Inventory   
+        VALUES (
+                vinventory.WarehouseId,
+                vinventory.ProductId,
+                vinventory.Stock           
+        );
+    END;
+
 
 */
 

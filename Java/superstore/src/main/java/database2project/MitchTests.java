@@ -1,6 +1,7 @@
 package database2project;
 
 import java.sql.*;
+import java.util.List;
 import java.util.Scanner;
 public class MitchTests 
 {
@@ -43,11 +44,17 @@ public class MitchTests
 
             //connection.deleteWarehouse(21);
             
-            //connection.getFlaggedCustomers();
+           //connection.getFlaggedCustomers();
+
 
             //connection.updateScore(61, 5);
             //connection.updateFlag(61,8);
             //connection.updateDescription(61, "Revenge of the test");
+
+            List<Reviews> reviews = connection.getFlaggedReviews();
+            for (Reviews review : reviews){
+                System.out.println(review);
+            }
         }
         
         // Catches any possible exceptions

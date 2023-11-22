@@ -1,5 +1,6 @@
 package database2project;
 import java.sql.*;
+import java.util.List;
 
 // The plan is to do the try catch here mostly, maybe with some more in the app (on second thought might do it in the object classes)
 public class SuperStoreServices {
@@ -93,8 +94,12 @@ public class SuperStoreServices {
         return ReviewsUtilities.getAverageScore(this.conn, product_id);
     }
 
-    public void getFlaggedCustomers (){
-        OtherUtilities.getFlaggedCustomers(this.conn);
+    public List<Customers> getFlaggedCustomers (){
+         return ReviewsUtilities.getFlaggedCustomers(this.conn);
+    }
+
+    public List<Reviews> getFlaggedReviews (){
+         return ReviewsUtilities.getFlaggedReviews(this.conn);
     }
 }
 
