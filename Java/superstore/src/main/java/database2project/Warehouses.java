@@ -121,5 +121,30 @@ public class Warehouses implements SQLData {
             }
         }
     }
+
+    public static void deleteWarehouse(Connection conn, int warehouse_id){
+        String sql = "{ call warehouses_package.delete_warehouse(?)}";
+        CallableStatement stmt = null;
+        try{
+        stmt = conn.prepareCall(sql);
+        stmt.setInt(1, warehouse_id);
+        stmt.execute();
+        System.out.println("Removed warehouse with id: " + warehouse_id + " from the database");
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+    }
 }
 

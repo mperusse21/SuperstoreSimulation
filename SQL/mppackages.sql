@@ -407,7 +407,6 @@ END;
 -- Inventory
 
 CREATE OR REPLACE PACKAGE inventory_package AS
-    PROCEDURE add_inventory (vinventory IN inventory_typ);
     PROCEDURE updatestock(vwarehouseid IN NUMBER, vproductid IN NUMBER, vstock IN NUMBER);
     FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
         RETURN NUMBER;
@@ -416,18 +415,6 @@ END inventory_package;
 /
 
 CREATE OR REPLACE PACKAGE BODY inventory_package AS 
--- Adds inventory for a specific product in a specific warehouse from an object
-PROCEDURE add_inventory (
-    vinventory IN inventory_typ  
-    ) IS
-    BEGIN
-    INSERT INTO Inventory   
-        VALUES (
-                vinventory.WarehouseId,
-                vinventory.ProductId,
-                vinventory.Stock           
-        );
-    END;
     
 -- Updates a warehouse's stock of a product
 PROCEDURE updatestock (
@@ -605,6 +592,19 @@ BEGIN
     end loop;
 END;
 /
+
+Bad way of doing it if we don't find anything else
+DECLARE
+    id VARCHAR2(10000);
+BEGIN
+    for row IN (SELECT * FROM Customers) loop
+        id := id || row.customerid || ',';
+    end loop;
+    
+    dbms_output.put_line(id);
+END;
+/
+
 */
 
 -- Audit 

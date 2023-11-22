@@ -34,12 +34,20 @@ public class MitchTests
            System.out.println("Order Id: " + order.getOrderId() + " Customer Id " + order.getCustomerId() + " Store Id: " + order.getStoreId());*/
 
         
-            //connection.addReview(0, 1, 1, 2, 0, "This is most test review ever");
+            //connection.addReview(0, 1, 1, 2, "This is most test review ever");
             //connection.deleteReview(41);
 
             //connection.deleteReview(2398);
 
             //System.out.println(connection.getAverageScore(1));
+
+            //connection.deleteWarehouse(21);
+            
+            //connection.getFlaggedCustomers();
+
+            //connection.updateScore(61, 5);
+            //connection.updateFlag(61,8);
+            //connection.updateDescription(61, "Revenge of the test");
         }
         
         // Catches any possible exceptions
