@@ -1,6 +1,7 @@
 package database2project;
 
 import java.sql.*;
+import java.util.Map;
 
 public class Customers implements SQLData {
 
@@ -86,16 +87,49 @@ public class Customers implements SQLData {
         stream.writeString(getLastname());
         stream.writeString(getEmail());
         stream.writeInt(getAddressId());
-        //(getAddress());
     }
 
     //toString for Customers
     @Override
     public String toString(){
-        return "Customer Id: " + this.customerId + ", Fullname: " + this.firstname + " " + this.lastname + ", Email: " + this.email + ", Address Id: " + this.addressId;
+        return "| Customer Id: " + this.customerId + " | Fullname: " + this.firstname + " " + this.lastname + " | Email: " + this.email + " | Address Id: " + this.addressId;
     }
 
 
+    //empty constructor to be used for getCustomerByEmail
+    public Customers (){};
+
+    public static Customers getCustomerByEmail (Connection conn, String email) throws SQLException, ClassNotFoundException {
+        String sql = "{ ? = call customers_package.getCustomerByEmail(?)}";
+        try (CallableStatement stmt = conn.prepareCall(sql)){
+
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Customers.TYPENAME, Class.forName("database2project.Customers"));
+            stmt.registerOutParameter(1, Types.STRUCT, "CUSTOMERS_TYPE");
+            stmt.setString(2, email);
+            stmt.execute();
+            Customers foundCustomer = (Customers)stmt.getObject(1);
+            return foundCustomer;
+        }
+
+    }
+
+    public static Customers getCustomerById (Connection conn, int customerId) throws SQLException, ClassNotFoundException {
+        String sql = "{ ? = call customers_package.getCustomer(?)}";
+        try (CallableStatement stmt = conn.prepareCall(sql)){
+
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Customers.TYPENAME, Class.forName("database2project.Customers"));
+            stmt.registerOutParameter(1, Types.STRUCT, "CUSTOMERS_TYPE");
+            stmt.setInt(2, customerId);
+            stmt.execute();
+            Customers foundCustomer = (Customers)stmt.getObject(1);
+            return foundCustomer;
+        }
+
+    }
 
 
 

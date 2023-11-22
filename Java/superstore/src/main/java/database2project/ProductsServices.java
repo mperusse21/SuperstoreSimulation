@@ -49,8 +49,16 @@ public class ProductsServices {
         return Products.getProduct(this.connection, productId);
     }
 
+    public List<Products> getAllProducts() throws SQLException, ClassNotFoundException {
+        return Products.getAllProducts(this.connection);
+    }
+
     public List<AuditTable> getAuditTable() throws SQLException, ClassNotFoundException {
         return AuditTable.getAuditTable(this.connection);
+    }
+
+    public String getStore(int storeId) throws SQLException, ClassNotFoundException {
+        return Stores.getStore(this.connection, storeId);
     }
     
 }

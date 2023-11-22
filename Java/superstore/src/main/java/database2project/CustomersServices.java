@@ -32,12 +32,20 @@ public class CustomersServices {
 
     }
 
-    public Customers getCustomerByEmail(String email){
-        throw new UnsupportedOperationException();
+    public Customers getCustomerByEmail(String email) throws SQLException, ClassNotFoundException{
+        return Customers.getCustomerByEmail(this.connection, email);
     }
 
-    public Customers getCustomerById(int customerId){
-        throw new UnsupportedOperationException();
+    public Customers getCustomerById(int customerId) throws SQLException, ClassNotFoundException{
+        return Customers.getCustomerById(this.connection, customerId);
+    }
+
+    public String getAddress(int addressId) throws SQLException, ClassNotFoundException{
+        return Addresses.getAddress(this.connection, addressId);
+    }
+
+    public String getCity(int cityId) throws SQLException, ClassNotFoundException {
+        return Cities.getCity(this.connection, cityId);
     }
 
 }

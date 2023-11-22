@@ -121,6 +121,40 @@ public class Products implements SQLData {
               return productList;
     
         }
+
+    public static List<Products> getAllProducts(Connection conn) {
+        String sql = "{ call ? := products_package.getAllProducts() }";
+        CallableStatement stmt = null;
+        ResultSet results = null;
+        List<Products> productList = new ArrayList<Products>();
+        try{
+            stmt = conn.prepareCall(sql);
+            stmt.registerOutParameter(1, Types.REF_CURSOR);
+            stmt.execute();
+            results = (ResultSet) stmt.getObject(1);
+            while (results.next()){
+                Products allProduct = new Products (results.getInt("ProductId"), results.getString("ProductName"), results.getString("Category")); 
+                productList.add(allProduct);
+            }
+        }
+
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null){
+                    stmt.close();
+                }
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+           
+              return productList;
+    
+        }
     }
 
 

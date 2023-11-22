@@ -254,6 +254,8 @@ FUNCTION getAllProductsByCategory(category_name VARCHAR2) RETURN SYS_REFCURSOR;
 
 FUNCTION getProduct(vproductid IN NUMBER) RETURN products_type; 
 
+FUNCTION getAllProducts RETURN SYS_REFCURSOR; 
+
 END products_package;
 /
 
@@ -305,6 +307,17 @@ ProductId = vproductid;
 vproducts := products_type(vproductid, vproductname, vcategory);
 RETURN vproducts;
 END getProduct;
+
+FUNCTION getAllProducts
+RETURN SYS_REFCURSOR AS all_products SYS_REFCURSOR;
+BEGIN
+OPEN all_products FOR
+SELECT
+ProductId, ProductName, Category
+FROM
+Products;
+RETURN all_products;
+END getAllProducts; 
 
 END products_package;
 /
@@ -492,6 +505,21 @@ customers_package.add_customers(new_customer);
   
 END;
 /
+
+CREATE OR REPLACE FUNCTION getAuditTable
+RETURN SYS_REFCURSOR AS all_changes SYS_REFCURSOR;
+BEGIN
+OPEN all_changes FOR
+SELECT
+AuditId, ChangedId, Action, TableChanged, DateModified
+FROM
+AuditTable;
+RETURN all_changes;
+END getAuditTable; 
+
+
+
+
 
 
 

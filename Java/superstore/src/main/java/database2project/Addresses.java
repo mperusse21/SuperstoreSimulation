@@ -1,5 +1,10 @@
 package database2project;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.*;
+
 public class Addresses {
 
     //Private fields for all fields of the Addresses table
@@ -29,6 +34,20 @@ public class Addresses {
         this.addressId = addressId;
         this.address = address;
         this.cityId = cityId;
+    }
+
+    public static String getAddress (Connection conn, int addressId) throws SQLException, ClassNotFoundException {
+        String sql = "{ ? = call addresses_package.getAddress(?)}";
+        String foundAddress = null;
+        try (CallableStatement stmt = conn.prepareCall(sql)){
+
+            stmt.registerOutParameter(1, Types.VARCHAR);
+            stmt.setInt(2, addressId);
+            stmt.execute();
+            foundAddress = stmt.getString(1);
+            return foundAddress;
+        }
+
     }
     
     
