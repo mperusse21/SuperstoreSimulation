@@ -107,8 +107,6 @@ public class Warehouses implements SQLData {
         } 
         catch (Exception e) {
             e.printStackTrace();
-            // If an error occurs returns null
-            return foundWarehouse;
         }
         // Always tries to close stmt
         finally {
@@ -120,6 +118,10 @@ public class Warehouses implements SQLData {
                 e.printStackTrace();
             }
         }
+
+             // If an no warehouse could be found returns null and prints a message
+            System.out.println("Unable to find warehouse with specified id");
+            return foundWarehouse;
     }
 
     public static void deleteWarehouse(Connection conn, int warehouse_id){
@@ -133,6 +135,7 @@ public class Warehouses implements SQLData {
         }
         catch (SQLException e){
             e.printStackTrace();
+            System.out.println("Unable to delete specified warehouse");
         }
         // Always tries to close stmt
         finally {

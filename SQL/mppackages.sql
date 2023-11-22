@@ -5,21 +5,65 @@ CREATE OR REPLACE PACKAGE orders_package AS
     PROCEDURE delete_order(vorderid IN NUMBER);
     FUNCTION get_order (vorderid NUMBER, vproductid NUMBER)
         RETURN orders_typ;
-    TYPE product_id_varray IS VARRAY(100) OF NUMBER;
-    FUNCTION get_all_products(vorderid NUMBER)
-        RETURN product_id_varray;
-    FUNCTION get_max_inventory (vproductid NUMBER)
-        RETURN NUMBER;
     FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
         RETURN VARCHAR2;
-FUNCTION get_customer_orders (vcustomerid NUMBER)
+    FUNCTION get_customer_orders (vcustomerid NUMBER)
         RETURN SYS_REFCURSOR;
+    PROCEDURE update_stock_after_order (vproductid IN NUMBER, vquantity IN NUMBER);
     ORDER_NOT_FOUND EXCEPTION;
     OUT_OF_STOCK EXCEPTION;
 END orders_package;
 /
 
 CREATE OR REPLACE PACKAGE BODY orders_package AS 
+-- Private function that gets and returns the max stock in any warehouse,
+-- used for public validate order function
+FUNCTION get_max_inventory (vproductid NUMBER)
+    RETURN NUMBER AS
+        total_stock NUMBER(10,0);
+    BEGIN
+        SELECT
+        -- Null is the same as having no stock
+            NVL(MAX(Stock), 0)
+        INTO
+            total_stock
+        FROM
+            Inventory
+        WHERE
+            ProductId = vproductid;
+        
+        return total_stock;
+    END;
+
+-- Private function for updating stock after an order is placed
+PROCEDURE update_stock_after_order (vproductid IN NUMBER, vquantity IN NUMBER)
+    AS
+            vwarehouseid NUMBER(5);
+            vstock NUMBER;
+            newStock NUMBER;
+    BEGIN
+        -- Gets the warehouse with the most stock
+        SELECT
+            WarehouseId,
+            Stock
+        INTO
+            vwarehouseid,
+            vstock
+        FROM
+            Inventory
+        WHERE
+            ProductId = vproductid         
+        ORDER BY
+            Stock DESC
+        FETCH FIRST ROW ONLY;
+        
+        newStock := vstock - vquantity;
+        
+        -- Calling the inventory package Update stock procedure
+        inventory_package.update_stock(vwarehouseid, vproductid, newStock);
+        
+    END;
+    
 PROCEDURE add_order (
     vorder IN orders_typ
 ) AS
@@ -46,6 +90,9 @@ PROCEDURE add_order (
                 vorder.Price,
                 vorder.OrderDate
         );
+        
+        -- Calling the private procedure to update the stock reflecting the order quantity
+        update_stock_after_order(vorder.ProductId, vorder.Quantity);
     END;
     
 -- takes an orderid and deletes all rows with the orderid. (if it has multiple products they will all be deleted)
@@ -90,40 +137,8 @@ FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
         return vorder;
     END;
     
--- Gets an order with a certain id (returns an varray of orders)
-FUNCTION get_all_products (vorderid IN NUMBER)
-    RETURN product_id_varray AS
-        products product_id_varray;
-    BEGIN
-        SELECT
-            ProductId
-        BULK COLLECT INTO
-            products
-        FROM
-            Orders
-        WHERE
-            OrderId = vorderid;
-        return products;
-    END;
-    
--- Gets and returns the max stock in any warehouse
-FUNCTION get_max_inventory (vproductid NUMBER)
-    RETURN NUMBER AS
-        total_stock NUMBER(10,0);
-    BEGIN
-        SELECT
-        -- Null is the same as having no stock
-            NVL(MAX(Stock), 0)
-        INTO
-            total_stock
-        FROM
-            Inventory
-        WHERE
-            ProductId = vproductid;
-        
-        return total_stock;
-    END;
 -- Was originally a boolean but couldn't get the boolean to work in JDBC
+-- Returns true or false depending on if any warehouse has enough stock to fulfull an order
 FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
     RETURN VARCHAR2 AS
        max_stock NUMBER(10, 0);
@@ -150,7 +165,7 @@ FUNCTION get_customer_orders (vcustomerid NUMBER)
             CustomerId = vcustomerid; 
         RETURN customer_orders;
     END;
-
+    
 END orders_package;
 /
 
@@ -467,17 +482,18 @@ END;
 -- Inventory
 
 CREATE OR REPLACE PACKAGE inventory_package AS
-    PROCEDURE updatestock(vwarehouseid IN NUMBER, vproductid IN NUMBER, vstock IN NUMBER);
+    PROCEDURE update_stock(vwarehouseid IN NUMBER, vproductid IN NUMBER, vstock IN NUMBER);
     FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
+        RETURN NUMBER;
+    FUNCTION get_total_stock (vproductid NUMBER)
         RETURN NUMBER;
     INVENTORY_NOT_FOUND EXCEPTION;
 END inventory_package;
 /
 
 CREATE OR REPLACE PACKAGE BODY inventory_package AS 
-    
 -- Updates a warehouse's stock of a product
-PROCEDURE updatestock (
+PROCEDURE update_stock (
     vwarehouseid IN NUMBER,
     vproductid IN NUMBER,
     vstock IN NUMBER
@@ -495,7 +511,7 @@ PROCEDURE updatestock (
 
     END;
 
--- Gets the stock of products in a warehouse
+-- Gets the stock of a product in a warehouse
 FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
     RETURN NUMBER AS
         vstock NUMBER(10,0);
@@ -516,6 +532,22 @@ FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
         return vstock;
     END;
     
+-- Returns the total stock of a product across all warehouses
+    FUNCTION get_total_stock (vproductid NUMBER)
+    RETURN NUMBER AS
+        total_stock NUMBER;
+    BEGIN
+        SELECT
+            -- Null is the same as having no stock
+            NVL(SUM(Stock), 0)
+        INTO 
+            total_stock
+        FROM
+            Inventory
+        WHERE
+            ProductId = vproductid;
+        RETURN total_stock;
+    END;
 END inventory_package;
 /
 
@@ -539,35 +571,6 @@ END;
 -- DROP TRIGGER InventoryChange;
 
 /* Testing 
-
-
- Got rid of all these, might re-add
-    EXCEPTION
-        WHEN ORDER_NOT_FOUND THEN
-        DBMS_OUTPUT.PUT_LINE('No order with this id found');
-        
-
---Function that returns all the Product Ids that are in a certain order 
-FUNCTION get_all_order_products(vorderid NUMBER)
-    RETURN products_id_varray IS
-    product_id products_id_varray;
-    BEGIN
-        SELECT
-            ProductId 
-        BULK COLLECT INTO 
-            product_id 
-        FROM 
-            Orders 
-        WHERE 
-            OrderId = vorderid;
-        
-        IF product_id.COUNT = 0 THEN
-                RAISE ORDER_NOT_FOUND;
-        END IF;
-        
-        RETURN product_id;
-    END ;
-    
     -- Gets the number of times a product was ordered
 FUNCTION get_times_ordered (vproductid NUMBER)
     RETURN NUMBER AS
@@ -601,9 +604,24 @@ PROCEDURE add_inventory (
                 vinventory.Stock           
         );
     END;
+    
+    -- Gets an order with a certain id (returns an varray of orders)
+FUNCTION get_all_products (vorderid IN NUMBER)
+    RETURN product_id_varray AS
+        products product_id_varray;
+    BEGIN
+        SELECT
+            ProductId
+        BULK COLLECT INTO
+            products
+        FROM
+            Orders
+        WHERE
+            OrderId = vorderid;
+        return products;
+    END;
 
 
 */
 
--- Audit 
 

@@ -25,8 +25,8 @@ public class SuperStoreServices {
     }
 
     // Method which returns a string "true" or "false" depending if there is enough quantity of a certain product warehouse.
-    public void validateOrder (int productId, int quantity){
-        OrdersUtilities.validateOrder(conn, productId, quantity);
+    public String validateOrder (int productId, int quantity){
+       return OrdersUtilities.validateOrder(conn, productId, quantity);
     }
 
     // Method which takes input needed to add an order, creates an Orders object and uses it's built in AddToDatabase method.
@@ -92,6 +92,10 @@ public class SuperStoreServices {
     // Gets the average review score for a product
     public Double getAverageScore (int product_id){
         return ReviewsUtilities.getAverageScore(this.conn, product_id);
+    }
+
+    public int getTotalStock (int product_id){
+        return InventoryUtilites.getTotalStock(this.conn, product_id);
     }
 
     public List<Customers> getFlaggedCustomers (){

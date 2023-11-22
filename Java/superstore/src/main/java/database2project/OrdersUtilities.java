@@ -5,14 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrdersUtilities {
-    public static String validateOrder(Connection conn, int productId, int quantity) {
+    /*
+     * Takes a product id and a quantity, validates whether or not the order would be allowed
+     * based on if there are any warehouses with enough quantity.
+     */
+    public static String validateOrder(Connection conn, int product_Id, int quantity) {
         String sql = "{ ? = call orders_package.validate_order(?, ?)}";
         CallableStatement stmt = null;
         String result = null;
         try {
             stmt = conn.prepareCall(sql);
             stmt.registerOutParameter(1, Types.VARCHAR);
-            stmt.setInt(2, productId);
+            stmt.setInt(2, product_Id);
             stmt.setInt(3, quantity);
             stmt.execute();
             result = stmt.getString(1);

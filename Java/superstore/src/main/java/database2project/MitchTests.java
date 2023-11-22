@@ -19,8 +19,8 @@ public class MitchTests
             connection = new SuperStoreServices(user, password);
 
             /* Testing validate order */
-            //connection.addOrder(0, 2,1,1,40,42.50,Date.valueOf("2020-01-01"));
-            //System.out.println(order.validateOrder(connection.retrievConnection()));
+            //connection.addOrder(0, 2,1,1,31,42.50,Date.valueOf("2023-11-22"));
+            //System.out.println(connection.validateOrder(2, 30));
             //order.AddToDatabase(connection.retrievConnection());
 
            // Orders order = connection.getOrder(2, 3);
@@ -31,9 +31,8 @@ public class MitchTests
            //Reviews review = connection.getReview(1);
            //System.out.println(review);
 
-           /*Orders order = connection.getOrder(2, 3);
-           System.out.println("Order Id: " + order.getOrderId() + " Customer Id " + order.getCustomerId() + " Store Id: " + order.getStoreId());*/
-
+           //Orders order = connection.getOrder(2, 3);
+           //System.out.println(order);
         
             //connection.addReview(0, 1, 1, 2, "This is most test review ever");
             //connection.deleteReview(41);
@@ -56,10 +55,12 @@ public class MitchTests
                 System.out.println(review);
             }*/
 
-            List<Orders> orders = connection.getCustomerOrders(1);
+            /*List<Orders> orders = connection.getCustomerOrders(1);
             for (Orders order : orders){
                 System.out.println(order);
-            }
+            }*/
+
+            //System.out.println(connection.getTotalStock(1));
         }
         
         // Catches any possible exceptions
