@@ -72,8 +72,8 @@ public class SuperStoreServices {
         ReviewsUtilities.updateDescription(this.conn, review_id, description);
     }
 
-    public void updateStock (int warehouse_id, int product_id, int stock){
-        InventoryUtilites.updateStock(this.conn, warehouse_id, product_id, stock);
+    public void updateStock (int inventory_id, int stock){
+        InventoryUtilites.updateStock(this.conn, inventory_id, stock);
     }
 
     public void updateWarehouseName (int warehouse_id, String warehouse_name){
@@ -100,6 +100,10 @@ public class SuperStoreServices {
 
     public int getTotalStock (int product_id){
         return InventoryUtilites.getTotalStock(this.conn, product_id);
+    }
+
+    public int getStock (int inventory_id){
+        return InventoryUtilites.getStock(this.conn, inventory_id);
     }
 
     public List<Customers> getFlaggedCustomers (){

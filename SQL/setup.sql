@@ -1,4 +1,3 @@
-DROP TABLE Provinces CASCADE CONSTRAINTS;
 DROP TABLE Cities CASCADE CONSTRAINTS;
 DROP TABLE Addresses CASCADE CONSTRAINTS;
 DROP TABLE Stores CASCADE CONSTRAINTS;
@@ -53,11 +52,10 @@ CREATE TABLE Warehouses(
 /
 
 CREATE TABLE Inventory (
+    InventoryId     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     WarehouseId     NUMBER(5)          REFERENCES Warehouses (WarehouseId),
     ProductId       NUMBER(5)          REFERENCES Products (ProductId),
-    Stock           NUMBER(10,0) CHECK(Stock >= 0),
-    
-    CONSTRAINT inventory_pk PRIMARY KEY (WarehouseId, ProductId)
+    Stock           NUMBER(10,0) CHECK(Stock >= 0)
 );
 /
 
@@ -83,6 +81,7 @@ CREATE TABLE Orders (
     CONSTRAINT orders_pk PRIMARY KEY (OrderId, ProductId)
 );
 /
+
 
 -- Insert statements 
 -- Cities
@@ -200,25 +199,44 @@ INSERT INTO Warehouses (WarehouseName, AddressId)
     
 -- Inventory
 
-INSERT INTO Inventory VALUES (1, 9, 1000);
-INSERT INTO Inventory VALUES (1, 10, 10);
-INSERT INTO Inventory VALUES (1, 8, 6);
-INSERT INTO Inventory VALUES (1, 15, 2132);
-INSERT INTO Inventory VALUES (1, 16, 352222);
-INSERT INTO Inventory VALUES (2, 1, 24980);
-INSERT INTO Inventory VALUES (2, 4, 39484);
-INSERT INTO Inventory VALUES (3, 3, 103);
-INSERT INTO Inventory VALUES (3, 7, 43242);
-INSERT INTO Inventory VALUES (4, 6, 43242);
-INSERT INTO Inventory VALUES (4, 7, 6579);
-INSERT INTO Inventory VALUES (4, 14, 123);
-INSERT INTO Inventory VALUES (5, 2, 40);
-INSERT INTO Inventory VALUES (5, 5, 1000);
-INSERT INTO Inventory VALUES (5, 11, 98765);
-INSERT INTO Inventory VALUES (5, 17, 4543);
-INSERT INTO Inventory VALUES (6, 12, 450);
-INSERT INTO Inventory VALUES (6, 4, 3532);
-INSERT INTO Inventory VALUES (6, 13, 43523);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (1, 9, 1000);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (1, 10, 10);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (1, 8, 6);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (1, 15, 2132);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (1, 16, 352222);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (2, 1, 24980);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (2, 4, 39484);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (3, 3, 103);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (3, 7, 43242);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (4, 6, 43242);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (4, 7, 6579);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (4, 14, 123);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (5, 2, 40);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (5, 5, 1000);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (5, 11, 98765);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (5, 17, 4543);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (6, 12, 450);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (6, 4, 3532);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (6, 13, 43523);
 
 
 -- Reviews
@@ -319,22 +337,7 @@ INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate)
     VALUES (15, 13, 8, 1, 15.00, '2021-12-29');
 
 -- SQL types for tables with more than 3 columns (and products because it's important)
-/*
-JUST IN CASE!
-CREATE OR REPLACE TYPE addresses_typ AS OBJECT(
-    AddressId       NUMBER(5), 
-    Address         VARCHAR2(50),
-    CityId          NUMBER(5)
-);
-/
 
-CREATE OR REPLACE TYPE cities_typ AS OBJECT(
-    CityId          NUMBER(5), 
-    City            VARCHAR2(50),
-    Province        VARCHAR2(20)
-);
-/
-*/
 CREATE OR REPLACE TYPE reviews_typ AS OBJECT(
     ReviewId        NUMBER(5),
     ProductId       NUMBER(5),
@@ -354,6 +357,7 @@ CREATE OR REPLACE TYPE warehouse_typ AS OBJECT(
 /
 
 CREATE OR REPLACE TYPE inventory_typ AS OBJECT(
+    InventoryId     NUMBER(5),
     WarehouseId     NUMBER(5),
     ProductId       NUMBER(5),
     Stock           NUMBER(10,0)

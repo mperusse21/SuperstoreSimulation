@@ -62,6 +62,7 @@ public class MitchTests
             }*/
 
             //System.out.println(connection.getTotalStock(1));
+            connection.updateStock(13, 40);
         }
         
         // Catches any possible exceptions

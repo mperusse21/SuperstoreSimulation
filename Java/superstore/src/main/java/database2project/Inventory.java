@@ -5,6 +5,7 @@ import java.sql.*;
 public class Inventory implements SQLData {
     
     //Private fields for all fields of the Inventory table
+    private int inventoryId;
     private int warehouseId;
     private int productId;
     private int stock;
@@ -12,17 +13,24 @@ public class Inventory implements SQLData {
 
 
     //Getters for the private fields
-    public int getWarehouseId(){
+    public int getInventoryId() {
+        return this.inventoryId;
+    }
+
+    public int getWarehouseId() {
         return this.warehouseId;
     }
-    public int getProductId(){
+    public int getProductId() {
         return this.productId;
     }
-    public int getStock(){
+    public int getStock() {
         return this.stock;
     }
 
     // Set methods
+    public void setInventoryId(int inventoryId) {
+        this.inventoryId = inventoryId;
+    }
 
     public void setWarehouseId(int warehouseId) {
         this.warehouseId = warehouseId;

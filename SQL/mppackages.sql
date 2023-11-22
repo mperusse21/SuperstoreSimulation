@@ -9,7 +9,6 @@ CREATE OR REPLACE PACKAGE orders_package AS
         RETURN VARCHAR2;
     FUNCTION get_customer_orders (vcustomerid NUMBER)
         RETURN SYS_REFCURSOR;
-    PROCEDURE update_stock_after_order (vproductid IN NUMBER, vquantity IN NUMBER);
     ORDER_NOT_FOUND EXCEPTION;
     OUT_OF_STOCK EXCEPTION;
 END orders_package;
@@ -38,16 +37,16 @@ FUNCTION get_max_inventory (vproductid NUMBER)
 -- Private function for updating stock after an order is placed
 PROCEDURE update_stock_after_order (vproductid IN NUMBER, vquantity IN NUMBER)
     AS
-            vwarehouseid NUMBER(5);
+            vinventoryid NUMBER(5);
             vstock NUMBER;
             newStock NUMBER;
     BEGIN
-        -- Gets the warehouse with the most stock
+        -- Gets the inventory id with the most stock of a specific product
         SELECT
-            WarehouseId,
+            InventoryId,
             Stock
         INTO
-            vwarehouseid,
+            vinventoryid,
             vstock
         FROM
             Inventory
@@ -60,7 +59,7 @@ PROCEDURE update_stock_after_order (vproductid IN NUMBER, vquantity IN NUMBER)
         newStock := vstock - vquantity;
         
         -- Calling the inventory package Update stock procedure
-        inventory_package.update_stock(vwarehouseid, vproductid, newStock);
+        inventory_package.update_stock(vinventoryid, newStock);
         
     END;
     
@@ -468,8 +467,8 @@ END;
 -- Inventory
 
 CREATE OR REPLACE PACKAGE inventory_package AS
-    PROCEDURE update_stock(vwarehouseid IN NUMBER, vproductid IN NUMBER, vstock IN NUMBER);
-    FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
+    PROCEDURE update_stock(vinventoryid IN NUMBER, vstock IN NUMBER);
+    FUNCTION get_stock (vinventoryid IN NUMBER)
         RETURN NUMBER;
     FUNCTION get_total_stock (vproductid NUMBER)
         RETURN NUMBER;
@@ -482,8 +481,7 @@ END inventory_package;
 CREATE OR REPLACE PACKAGE BODY inventory_package AS 
 -- Updates a warehouse's stock of a product
 PROCEDURE update_stock (
-    vwarehouseid IN NUMBER,
-    vproductid IN NUMBER,
+    vinventoryid IN NUMBER,
     vstock IN NUMBER
 ) IS
     BEGIN
@@ -491,7 +489,7 @@ PROCEDURE update_stock (
         SET
             Stock = vstock
         WHERE
-            WarehouseId = vwarehouseid AND ProductId = vproductid;
+            InventoryId = vinventoryid;
         
         IF SQL%NOTFOUND THEN
             RAISE INVENTORY_NOT_FOUND;
@@ -500,7 +498,7 @@ PROCEDURE update_stock (
     END;
 
 -- Gets the stock of a product in a warehouse
-FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
+FUNCTION get_stock (vinventoryid NUMBER)
     RETURN NUMBER AS
         vstock NUMBER(10,0);
     BEGIN
@@ -511,7 +509,7 @@ FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
         FROM
             Inventory
         WHERE
-            WarehouseId = vwarehouseid AND ProductId = vproductid;
+            InventoryId = vinventoryid;
         
         IF SQL%NOTFOUND THEN
             RAISE INVENTORY_NOT_FOUND;
@@ -557,13 +555,13 @@ AFTER INSERT OR UPDATE OR DELETE ON Inventory
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
-        INSERT INTO AuditTable (ChangedId, ChangedId2, Action, TableChanged, DateModified)
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
         VALUES (:NEW.WarehouseId, :NEW.ProductId, 'INSERT', 'INVENTORY', SYSDATE);
     ELSIF DELETING THEN
-        INSERT INTO AuditTable (ChangedId, ChangedId2, Action, TableChanged, DateModified)
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
         VALUES (:OLD.WarehouseId, :OLD.ProductId, 'DELETE', 'INVENTORY', SYSDATE);
     ELSIF UPDATING THEN
-        INSERT INTO AuditTable (ChangedId, ChangedId2, Action, TableChanged, DateModified)
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
         VALUES (:NEW.WarehouseId, :NEW.ProductId, 'UPDATE', 'INVENTORY', SYSDATE);
     END IF;
 END;
