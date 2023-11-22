@@ -250,11 +250,9 @@ PROCEDURE update_product_category(product_id NUMBER, category_name VARCHAR2);
 
 TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
-CATEGORY_NOT_FOUND EXCEPTION;
+FUNCTION getAllProductsByCategory(category_name VARCHAR2) RETURN SYS_REFCURSOR;
 
-FUNCTION getProductsByCategory(category_name VARCHAR2) RETURN products_name_varray;
-
-FUNCTION getProduct(vproductid NUMBER) RETURN products_type; 
+FUNCTION getProduct(vproductid IN NUMBER) RETURN products_type; 
 
 END products_package;
 /
@@ -275,24 +273,22 @@ BEGIN
 UPDATE Products SET Category = category_name WHERE ProductId = product_id;
 END update_product_category;
 
---Function that returns all the ProductIds that are in a certain category (the parameter value)
-FUNCTION getProductsByCategory(category_name VARCHAR2)
-RETURN products_name_varray IS
-products_id products_name_varray := products_name_varray();
+--Function that returns all the Products that are in a certain category (the parameter value)
+FUNCTION getAllProductsByCategory(category_name VARCHAR2)
+RETURN SYS_REFCURSOR AS all_products SYS_REFCURSOR;
 BEGIN
+OPEN all_products FOR
 SELECT
-ProductId BULK COLLECT INTO products_id FROM Products WHERE Category = category_name;
-IF products_id.COUNT < 1 THEN
-RAISE CATEGORY_NOT_FOUND;
-END IF;
-RETURN products_id;
-EXCEPTION
-WHEN CATEGORY_NOT_FOUND THEN
-DBMS_OUTPUT.PUT_LINE('Category does not exist');
-END getProductsByCategory;
+ProductId, ProductName, Category
+FROM
+Products
+WHERE
+Category = category_name;
+RETURN all_products;
+END getAllProductsByCategory; 
 
 --Function that returns a products_type corresponding to the ProductId value in the parameter
-FUNCTION getProduct (vproductid NUMBER)
+FUNCTION getProduct (vproductid IN NUMBER)
 RETURN products_type AS
 vproductname VARCHAR2(30);
 vcategory VARCHAR2(20);

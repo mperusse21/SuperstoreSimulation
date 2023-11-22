@@ -20,8 +20,12 @@ public class MohTests {
             //conn.updateProductCategory(1, "Grocery");
             Products product = conn.getProductById(14);
             System.out.println(product);
-            List<Products> products = conn.getProductByCategory("Grocery");
-            System.out.println(products);
+            List<Products> products = conn.getProductsByCategory("Grocery");
+            System.out.println(products.get(1));
+            List<AuditTable> audits = conn.getAuditTable();
+            for (AuditTable audit : audits) {
+                System.out.println(audit);
+            } 
         }
         
         // Catches any possible exceptions

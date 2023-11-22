@@ -65,7 +65,7 @@ public class Products implements SQLData {
     //toString for Products
     @Override 
     public String toString(){
-        return "Product Id: " + this.productId + ", Product Name: " + this.productName + ", Category: " + this.category;
+        return "| Product Id: " + this.productId + " | Product Name: " + this.productName + " | Category: " + this.category + " |";
     }
 
     //empty constructor to be used for getProduct
@@ -87,33 +87,40 @@ public class Products implements SQLData {
 
     }
 
-    public static List<Products> getProductsByCategory(Connection conn, String category) throws SQLException, ClassNotFoundException {
-        String sql = "{ call ? := products_package.getProductsByCategory(?)}";
-        try (CallableStatement stmt = conn.prepareCall(sql)) {
-            Map map = conn.getTypeMap();
-            conn.setTypeMap(map);
-            map.put(Products.TYPENAME, Class.forName("database2project.Products"));
+    public static List<Products> getProductsByCategory(Connection conn, String category) {
+        String sql = "{ call ? := products_package.getAllProductsByCategory(?) }";
+        CallableStatement stmt = null;
+        ResultSet results = null;
+        List<Products> productList = new ArrayList<Products>();
+        try{
+            stmt = conn.prepareCall(sql);
             stmt.registerOutParameter(1, Types.REF_CURSOR);
             stmt.setString(2, category);
             stmt.execute();
-    
-            ResultSet resultSet = (ResultSet) stmt.getObject(1);
-            List<Products> productList = new ArrayList<>();
-    
-            while (resultSet.next()) {
-                Products product = new Products(
-                    resultSet.getInt("ProductId"),
-                    resultSet.getString("ProductName"),
-                    resultSet.getString("Category")
-                );
-                productList.add(product);
+            results = (ResultSet) stmt.getObject(1);
+            while (results.next()){
+                Products foundProduct = new Products (results.getInt("ProductId"), results.getString("ProductName"), results.getString("Category")); 
+                productList.add(foundProduct);
             }
+        }
+
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null){
+                    stmt.close();
+                }
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+           
+              return productList;
     
-            return productList;
         }
     }
-    
 
 
-
-}

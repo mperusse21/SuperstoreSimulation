@@ -1,7 +1,6 @@
 package database2project;
 
 import java.sql.*;
-import java.util.Map;
 import java.util.*;
 
 public class ProductsServices {
@@ -42,12 +41,16 @@ public class ProductsServices {
             }
     }
 
-    public List<Products> getProductByCategory(String category) throws SQLException, ClassNotFoundException {
+    public List<Products> getProductsByCategory(String category) throws SQLException, ClassNotFoundException {
         return Products.getProductsByCategory(this.connection, category);
     }
 
     public Products getProductById(int productId) throws SQLException, ClassNotFoundException {
         return Products.getProduct(this.connection, productId);
+    }
+
+    public List<AuditTable> getAuditTable() throws SQLException, ClassNotFoundException {
+        return AuditTable.getAuditTable(this.connection);
     }
     
 }
