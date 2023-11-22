@@ -88,6 +88,7 @@ public class Warehouses implements SQLData {
         return "Warehouse Id: " + this.warehouseId + ", " + this.warehouseName + ", Address Id:" + this.addressId;
     }   
 
+    // Not necessary but added
     public static Warehouses getWarehouse(Connection conn, int warehouse_id) {
         String sql = "{ ? = call warehouses_package.get_warehouse(?) }";
         CallableStatement stmt = null;
@@ -145,6 +146,34 @@ public class Warehouses implements SQLData {
                 }
             }
             catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Takes a review id and updates it's description to a provided string.
+     */
+    public static void updateWarehouseName(Connection conn, int warehouse_id, String warehouse_name) {
+        String sql = "{ call warehouses_package.updatewarehousename(?, ?)}";
+        CallableStatement stmt = null;
+        try {
+            stmt = conn.prepareCall(sql);
+            stmt.setInt(1, warehouse_id);
+            stmt.setString(2, warehouse_name);
+            stmt.execute();
+            System.out.println("Updated Warehouse " + warehouse_id + " name to: " + warehouse_name);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error when trying to update warehouse " + warehouse_id + " name");
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }

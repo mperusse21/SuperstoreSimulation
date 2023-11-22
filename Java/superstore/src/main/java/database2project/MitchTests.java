@@ -8,7 +8,8 @@ public class MitchTests
     public static void main( String[] args ) {
         Scanner reader = new Scanner(System.in);
         SuperStoreServices connection = null;
-
+        boolean validLogin = false;
+        while (!validLogin){
         try {
             // Prompt user for username and password
             System.out.print("Enter your username: ");
@@ -17,7 +18,7 @@ public class MitchTests
 
             // Creating the connection using the SuperStoreServices object
             connection = new SuperStoreServices(user, password);
-
+            validLogin = true;
             /* Testing validate order */
             //connection.addOrder(0, 2,1,1,31,42.50,Date.valueOf("2023-11-22"));
             //System.out.println(connection.validateOrder(2, 30));
@@ -64,21 +65,24 @@ public class MitchTests
         }
         
         // Catches any possible exceptions
-        catch (Exception e){
-            e.printStackTrace();
+        catch (SQLException e){
+            System.out.println("Invalid username or password");
         }   
 
         // Closes the connection and the Scanner
         finally {
-            try {
-                connection.close();
-            } 
-            catch (SQLException e) {
+            try{
+                if (connection != null) {
+                    connection.close();
+                }
+            }
+            catch (SQLException e){
                 e.printStackTrace();
             }
-
-            reader.close();
         }
-     
+    }
+
+    reader.close();
+
     }
 }

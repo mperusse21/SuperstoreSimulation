@@ -49,8 +49,9 @@ public class ReviewsUtilities {
             stmt.setInt(2, score);
             stmt.execute();
             System.out.println("Updated review: " + review_id + " score to: " + score);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("Error when trying to update review " + review_id + " score");
         }
         // Always tries to close stmt
         finally {
@@ -76,8 +77,9 @@ public class ReviewsUtilities {
             stmt.setInt(2, flag);
             stmt.execute();
             System.out.println("Updated review: " + review_id + " flag to: " + flag);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("Error when trying to update review " + review_id + " flag");
         }
         // Always tries to close stmt
         finally {
@@ -103,8 +105,9 @@ public class ReviewsUtilities {
             stmt.setString(2, description);
             stmt.execute();
             System.out.println("Updated review " + review_id + " description to: " + description);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("Error when trying to update review " + review_id + " description");
         }
         // Always tries to close stmt
         finally {

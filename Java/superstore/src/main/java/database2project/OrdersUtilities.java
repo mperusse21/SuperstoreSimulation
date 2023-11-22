@@ -21,10 +21,9 @@ public class OrdersUtilities {
             stmt.execute();
             result = stmt.getString(1);
             return result;
-        } catch (Exception e) {
+        } 
+        catch (SQLException e) {
             e.printStackTrace();
-            // Will return null if an error occurs
-            return result;
         }
         // Always tries to close stmt
         finally {
@@ -36,6 +35,9 @@ public class OrdersUtilities {
                 e.printStackTrace();
             }
         }
+        
+        // Will return null if an error occurs
+        return result;
     }
 
     // Returns an ArrayList of Orders by a specific customer.

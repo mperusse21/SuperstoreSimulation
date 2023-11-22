@@ -383,7 +383,6 @@ END;
 -- Warehouses
 
 CREATE OR REPLACE PACKAGE warehouses_package AS
-    PROCEDURE add_warehouse (vwarehouse IN warehouse_typ);
     PROCEDURE delete_warehouse (vwarehouseid IN NUMBER);
     PROCEDURE updatewarehousename(vwarehouseid NUMBER, vwarehousename IN VARCHAR2);
     FUNCTION get_warehouse (vwarehouseid NUMBER)
@@ -393,18 +392,6 @@ END warehouses_package;
 /
 
 CREATE OR REPLACE PACKAGE BODY warehouses_package AS 
--- Takes a warehosue object and adds it to the database
-PROCEDURE add_warehouse (
-    vwarehouse IN warehouse_typ 
-) IS
-    BEGIN
-        INSERT INTO Warehouses (WarehouseName, AddressId)   
-            VALUES (
-                    vwarehouse.WarehouseName,
-                    vwarehouse.AddressId
-            );
-    END;
-
 -- Deletes a warehouse (and all it's inventory) with a specified Id 
 PROCEDURE delete_warehouse (
     vwarehouseid IN NUMBER
@@ -418,7 +405,7 @@ PROCEDURE delete_warehouse (
         END IF;
 
     END;
-/*
+
 -- updates a specified warehouses name
 PROCEDURE updatewarehousename (
     vwarehouseid IN NUMBER,
@@ -436,7 +423,6 @@ PROCEDURE updatewarehousename (
         END IF;
 
     END;
-    */
 
 FUNCTION get_warehouse (vwarehouseid NUMBER)
     RETURN warehouse_typ AS
@@ -487,6 +473,8 @@ CREATE OR REPLACE PACKAGE inventory_package AS
         RETURN NUMBER;
     FUNCTION get_total_stock (vproductid NUMBER)
         RETURN NUMBER;
+    FUNCTION get_all_inventory 
+        RETURN SYS_REFCURSOR;
     INVENTORY_NOT_FOUND EXCEPTION;
 END inventory_package;
 /
@@ -533,7 +521,7 @@ FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
     END;
     
 -- Returns the total stock of a product across all warehouses
-    FUNCTION get_total_stock (vproductid NUMBER)
+FUNCTION get_total_stock (vproductid NUMBER)
     RETURN NUMBER AS
         total_stock NUMBER;
     BEGIN
@@ -547,6 +535,19 @@ FUNCTION get_stock (vwarehouseid NUMBER, vproductid NUMBER)
         WHERE
             ProductId = vproductid;
         RETURN total_stock;
+    END;
+    
+-- Returns a cursor containing the total stock of every product in every warehouse.
+FUNCTION get_all_inventory 
+    RETURN SYS_REFCURSOR AS
+        all_inventory SYS_REFCURSOR;
+    BEGIN
+        OPEN all_inventory FOR 
+        SELECT 
+            *
+        FROM
+            Inventory;
+        RETURN all_inventory;
     END;
 END inventory_package;
 /
@@ -604,23 +605,6 @@ PROCEDURE add_inventory (
                 vinventory.Stock           
         );
     END;
-    
-    -- Gets an order with a certain id (returns an varray of orders)
-FUNCTION get_all_products (vorderid IN NUMBER)
-    RETURN product_id_varray AS
-        products product_id_varray;
-    BEGIN
-        SELECT
-            ProductId
-        BULK COLLECT INTO
-            products
-        FROM
-            Orders
-        WHERE
-            OrderId = vorderid;
-        return products;
-    END;
-
 
 */
 

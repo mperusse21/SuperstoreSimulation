@@ -1,9 +1,6 @@
 package database2project;
 
-import java.sql.SQLData;
-import java.sql.SQLException;
-import java.sql.SQLInput;
-import java.sql.SQLOutput;
+import java.sql.*;
 
 public class Inventory implements SQLData {
     

@@ -2,7 +2,6 @@ package database2project;
 import java.sql.*;
 import java.util.List;
 
-// The plan is to do the try catch here mostly, maybe with some more in the app (on second thought might do it in the object classes)
 public class SuperStoreServices {
     private String url = "jdbc:oracle:thin:@198.168.52.211:1521/pdbora19c.dawsoncollege.qc.ca";
     private Connection conn;
@@ -20,10 +19,6 @@ public class SuperStoreServices {
         System.out.println("Disconnected");
     }
 
-    public Connection retrievConnection (){
-        return this.conn;
-    }
-
     // Method which returns a string "true" or "false" depending if there is enough quantity of a certain product warehouse.
     public String validateOrder (int productId, int quantity){
        return OrdersUtilities.validateOrder(conn, productId, quantity);
@@ -34,6 +29,7 @@ public class SuperStoreServices {
     public void addOrder(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate) 
         throws SQLException, ClassNotFoundException{            
             Orders newOrder = new Orders(orderId, productId, customerId, storeId, quantity, price, orderDate);
+            // Does validation here and in SQL for added safety
             if (OrdersUtilities.validateOrder(this.conn, productId, quantity).equals("true")){
             newOrder.AddToDatabase(this.conn);
             }
@@ -74,6 +70,14 @@ public class SuperStoreServices {
 
     public void updateDescription (int review_id, String description){
         ReviewsUtilities.updateDescription(this.conn, review_id, description);
+    }
+
+    public void updateStock (int warehouse_id, int product_id, int stock){
+        InventoryUtilites.updateStock(this.conn, warehouse_id, product_id, stock);
+    }
+
+    public void updateWarehouseName (int warehouse_id, String warehouse_name){
+        Warehouses.updateWarehouseName(this.conn, warehouse_id, warehouse_name);
     }
 
     public Orders getOrder (int order_id, int product_id) {

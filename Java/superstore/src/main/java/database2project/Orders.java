@@ -1,11 +1,7 @@
 package database2project;
 
-import java.lang.reflect.Constructor;
 import java.sql.*;
 import java.util.Map;
-
-import javax.lang.model.type.NullType;
-
 
 public class Orders implements SQLData {
     
