@@ -91,7 +91,7 @@ CREATE TABLE AuditTable (
 
 -- Cities
 INSERT INTO Cities (City, Province) VALUES ('Montreal', 'Quebec');
-INSERT INTO Cities (City, Province) VALUES ('Toronto', 'Ontatio');
+INSERT INTO Cities (City, Province) VALUES ('Toronto', 'Ontario');
 INSERT INTO Cities (City, Province) VALUES ('Calgary', 'Alberta');
 INSERT INTO Cities (City, Province) VALUES ('Laval', 'Quebec');
 INSERT INTO Cities (City, Province) VALUES ('Brossard', 'Quebec');
@@ -119,14 +119,13 @@ INSERT INTO Addresses (CityId) VALUES (3);
 INSERT INTO Addresses (CityId) VALUES (5);
 -- Warehouse Addresses
 INSERT INTO Addresses (Address, CityId) VALUES ('100 rue William', 6);
--- This is wrong but the address confused me
-INSERT INTO Addresses (Address, CityId) VALUES ('304 Rue Francois-Perrault, Villera Saint-Michel', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('304 Rue Francois-Perrault', 1);
 INSERT INTO Addresses (Address, CityId) VALUES ('86700 Weston Rd', 2);
 INSERT INTO Addresses (Address, CityId) VALUES ('170 Sideroad', 7);
 INSERT INTO Addresses (Address, CityId) VALUES ('1231 Trudea road', 8);
 INSERT INTO Addresses (Address, CityId) VALUES ('16 Whitlock Rd', 9);
 
--- Stores (stores with same name only differentiated by StoreId) NOT SURE IF CORRECT!!!!
+-- Stores 
 INSERT INTO Stores (StoreName) VALUES ('dawson store');
 INSERT INTO Stores (StoreName) VALUES ('dealer montreal');
 INSERT INTO Stores (StoreName) VALUES ('Dealer one');
@@ -134,18 +133,9 @@ INSERT INTO Stores (StoreName) VALUES ('marche adonis');
 INSERT INTO Stores (StoreName) VALUES ('movie start');
 INSERT INTO Stores (StoreName) VALUES ('movie store');
 INSERT INTO Stores (StoreName) VALUES ('star store');
--- Quebec
-INSERT INTO Stores (StoreName) VALUES ('store magic');
--- Toronto
 INSERT INTO Stores (StoreName) VALUES ('store magic');
 INSERT INTO Stores (StoreName) VALUES ('super rue champlain');
--- Quebec
 INSERT INTO Stores (StoreName) VALUES ('toy r us');
--- Toronto
-INSERT INTO Stores (StoreName) VALUES ('toy r us');
--- Quebec
-INSERT INTO Stores (StoreName) VALUES ('marche atwater');
--- Calgary
 INSERT INTO Stores (StoreName) VALUES ('marche atwater');
 
 -- Products
@@ -190,7 +180,6 @@ INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Olivia', 
 
 INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse A', 13);
--- This is the weird one
 INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse B', 14);
 INSERT INTO Warehouses (WarehouseName, AddressId) 
@@ -294,22 +283,22 @@ INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description)
 -- Orders
 
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate)
-    VALUES (1, 1, 13, 2, 10.00, '2023-10-23');
+    VALUES (1, 1, 11, 2, 10.00, '2023-10-23');
 -- same order
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (2, 1, 6, 1, 30.00, '2023-10-23');
 INSERT INTO Orders VALUES (2, 3, 1, 6, 1, 16.00, '2023-10-23');
 --
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (2, 1, 11, 1, 45.00, '2023-10-02');
+    VALUES (2, 1, 10, 1, 45.00, '2023-10-02');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (4, 2, 5, 3, 50.00, NULL);
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (5, 3, 2, 1, 856600.00, NULL);
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (6, 4, 9, 1, 2.00, '2023-10-23');
+    VALUES (6, 4, 8, 1, 2.00, '2023-10-23');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (7, 5, 14, 6, 10.00, '2020-05-06');
+    VALUES (7, 5, 11, 6, 10.00, '2020-05-06');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (8, 6, 3, 1, 50000.00, '2023-10-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
@@ -317,27 +306,27 @@ INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate)
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (9, 8, 4, 1, 970.00, '2023-04-21');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (10, 8, 11, 1, 40.00, '2023-10-11');
+    VALUES (10, 8, 10, 1, 40.00, '2023-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (11, 8, 11, 1, 40.00, '2010-10-11');
+    VALUES (11, 8, 10, 1, 40.00, '2010-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (7, 8, 14, 7, 10.00, '2022-05-06');
+    VALUES (7, 8, 11, 7, 10.00, '2022-05-06');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (11, 9, 12, 2, 80.00, '2023-10-07');
+    VALUES (11, 9, 10, 2, 80.00, '2023-10-07');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (10, 8, 11, 1, 38.00, '2022-10-11');
+    VALUES (10, 8, 10, 1, 38.00, '2022-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (3, 10, 1, 3, 50.00, '2023-10-01');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (12, 10, 10, 1, 10.00, '2023-10-10');
+    VALUES (12, 10, 9, 1, 10.00, '2023-10-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (12, 10, 10, 3, 30.00, '2019-09-12');
+    VALUES (12, 10, 9, 3, 30.00, '2019-09-12');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (13, 11, 4, 1, 9.50, '2019-04-03');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (14, 12, 7, 1, 200.00, '2020-01-20');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (15, 13, 13, 1, 13.50, '2021-12-29');
+    VALUES (15, 13, 11, 1, 13.50, '2021-12-29');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
     VALUES (15, 13, 8, 1, 15.00, '2021-12-29');
 

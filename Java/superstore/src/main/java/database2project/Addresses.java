@@ -37,6 +37,7 @@ public class Addresses {
     }
 
     public static String getAddress (Connection conn, int addressId) throws SQLException, ClassNotFoundException {
+        
         String sql = "{ ? = call addresses_package.getAddress(?)}";
         String foundAddress = null;
         try (CallableStatement stmt = conn.prepareCall(sql)){
@@ -46,6 +47,24 @@ public class Addresses {
             stmt.execute();
             foundAddress = stmt.getString(1);
             return foundAddress;
+        }
+
+    }
+
+    public static int getCityId (Connection conn, String address) throws SQLException, ClassNotFoundException {
+        if (address == null) {
+            return -1;
+        }
+        else {
+            String sql = "{ ? = call addresses_package.getCityId(?)}";
+            try (CallableStatement stmt = conn.prepareCall(sql)){
+
+                stmt.registerOutParameter(1, Types.INTEGER);
+                stmt.setString(2, address);
+                stmt.execute();
+                int foundCityId = stmt.getInt(1);
+                return foundCityId;
+            }
         }
 
     }

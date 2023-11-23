@@ -30,8 +30,7 @@ public class SuperStoreServices {
     // uses it's built in AddToDatabase method.
     // Also performs validation.
     public void addOrder(int orderId, int productId, int customerId, int storeId, int quantity, Double price,
-            Date orderDate)
-            throws SQLException, ClassNotFoundException {
+            Date orderDate) {
         Orders newOrder = new Orders(orderId, productId, customerId, storeId, quantity, price, orderDate);
         // Does validation here and in SQL for added safety
         if (OrdersUtilities.validateOrder(this.conn, productId, quantity).equals("true")) {
@@ -43,10 +42,10 @@ public class SuperStoreServices {
 
     // Method which takes input needed to add a review, creates a Review object and
     // uses it's built in AddToDatabase method.
-    public void addReview(int reviewId, int productId, int customerId, int score,
-            String description) throws ClassNotFoundException {
-        // Every review is flagged 0 times when added
-        Reviews newReview = new Reviews(reviewId, productId, customerId, score, 0, description);
+    public void addReview(int productId, int customerId, int score,
+            String description) {
+        // Every review is flagged 0 times when added and review id is always generated
+        Reviews newReview = new Reviews(0, productId, customerId, score, 0, description);
         newReview.AddToDatabase(this.conn);
     }
 
@@ -107,10 +106,6 @@ public class SuperStoreServices {
         return InventoryUtilites.getTotalStock(this.conn, product_id);
     }
 
-    public int getStock(int inventory_id) {
-        return InventoryUtilites.getStock(this.conn, inventory_id);
-    }
-
     public List<Customers> getFlaggedCustomers() {
         return ReviewsUtilities.getFlaggedCustomers(this.conn);
     }
@@ -130,4 +125,93 @@ public class SuperStoreServices {
     public List<Inventory> getAllInventory() {
         return InventoryUtilites.getAllInventory(this.conn);
     }
+
+    public List<Reviews> getAllReviews() {
+        return ReviewsUtilities.getAllReviews(conn); 
+    }
+
+    public void updateProductName(int productId, String productName) throws SQLException {
+
+        String sql = "{call products_package.update_product_name(?,?)}";
+        try(CallableStatement stmt = this.conn.prepareCall(sql)){
+            stmt.setInt(1, productId);
+            stmt.setString(2, productName);
+            stmt.execute();
+            System.out.println("Product has successfully been updated!");
+        }
+}
+
+    public void updateProductCategory(int productId, String category) throws SQLException {
+
+            String sql = "{call products_package.update_product_category(?,?)}";
+            try(CallableStatement stmt = this.conn.prepareCall(sql)){
+                stmt.setInt(1, productId);
+                stmt.setString(2, category);
+                stmt.execute();
+                System.out.println("Product has successfully been updated!");
+            }
+    }
+
+    public Customers getCustomerByEmail(String email) throws SQLException, ClassNotFoundException{
+        return Customers.getCustomerByEmail(this.conn, email);
+    }
+
+    public Customers getCustomerById(int customerId) throws SQLException, ClassNotFoundException{
+        return Customers.getCustomerById(this.conn, customerId);
+    }
+
+    public String getAddress(int addressId) throws SQLException, ClassNotFoundException{
+        return Addresses.getAddress(this.conn, addressId);
+    }
+
+    public String getCity(int cityId) throws SQLException, ClassNotFoundException {
+        return Cities.getCity(this.conn, cityId);
+    }
+
+    public String getProvince(int cityId) throws SQLException, ClassNotFoundException {
+        return Cities.getProvince(this.conn, cityId);
+    }
+
+    public List<Customers> getAllCustomers() throws SQLException, ClassNotFoundException {
+        return Customers.getAllCustomers(this.conn);
+    }
+
+    public List<Products> getProductsByCategory(String category) throws SQLException, ClassNotFoundException {
+        return Products.getProductsByCategory(this.conn, category);
+    }
+
+    public Products getProductById(int productId) throws SQLException, ClassNotFoundException {
+        return Products.getProduct(this.conn, productId);
+    }
+
+    public List<Products> getAllProducts() throws SQLException, ClassNotFoundException {
+        return Products.getAllProducts(this.conn);
+    }
+
+    public List<AuditTable> getAuditTable() throws SQLException, ClassNotFoundException {
+        return AuditTable.getAuditTable(this.conn);
+    }
+
+    public String getStore(int storeId) throws SQLException, ClassNotFoundException {
+        return Stores.getStore(this.conn, storeId);
+    }
+
+    public void addProduct(String productName, String category) throws SQLException, ClassNotFoundException {            
+            Products newProduct = new Products (0, productName, category);
+            newProduct.AddToDatabase(this.conn);
+        }
+
+    public String getFullLocation(int addressId) throws SQLException, ClassNotFoundException {
+        if (addressId == 0) {
+            return "";
+        }
+        else {
+            String address = Addresses.getAddress(this.conn, addressId); 
+            int cityId = Addresses.getCityId(this.conn, address);
+            String city = Cities.getCity(this.conn, cityId);
+            String province = Cities.getProvince(this.conn, cityId);
+            return " Address: " + address + " | City: " + city + " | Province: " + province;
+        }
+    }
+
 }

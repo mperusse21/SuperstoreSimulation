@@ -77,8 +77,9 @@ public class Inventory implements SQLData {
         stream.writeInt(getStock());
     }
 
-    public String toString (){
-        return "Inventory Id: " + this.inventoryId + " Warehouse Id: " + this.warehouseId + " Product Id: " + this.productId + "\nStock: " + this.stock;
+    // Returns a string representation of an inventory row, takes a warehouse and full address location as input
+    public String toString (Warehouses w, String fullLocation){
+        return "| Inventory Id: " + this.inventoryId + w.toString(fullLocation) + "| Product Id: " + this.productId + "| Stock: " + this.stock;
     }
        
 }

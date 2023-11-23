@@ -68,8 +68,6 @@ END warehouses_package;
 -- Package containing procedures and functions related to the inventory table.
 CREATE OR REPLACE PACKAGE inventory_package AS
     PROCEDURE update_stock(vinventoryid IN NUMBER, vstock IN NUMBER);
-    FUNCTION get_stock (vinventoryid IN NUMBER)
-        RETURN NUMBER;
     FUNCTION get_total_stock (vproductid NUMBER)
         RETURN NUMBER;
     FUNCTION get_all_inventory 
@@ -94,27 +92,6 @@ PROCEDURE update_stock (
         IF SQL%NOTFOUND THEN
             RAISE INVENTORY_NOT_FOUND;
         END IF;
-    END;
-
--- Gets and returns the stock (number) of a product in a warehouse
-FUNCTION get_stock (vinventoryid NUMBER)
-    RETURN NUMBER AS
-        vstock NUMBER(10,0);
-    BEGIN
-        SELECT
-            Stock
-        INTO
-            vstock
-        FROM
-            Inventory
-        WHERE
-            InventoryId = vinventoryid;
-        
-        IF SQL%NOTFOUND THEN
-            RAISE INVENTORY_NOT_FOUND;
-        END IF;
-        
-        return vstock;
     END;
     
 -- Returns the total stock of a specific product across all warehouses
@@ -359,6 +336,8 @@ CREATE OR REPLACE PACKAGE reviews_package AS
         RETURN SYS_REFCURSOR;
     FUNCTION get_flagged_reviews 
         RETURN SYS_REFCURSOR;
+    FUNCTION get_all_reviews 
+        RETURN SYS_REFCURSOR;
     REVIEW_NOT_FOUND EXCEPTION;
 END reviews_package;
 /
@@ -516,6 +495,20 @@ FUNCTION get_flagged_reviews
         RETURN flagged_reviews;
     END;
     
+FUNCTION get_all_reviews 
+        RETURN SYS_REFCURSOR AS
+        all_reviews SYS_REFCURSOR;
+    BEGIN
+        OPEN all_reviews FOR 
+        SELECT 
+            *
+        FROM
+            Reviews
+        ORDER BY
+            ReviewId ASC; 
+        RETURN all_reviews;
+    END;
+    
 END reviews_package;
 /
 
@@ -589,3 +582,23 @@ BEGIN
 END;
 /
 
+/*-- Gets and returns the stock (number) of a product in a warehouse
+FUNCTION get_stock (vinventoryid NUMBER)
+    RETURN NUMBER AS
+        vstock NUMBER(10,0);
+    BEGIN
+        SELECT
+            Stock
+        INTO
+            vstock
+        FROM
+            Inventory
+        WHERE
+            InventoryId = vinventoryid;
+        
+        IF SQL%NOTFOUND THEN
+            RAISE INVENTORY_NOT_FOUND;
+        END IF;
+        
+        return vstock;
+    END;*/

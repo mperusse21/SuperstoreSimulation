@@ -32,16 +32,42 @@ public class Cities {
     }
 
     public static String getCity (Connection conn, int cityId) throws SQLException, ClassNotFoundException {
-        String sql = "{ ? = call cities_package.getCity(?)}";
-        String foundCity = null;
-        try (CallableStatement stmt = conn.prepareCall(sql)){
+        if (cityId == -1) {
+            return "";
+        }
+        else {
+            String sql = "{ ? = call cities_package.getCity(?)}";
+            String foundCity = null;
+            try (CallableStatement stmt = conn.prepareCall(sql)){
 
-            stmt.registerOutParameter(1, Types.VARCHAR);
-            stmt.setInt(2, cityId);
-            stmt.execute();
-            foundCity = stmt.getString(1);
-            return foundCity;
+                stmt.registerOutParameter(1, Types.VARCHAR);
+                stmt.setInt(2, cityId);
+                stmt.execute();
+                foundCity = stmt.getString(1);
+                return foundCity;
+            }
         }
 
     }
+
+    public static String getProvince (Connection conn, int cityId) throws SQLException, ClassNotFoundException {
+        if (cityId == -1) {
+            return "";
+        }
+        else {
+            String sql = "{ ? = call cities_package.getProvince(?)}";
+            String foundProvince = null;
+            try (CallableStatement stmt = conn.prepareCall(sql)){
+
+                stmt.registerOutParameter(1, Types.VARCHAR);
+                stmt.setInt(2, cityId);
+                stmt.execute();
+                foundProvince = stmt.getString(1);
+                return foundProvince;
+            }
+        }
+
+    }
+
+
 }

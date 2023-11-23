@@ -16,13 +16,13 @@ public class ReviewsUtilities {
         CallableStatement stmt = null;
         try {
             stmt = conn.prepareCall(sql);
-            stmt.registerOutParameter(1, Types.INTEGER);
+            stmt.registerOutParameter(1, Types.DOUBLE);
             stmt.setInt(2, product_id);
             stmt.execute();
             result = stmt.getDouble(1);
             return result;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Unable to get average score of product " + product_id);
             return result;
         }
         // Always tries to close stmt
@@ -50,7 +50,6 @@ public class ReviewsUtilities {
             stmt.execute();
             System.out.println("Updated review: " + review_id + " score to: " + score);
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println("Error when trying to update review " + review_id + " score");
         }
         // Always tries to close stmt
@@ -78,7 +77,6 @@ public class ReviewsUtilities {
             stmt.execute();
             System.out.println("Updated review: " + review_id + " flag to: " + flag);
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println("Error when trying to update review " + review_id + " flag");
         }
         // Always tries to close stmt
@@ -98,6 +96,10 @@ public class ReviewsUtilities {
      */
     public static void updateDescription(Connection conn, int review_id, String description) {
         String sql = "{ call reviews_package.update_description(?, ?)}";
+        // if the user enters null then passes a null value instead of the string null
+        if (description.equals("null")){
+            description = null;
+        }
         CallableStatement stmt = null;
         try {
             stmt = conn.prepareCall(sql);
@@ -106,7 +108,6 @@ public class ReviewsUtilities {
             stmt.execute();
             System.out.println("Updated review " + review_id + " description to: " + description);
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println("Error when trying to update review " + review_id + " description");
         }
         // Always tries to close stmt
@@ -141,7 +142,6 @@ public class ReviewsUtilities {
             return customerList;
         } 
         catch (SQLException e) {
-            e.printStackTrace();
         }
         // Always tries to close stmt
         finally {
@@ -154,8 +154,7 @@ public class ReviewsUtilities {
             }
         }
 
-        // If an error occurs or no customers are flagged returns null and prints a message
-        System.out.println("Unable to find any flagged customers");
+        // If an error occurs returns null
         return null;
     }
 
@@ -178,7 +177,6 @@ public class ReviewsUtilities {
             return reviewsList;
         } 
         catch (SQLException e) {
-            e.printStackTrace();
         }
         // Always tries to close stmt
         finally {
@@ -191,8 +189,41 @@ public class ReviewsUtilities {
             }
         }
         
+        // If an error occurs returns null 
+        return null;
+    }
+
+    public static List<Reviews> getAllReviews(Connection conn) {
+        String sql = "{ ? = call reviews_package.get_all_reviews()}";
+        CallableStatement stmt = null;
+        List<Reviews> reviewsList = new ArrayList<Reviews>(); 
+        try {
+            stmt = conn.prepareCall(sql);
+            stmt.registerOutParameter(1, Types.REF_CURSOR);
+            stmt.execute();
+            ResultSet results = (ResultSet) stmt.getObject(1);
+            while (results.next()) {
+                Reviews foundReview = new Reviews(results.getInt("ReviewId"), results.getInt("ProductId"), 
+                results.getInt("CustomerId"), results.getInt("Score"), results.getInt("Flag"), 
+                results.getString("Description"));
+                reviewsList.add(foundReview);
+            }
+            return reviewsList;
+        } 
+        catch (SQLException e) {
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
         // If an error occurs or no reviews are flagged returns null and prints a message
-        System.out.println("Unable to find any flagged reviews");
+        System.out.println("Unable to find any reviews");
         return null;
     }
 }

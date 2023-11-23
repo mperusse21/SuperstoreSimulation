@@ -23,7 +23,7 @@ public class OrdersUtilities {
             return result;
         } 
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Unable to validate given order");
         }
         // Always tries to close stmt
         finally {
@@ -60,7 +60,7 @@ public class OrdersUtilities {
             return ordersList;
         } 
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Unable to get orders by customer " + customer_id);
         }
         // Always tries to close stmt
         finally {
@@ -96,7 +96,7 @@ public class OrdersUtilities {
             return ordersList;
         } 
         catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Unable to get all orders");
         }
         // Always tries to close stmt
         finally {

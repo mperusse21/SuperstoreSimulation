@@ -109,14 +109,16 @@ public class Orders implements SQLData {
         stream.writeDate(getOrderDate());
     }
 
-    public String toString (){
-        return "Order Id: " + this.orderId + " Customer Id: " + this.customerId + " Store Id: " + this.storeId
-        + "\nProduct Id: " + this.productId + " Quantity: " + this.quantity + " Price: " + this.price + " Order Date: "
-        + this.orderDate + "\n" ;
+    // Returns a string representation of an order.
+    // (Takes a product, customer, and strings representing the full address and store name)
+    public String toString (Products p, Customers c, String storeName, String fullLocation){
+        return "| Order Id: " + this.orderId  + c.toString() + fullLocation +
+        "\n" + p.toString() + " Quantity: " + this.quantity + " | Price: " + this.price + " | Order Date: "
+        + this.orderDate + "| Store ID: " + this.storeId + " | Store Name: " + storeName + "\n";
     }  
 
     // Method which adds an order using the add_order procedure
-    public void AddToDatabase(Connection conn) throws ClassNotFoundException{
+    public void AddToDatabase(Connection conn) {
         String sql = "{ call orders_package.add_order(?)}";
         CallableStatement stmt = null;
         try {
@@ -133,7 +135,7 @@ public class Orders implements SQLData {
             System.out.println("Successfully added order information to the database"); 
         }      
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to add given order");
         }
         // Always tries to close stmt
         finally {
@@ -158,7 +160,7 @@ public class Orders implements SQLData {
             System.out.println("Removed order " + order_id + " from the database");
         }
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to delete order " + order_id);
         }
         // Always tries to close stmt
         finally {
@@ -193,7 +195,7 @@ public class Orders implements SQLData {
             return foundOrder;
         } 
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to get order " + order_id);
             // Will return a null found order if an error occurs
             return foundOrder;
         }

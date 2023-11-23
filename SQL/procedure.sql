@@ -14,6 +14,8 @@ PROCEDURE remove_cities(city_id NUMBER);
 
 FUNCTION getCity(city_id NUMBER) RETURN VARCHAR2;
 
+FUNCTION getProvince(city_id NUMBER) RETURN VARCHAR2;
+
 END cities_package;
 /
 
@@ -49,6 +51,16 @@ City INTO city_name FROM Cities WHERE CityId = city_id;
 RETURN city_name;
 END getCity;
 
+--Function that returns the province corresponding to the CityId value inside the parameter
+FUNCTION getProvince(city_id NUMBER)
+RETURN VARCHAR2 IS
+province_name VARCHAR2(50);   
+BEGIN
+SELECT
+Province INTO province_name FROM Cities WHERE CityId = city_id;
+RETURN province_name;
+END getProvince;
+
 END cities_package;
 /
 
@@ -66,25 +78,6 @@ END IF;
 END CitiesChange;
 /
 
---Anonymous block (for testing)
-
-SELECT * FROM Cities;
-SELECT * FROM AuditTable;
-
-DECLARE
-
-city_name VARCHAR2(50);
-
-BEGIN
-
---cities_package.add_cities('Dorval', 'Quebec');
---cities_package.remove_cities(10);
---city_name := cities_package.getCity(10);
-DBMS_OUTPUT.PUT_LINE(city_name);
-  
-END;
-/
-
 -- ADDRESSES --
 
 --Package containing all subprograms related to Addresses:
@@ -100,6 +93,8 @@ PROCEDURE add_addresses(address_name VARCHAR2, city_id NUMBER);
 PROCEDURE remove_addresses(address_id NUMBER);
 
 FUNCTION getAddress(address_id NUMBER) RETURN VARCHAR2;
+
+FUNCTION getCityId(address_name VARCHAR2) RETURN NUMBER;
 
 END addresses_package;
 /
@@ -136,6 +131,15 @@ Address INTO address_name FROM Addresses WHERE AddressId = address_id;
 RETURN address_name;
 END getAddress;
 
+FUNCTION getCityId(address_name VARCHAR2)
+RETURN NUMBER IS
+city_id NUMBER(5);   
+BEGIN
+SELECT
+CityId INTO city_id FROM Addresses WHERE Address = address_name;
+RETURN city_id;
+END getCityId;
+
 END addresses_package;
 /
 
@@ -151,25 +155,6 @@ ELSIF DELETING THEN
 INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:OLD.AddressId, 'DELETE', 'ADDRESSES', SYSDATE);
 END IF;
 END AddressesChange;
-/
-
---Anonymous block (for testing)
-
-SELECT * FROM Addresses;
-SELECT * FROM AuditTable;
-
-DECLARE
-
-address_name VARCHAR2(50);
-
-BEGIN
-
---addresses_package.add_addresses('1-825 Rue Richmond', 1);
-addresses_package.remove_addresses(19);
---address_name := addresses_package.getAddress(19);
-DBMS_OUTPUT.PUT_LINE(address_name);
-  
-END;
 /
 
 -- STORES --
@@ -216,24 +201,6 @@ RETURN store_name;
 END getStore;
 
 END stores_package;
-/
-
---Anonymous block (for testing)
-
-SELECT * FROM Stores;
-
-DECLARE
-
-store_name VARCHAR2(50);
-
-BEGIN
-
---stores_package.add_stores('Best Buy');
---stores_package.remove_stores(15);
-store_name := stores_package.getStore(15);
-DBMS_OUTPUT.PUT_LINE(store_name);
-  
-END;
 /
 
 -- PRODUCTS --
@@ -344,29 +311,6 @@ END IF;
 END CustomersChange;
 /
 
---Anonymous block (for testing)
-
-SELECT * FROM Products;
-SELECT * FROM AuditTable;
-
-DECLARE
-
-product_ids products_package.products_name_varray;
-product products_type;
-
-BEGIN
-
---products_package.update_products(17, 'Train X745', 'Vehicle');
-product := products_package.getProduct(14);
-DBMS_OUTPUT.PUT_LINE(product.ProductName || ' ' || product.Category);
-product_ids := products_package.getProductsByCategory('Grocerry');
-FOR i IN 1..product_ids.COUNT LOOP
-DBMS_OUTPUT.PUT_LINE(product_ids(i));
-END LOOP;
-  
-END;
-/
-
 -- CUSTOMERS --
 
 --Package containing all subprograms related to Customers
@@ -443,29 +387,6 @@ RETURN vcustomers;
 END getCustomer;
 
 END customers_package;
-/
-
---Anonymous block (for testing)
-
-SELECT * FROM Customers;
-SELECT * FROM AuditTable;
-
-DECLARE
-
-new_customer customers_type;
-
-BEGIN
-
-new_customer := customers_type(NULL, 'John', 'Doe', 'john.doe@email.com', 3);
-customers_package.add_customers(new_customer);
---customers_package.remove_customers();
---customers_package.update_customers(14, 'Johnatahan', 'Doe', 'john.doe@email.com', 1);
---new_customer := customers_package.getCustomerByEmail('msadeghi@dawsoncollege.qc.ca');
---DBMS_OUTPUT.PUT_LINE('getCustomerByEmail function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
---new_customer := customers_package.getCustomer(1);
---DBMS_OUTPUT.PUT_LINE('getCustomer function called successfully. Retrieved Customer: ' || new_customer.Firstname || ' ' || new_customer.Lastname);
-  
-END;
 /
 
 CREATE OR REPLACE FUNCTION getAuditTable

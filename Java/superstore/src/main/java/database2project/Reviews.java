@@ -101,21 +101,22 @@ public class Reviews implements SQLData {
         stream.writeString(getDescription());
     }
 
-    // toString method which returns a string representation of a Review (preliminary)
-    public String toString (){
-        return "Review " + this.reviewId + " by customer " + this.customerId + " for product with the id " + this.productId +
-        ". Score: " + this.score + " Number of Flags: " + this.flag + "\nDescription: " + this.description;
+    // toString method which returns a string representation of a Review 
+    //(Takes a product, customer, and a string representing the full address location)
+    public String toString (Products p, Customers c, String fullLocation){
+        return "| Review Id " + this.reviewId  + c.toString()  + fullLocation + "\n" + p.toString() + 
+        " Score: " + this.score + " | Flags: " + this.flag + " | Description: " + this.description + "\n";
     }
        
     // Method which adds an review using the add_review procedure
-    public void AddToDatabase(Connection conn) throws ClassNotFoundException {
+    public void AddToDatabase(Connection conn) {
         CallableStatement stmt = null;
         try {
             Map map = conn.getTypeMap();
             conn.setTypeMap(map);
             map.put(Reviews.TYPENAME,
                     Class.forName("database2project.Reviews"));
-            Reviews newReview = new Reviews(this.reviewId, this.productId, this.customerId, this.score, this.flag,
+            Reviews newReview = new Reviews(this.reviewId, this.productId, this.customerId, this.score, 0,
                     this.description);
             String sql = "{ call reviews_package.add_review(?)}";
             stmt = conn.prepareCall(sql);
@@ -123,8 +124,8 @@ public class Reviews implements SQLData {
             stmt.execute();
             System.out.println("Successfully added review to the database");
         }
-        catch (SQLException e){
-            e.printStackTrace();
+        catch (Exception e){
+            System.out.println("Unable to add given review");
         }
         // Always tries to close stmt
         finally {
@@ -149,7 +150,7 @@ public class Reviews implements SQLData {
         System.out.println("Removed review with id: " + review_id + " from the database");
         }
         catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Unable to delete review " + review_id);
         }
         // Always tries to close stmt
         finally {
@@ -181,7 +182,7 @@ public class Reviews implements SQLData {
             foundReview = (Reviews) stmt.getObject(1);
             return foundReview;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to get review " + review_id);
             // Will return a null found order if an error occurs
             return foundReview;
         }

@@ -15,8 +15,6 @@ public class Warehouses implements SQLData {
     private int warehouseId;
     private String warehouseName;
     private int addressId;
-    //Optional private field (may not be used)
-    private Addresses address;
 
     public static final String TYPENAME = "WAREHOUSE_TYP";
 
@@ -29,10 +27,6 @@ public class Warehouses implements SQLData {
     }
     public int getAddressId(){
         return this.addressId;
-    }
-    //Optional
-    public Addresses getAddress(){
-        return this.address;
     }
 
     // Set methods 
@@ -49,10 +43,6 @@ public class Warehouses implements SQLData {
         this.addressId = addressId;
     }
 
-    // Optional
-    public void setAddress(Addresses address) {
-        this.address = address;
-    }
     //Constructor initializing all private fields
     public Warehouses(int warehouseId, String warehouseName, int addressId){
         this.warehouseId = warehouseId;
@@ -83,12 +73,13 @@ public class Warehouses implements SQLData {
         stream.writeInt(getAddressId());
     }
 
-    // toString method which returns a string representation of a Warehouse (preliminary)
-    public String toString (){
-        return "Warehouse Id: " + this.warehouseId + ", " + this.warehouseName + ", Address Id:" + this.addressId;
+    // toString method which returns a string representation of a Warehouse, 
+    // takes a string representing the full address location
+    public String toString (String fullLocation){
+        return "| Warehouse Id: " + this.warehouseId + " | Warehouse Name: " + this.warehouseName + " | Address Id: " + this.addressId + 
+        fullLocation + " | ";
     }   
 
-    // Not necessary but added
     public static Warehouses getWarehouse(Connection conn, int warehouse_id) {
         String sql = "{ ? = call warehouses_package.get_warehouse(?) }";
         CallableStatement stmt = null;
@@ -107,7 +98,7 @@ public class Warehouses implements SQLData {
             return foundWarehouse;
         } 
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to get warehouse " + warehouse_id);
         }
         // Always tries to close stmt
         finally {
@@ -135,8 +126,7 @@ public class Warehouses implements SQLData {
         System.out.println("Removed warehouse with id: " + warehouse_id + " from the database");
         }
         catch (SQLException e){
-            e.printStackTrace();
-            System.out.println("Unable to delete specified warehouse");
+            System.out.println("Unable to delete warehouse " + warehouse_id);
         }
         // Always tries to close stmt
         finally {
@@ -152,7 +142,7 @@ public class Warehouses implements SQLData {
     }
 
     /**
-     * Takes a review id and updates it's description to a provided string.
+     * Takes a warehouse id and updates it's name to a provided string.
      */
     public static void updateWarehouseName(Connection conn, int warehouse_id, String warehouse_name) {
         String sql = "{ call warehouses_package.updatewarehousename(?, ?)}";
@@ -164,7 +154,6 @@ public class Warehouses implements SQLData {
             stmt.execute();
             System.out.println("Updated Warehouse " + warehouse_id + " name to: " + warehouse_name);
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println("Error when trying to update warehouse " + warehouse_id + " name");
         }
         // Always tries to close stmt
