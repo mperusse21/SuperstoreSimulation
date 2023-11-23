@@ -114,8 +114,9 @@ public class App
                 System.out.println("Please enter email: ");   
                 String email = reader.next(); 
                 Customers customer = connection.getCustomerByEmail(email);
-                String customerAddress = connection.getAddress(customer.getAddressId()); 
-                System.out.println("Customer found: " + customer + " Address: " + customerAddress ); 
+                //String customerAddress = connection.getAddress(customer.getAddressId()); 
+                String customerAddress = connection.getFullLocation(customer.getAddressId()); 
+                System.out.println("Customer found: " + customer ); 
             }
             else if (searchMethod == 3) {
                 exitPage = true;

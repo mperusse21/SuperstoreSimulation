@@ -197,4 +197,12 @@ public class SuperStoreServices {
             newProduct.AddToDatabase(this.conn);
         }
 
+    public String getFullLocation(int addressId) throws SQLException, ClassNotFoundException {
+        String address = Addresses.getAddress(this.conn, addressId); 
+        int cityId = Addresses.getCityId(this.conn, address);
+        String city = Cities.getCity(this.conn, cityId);
+        String province = Cities.getProvince(this.conn, cityId);
+        return " | Address: " + address + " | City: " + city + " | Province: " + province;
+    }
+
 }

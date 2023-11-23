@@ -113,6 +113,8 @@ PROCEDURE remove_addresses(address_id NUMBER);
 
 FUNCTION getAddress(address_id NUMBER) RETURN VARCHAR2;
 
+FUNCTION getCityId(address_name VARCHAR2) RETURN NUMBER;
+
 END addresses_package;
 /
 
@@ -147,6 +149,15 @@ SELECT
 Address INTO address_name FROM Addresses WHERE AddressId = address_id;
 RETURN address_name;
 END getAddress;
+
+FUNCTION getCityId(address_name VARCHAR2)
+RETURN NUMBER IS
+city_id NUMBER(5);   
+BEGIN
+SELECT
+CityId INTO city_id FROM Addresses WHERE Address = address_name;
+RETURN city_id;
+END getCityId;
 
 END addresses_package;
 /
