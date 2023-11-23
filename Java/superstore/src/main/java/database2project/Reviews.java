@@ -103,8 +103,8 @@ public class Reviews implements SQLData {
 
     // toString method which returns a string representation of a Review (preliminary)
     public String toString (Products p, Customers c){
-        return "| Review Id " + this.reviewId + c.toString() + p.toString() + 
-        "\n| Score: " + this.score + " | Flags: " + this.flag + " | Description: " + this.description;
+        return "| Review Id " + this.reviewId  + c.toString() + "\n" + p.toString() + 
+        " Score: " + this.score + " | Flags: " + this.flag + " | Description: " + this.description + "\n";
     }
        
     // Method which adds an review using the add_review procedure

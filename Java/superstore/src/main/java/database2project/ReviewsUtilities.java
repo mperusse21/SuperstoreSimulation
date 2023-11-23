@@ -190,4 +190,38 @@ public class ReviewsUtilities {
         System.out.println("Unable to find any flagged reviews");
         return null;
     }
+
+    public static List<Reviews> getAllReviews(Connection conn) {
+        String sql = "{ ? = call reviews_package.get_all_reviews()}";
+        CallableStatement stmt = null;
+        List<Reviews> reviewsList = new ArrayList<Reviews>(); 
+        try {
+            stmt = conn.prepareCall(sql);
+            stmt.registerOutParameter(1, Types.REF_CURSOR);
+            stmt.execute();
+            ResultSet results = (ResultSet) stmt.getObject(1);
+            while (results.next()) {
+                Reviews foundReview = new Reviews(results.getInt("ReviewId"), results.getInt("ProductId"), 
+                results.getInt("CustomerId"), results.getInt("Score"), results.getInt("Flag"), 
+                results.getString("Description"));
+                reviewsList.add(foundReview);
+            }
+            return reviewsList;
+        } 
+        catch (SQLException e) {
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        // If an error occurs or no reviews are flagged returns null and prints a message
+        System.out.println("Unable to find any reviews");
+        return null;
+    }
 }

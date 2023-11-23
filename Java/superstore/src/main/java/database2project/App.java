@@ -44,7 +44,7 @@ public class App
                 System.out.println("| 7 - Exit      |                |");
                 System.out.println("----------------------------------\n");
                 System.out.println("What would you like to access? (enter the corresponding numerical value)");
-                int tableToAccess = setValidAction(reader, 7);
+                int tableToAccess = AppUtilities.setValidAction(reader, 7);
 
                 if (tableToAccess == 1) {
                     accessCustomers(connection, reader);
@@ -103,7 +103,7 @@ public class App
             System.out.println("| 3 - Back           |                       |");
             System.out.println("----------------------------------------------\n");
             System.out.println("How would you like to view customers? (enter the corresponding numerical value)");
-            int searchMethod = setValidAction(reader, 3);
+            int searchMethod = AppUtilities.setValidAction(reader, 3);
             if (searchMethod == 1) {
                 List<Customers> allCustomers = connection.getAllCustomers();
                 for (Customers allCustomer : allCustomers ){
@@ -138,7 +138,7 @@ public class App
             System.out.println("| 5 - Back              |                         |");
             System.out.println("---------------------------------------------------\n");
             System.out.println("What is the desired action? (enter the corresponding numerical value)");
-            int action = setValidAction(reader, 5);
+            int action = AppUtilities.setValidAction(reader, 5);
             if (action == 1){
                 System.out.println("Enter the name of the new product: ");
                 // Flushes the reader
@@ -153,14 +153,14 @@ public class App
                 System.out.println("| 1 - Name               |  2 - Category          |");
                 System.out.println("---------------------------------------------------");
                 System.out.println("Which field would you like to update? (enter the corresponding numerical value)");
-                int field = setValidAction(reader, 2);
+                int field = AppUtilities.setValidAction(reader, 2);
                 if (field == 1) {
                     List<Products> allProducts = connection.getAllProducts();
                         for (Products allProduct : allProducts ){
                             System.out.println(allProduct);
                         }
                     System.out.println("Enter the product id of the product you wish to modify: ");
-                    int productId = reader.nextInt();
+                    int productId = AppUtilities.getValidInt(reader);
                     System.out.println("Enter the new product name: ");
                     // Flushes the reader
                     reader.nextLine();
@@ -173,7 +173,7 @@ public class App
                             System.out.println(allProduct);
                         }
                     System.out.println("Enter the product id of the product you wish to modify: ");
-                    int productId = reader.nextInt();
+                    int productId = AppUtilities.getValidInt(reader);
                     // Flushes the reader
                     reader.nextLine();
                     System.out.println("Enter the new product category: ");
@@ -232,7 +232,7 @@ public class App
             System.out.println("What is the desired action? (enter the corresponding numerical value)");
 
             
-            int action = setValidAction(reader, 5);
+            int action = AppUtilities.setValidAction(reader, 5);
             if (action == 1){
                 System.out.println("|All Orders|\n");
                 List<Orders> allOrders = connection.getAllOrders();
@@ -240,25 +240,25 @@ public class App
                 
                 System.out.println("Adding an order... enter the required information");
 
-                System.out.println("Enter the Order ID to add (or 0 to have a new one generated)");
-                int order_id = reader.nextInt();
+                System.out.println("Enter the Order ID to add a product to an existing order (or 0 to start a new one)");
+                int order_id = AppUtilities.getValidInt(reader);
 
                 System.out.println("Enter the ID of the purchased product");
-                int product_id = reader.nextInt();
+                int product_id = AppUtilities.getValidInt(reader);
 
                 System.out.println("Enter the ID of the customer");
-                int customer_id = reader.nextInt();
+                int customer_id = AppUtilities.getValidInt(reader);
 
                 System.out.println("Enter the ID of the store");
-                int store_id = reader.nextInt();
+                int store_id = AppUtilities.getValidInt(reader);
 
                 System.out.println("Enter the price");
                 double price = reader.nextDouble();
 
                 System.out.println("Enter the quantity of the product");
-                int quantity = reader.nextInt();
+                int quantity = AppUtilities.getValidInt(reader);
 
-                System.out.println("Enter the Order Date in the format (YYYY-MM-DD):");
+                System.out.println("Enter the Order Date in the format (YYYY-MM-DD)");
                 String orderDateString = reader.next();
                 Date orderDate = Date.valueOf(orderDateString);
 
@@ -270,15 +270,15 @@ public class App
                 List<Orders> allOrders = connection.getAllOrders();
                 DisplayUtilities.displayOrders(connection, allOrders);
                 System.out.println("Enter the ID of the order you would like to delete");
-                int order_id = reader.nextInt();
+                int order_id = AppUtilities.getValidInt(reader);
                 connection.deleteOrder(order_id);
             }
             if (action == 3){
                 DisplayUtilities.displayAllCustomers(connection);
                 System.out.println("Enter the ID of the customer whose orders you would like to find");
-                int customer_id = reader.nextInt();
+                int customer_id = AppUtilities.getValidInt(reader);
                 List<Orders> customerOrders = connection.getCustomerOrders(customer_id);
-                System.out.println("\n|All Orders by Customer " + customer_id + " |\n");
+                System.out.println("\n|All Orders by Customer " + customer_id + "|\n");
                 DisplayUtilities.displayOrders(connection, customerOrders);
             }
 
@@ -288,11 +288,17 @@ public class App
                 for (Products allProduct : allProducts ){
                     System.out.println(allProduct);
                 }                
+                System.out.println("\nCheck if a certain quantity of product is available in any warehouse");
                 System.out.println("Enter a product id");
-                int product_id = reader.nextInt();
+                int product_id = AppUtilities.getValidInt(reader);
                 System.out.println("Enter a quantity to check if there is enough stock to allow the order");
-                int quantity = reader.nextInt();
-                System.out.println("The order is valid: " + connection.validateOrder(product_id, quantity));
+                int quantity = AppUtilities.getValidInt(reader);
+                if (connection.validateOrder(product_id, quantity).equals("true")){
+                    System.out.println("The order would be valid");
+                }
+                else {
+                    System.out.println("The order would be invalid");
+                }
             }
 
             if (action == 5){
@@ -312,20 +318,20 @@ public class App
         System.out.println("-------------------------------------------------------------\n");
         System.out.println("What is the desired action? (enter the corresponding numerical value)");
 
-        int action = setValidAction(reader, 6);
+        int action = AppUtilities.setValidAction(reader, 6);
         if (action == 1){
             System.out.println("Adding a review... enter the required information");
             DisplayUtilities.displayAllProducts(connection);
             System.out.println("Enter the ID of the reviewed product");
-            int productId = reader.nextInt();
+            int productId = AppUtilities.getValidInt(reader);
             
             DisplayUtilities.displayAllCustomers(connection);
 
             System.out.println("Enter the ID of the reviewing customer");
-            int customerId = reader.nextInt();
+            int customerId = AppUtilities.getValidInt(reader);
 
             System.out.println("Enter the score (from 1 to 5)");
-            int score = reader.nextInt();
+            int score = AppUtilities.getValidInt(reader);
             // Flushes the reader
             reader.nextLine();
 
@@ -336,30 +342,31 @@ public class App
             connection.addReview(productId, customerId, score, description);
         }
         if (action == 2){
-            // GET BACK TO THIS LATER!!! List<Reviews> allReviews = connection.get
+            DisplayUtilities.displayAllReviews(connection);
             System.out.println("Enter the ID of the review you would like to delete");
             int review_id = reader.nextInt();
             connection.deleteReview(review_id);
         }
         if (action == 3){
+            DisplayUtilities.displayAllReviews(connection);
             System.out.println("Enter the ID of the review you'd like to update");
             int review_id = reader.nextInt();
-            handleReviewUpdate(reader, connection, review_id);
+            AppUtilities.handleReviewUpdate(reader, connection, review_id);
         }
         if (action == 4){
             List<Reviews> flaggedReviews = connection.getFlaggedReviews();
             System.out.println("\n|All Flagged Reviews|\n");
             DisplayUtilities.displayReviews(connection, flaggedReviews);
             System.out.println("Enter the ID of the review you'd like to modify");
-            int review_id = reader.nextInt();
+            int review_id = AppUtilities.getValidInt(reader);;
             System.out.println("Press 1 to delete the review or 2 to update it");
-            int choice = setValidAction(reader, 2);
+            int choice = AppUtilities.setValidAction(reader, 2);
             if (choice == 1){
                 connection.deleteReview(review_id);
             }
 
             if (choice == 2){
-                handleReviewUpdate(reader, connection, review_id);
+                AppUtilities.handleReviewUpdate(reader, connection, review_id); 
             }
 
         }
@@ -387,22 +394,22 @@ public class App
         System.out.println("--------------------------------------------------------------\n");
         System.out.println("What is the desired action? (enter the corresponding numerical value)");
 
-        int action = setValidAction(reader, 4);
+        int action = AppUtilities.setValidAction(reader, 4);
         if (action == 1){
             DisplayUtilities.displayAllInventory(connection);
             System.out.println("Enter the inventory ID you'd like to update");
-            int inventory_id = reader.nextInt();
+            int inventory_id = AppUtilities.getValidInt(reader);
             System.out.println("Enter the new amount of stock");
-            int stock = reader.nextInt();
+            int stock = AppUtilities.getValidInt(reader);
             connection.updateStock(inventory_id, stock);
         }
         if (action == 2){
             // All warehouses with stock that can be updated are in inventory
             DisplayUtilities.displayAllInventory(connection);
             System.out.println("Enter the ID of the warehouse you'd like to update");
-            int warehouse_id = reader.nextInt();
+            int warehouse_id = AppUtilities.getValidInt(reader);
             System.out.println("Enter the new name");
-            // Flushing the scanner
+            // Flushing the scanner 
             reader.nextLine();
             String name = reader.nextLine();
             connection.updateWarehouseName(warehouse_id, name);
@@ -412,61 +419,14 @@ public class App
             // All warehouses that can be deleted are in inventory
             DisplayUtilities.displayAllInventory(connection);
             System.out.println("Enter the ID of the warehouse you'd like to delete (entering 0 will always return to the menu)");
-            int warehouse_id = reader.nextInt();
+            int warehouse_id = AppUtilities.getValidInt(reader);
             connection.deleteWarehouse(warehouse_id);
         }
         if (action == 4){
             DisplayUtilities.displayAllProducts(connection);
             System.out.println("Enter a product ID to get it's total stock");
-            int product_id = reader.nextInt();
+            int product_id = AppUtilities.getValidInt(reader);
             System.out.println("The total stock of product " + product_id + " across all warehouses is: " + connection.getTotalStock(product_id));
-        }
-    }
-
-    public static int setValidAction (Scanner reader, int max) {
-        boolean isValid = false;
-        int action = 0;
-        while (!isValid){
-            action = reader.nextInt();
-            if (action >= 0 && action <= max){
-                isValid = true;
-            }
-            else {
-                System.out.println("Invalid input, must be between 1 and " + max);
-            }
-        }
-        return action;
-    }
-
-    public static void handleReviewUpdate(Scanner reader, SuperStoreServices connection, int review_id){
-        System.out.println("Choose an update option:");
-        System.out.println("1. Update Score");
-        System.out.println("2. Update Flag");
-        System.out.println("3. Update Description");
-
-        int choice = setValidAction(reader, 3);
-
-        if (choice == 1){
-            System.out.println("Enter the new score (from 1 to 5)");
-            int score = reader.nextInt();
-            connection.updateScore(review_id, score);
-        }
-
-        if (choice == 2){
-            System.out.println("Enter the new flag value");
-            int score = reader.nextInt();
-            connection.updateFlag(review_id, score);
-        }
-
-        if (choice == 3){
-            System.out.println("Enter the new description (or null)");
-            // flush the scanner
-            reader.nextLine();
-            String description = reader.nextLine();
-            if (description.equals("null")){
-                description = null;
-            }
-            connection.updateDescription(review_id, description);
         }
     }
 }

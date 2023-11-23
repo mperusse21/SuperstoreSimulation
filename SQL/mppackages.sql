@@ -336,6 +336,8 @@ CREATE OR REPLACE PACKAGE reviews_package AS
         RETURN SYS_REFCURSOR;
     FUNCTION get_flagged_reviews 
         RETURN SYS_REFCURSOR;
+    FUNCTION get_all_reviews 
+        RETURN SYS_REFCURSOR;
     REVIEW_NOT_FOUND EXCEPTION;
 END reviews_package;
 /
@@ -491,6 +493,20 @@ FUNCTION get_flagged_reviews
         ORDER BY
             ReviewId ASC; 
         RETURN flagged_reviews;
+    END;
+    
+FUNCTION get_all_reviews 
+        RETURN SYS_REFCURSOR AS
+        all_reviews SYS_REFCURSOR;
+    BEGIN
+        OPEN all_reviews FOR 
+        SELECT 
+            *
+        FROM
+            Reviews
+        ORDER BY
+            ReviewId ASC; 
+        RETURN all_reviews;
     END;
     
 END reviews_package;

@@ -126,6 +126,10 @@ public class SuperStoreServices {
         return InventoryUtilites.getAllInventory(this.conn);
     }
 
+    public List<Reviews> getAllReviews() {
+        return ReviewsUtilities.getAllReviews(conn); 
+    }
+
     public void updateProductName(int productId, String productName) throws SQLException {
 
         String sql = "{call products_package.update_product_name(?,?)}";
@@ -209,6 +213,5 @@ public class SuperStoreServices {
             return " | Address: " + address + " | City: " + city + " | Province: " + province;
         }
     }
-
 
 }
