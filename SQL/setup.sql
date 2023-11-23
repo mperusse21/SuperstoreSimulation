@@ -120,7 +120,7 @@ INSERT INTO Addresses (CityId) VALUES (5);
 -- Warehouse Addresses
 INSERT INTO Addresses (Address, CityId) VALUES ('100 rue William', 6);
 -- This is wrong but the address confused me
-INSERT INTO Addresses (Address, CityId) VALUES ('304 Rue Fran�ois-Perrault, Villera Saint-Michel', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('304 Rue Francois-Perrault, Villera Saint-Michel', 1);
 INSERT INTO Addresses (Address, CityId) VALUES ('86700 Weston Rd', 2);
 INSERT INTO Addresses (Address, CityId) VALUES ('170 Sideroad', 7);
 INSERT INTO Addresses (Address, CityId) VALUES ('1231 Trudea road', 8);
