@@ -126,6 +126,10 @@ public class SuperStoreServices {
         return InventoryUtilites.getAllInventory(this.conn);
     }
 
+    public List<Reviews> getAllReviews() {
+        return ReviewsUtilities.getAllReviews(conn); 
+    }
+
     public void updateProductName(int productId, String productName) throws SQLException {
 
         String sql = "{call products_package.update_product_name(?,?)}";
@@ -196,4 +200,13 @@ public class SuperStoreServices {
             Products newProduct = new Products (0, productName, category);
             newProduct.AddToDatabase(this.conn);
         }
+
+    public String getFullLocation(int addressId) throws SQLException, ClassNotFoundException {
+        String address = Addresses.getAddress(this.conn, addressId); 
+        int cityId = Addresses.getCityId(this.conn, address);
+        String city = Cities.getCity(this.conn, cityId);
+        String province = Cities.getProvince(this.conn, cityId);
+        return " | Address: " + address + " | City: " + city + " | Province: " + province;
+    }
+
 }

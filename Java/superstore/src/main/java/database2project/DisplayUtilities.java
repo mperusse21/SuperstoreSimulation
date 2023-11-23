@@ -46,4 +46,14 @@ public class DisplayUtilities {
             System.out.println(inventory.toString(warehouse, address));
         }     
     }
+
+    public static void displayAllReviews (SuperStoreServices connection) throws ClassNotFoundException, SQLException {
+        System.out.println("\n|All Inventory|\n");
+        List<Reviews> allReviews = connection.getAllReviews();
+        for (Reviews review : allReviews ){
+            Products product = connection.getProductById(review.getProductId());
+            Customers customer = connection.getCustomerById(review.getCustomerId());
+            System.out.println(review.toString(product, customer));
+        }     
+    }
 }

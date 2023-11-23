@@ -114,8 +114,9 @@ public class App
                 System.out.println("Please enter email: ");   
                 String email = reader.next(); 
                 Customers customer = connection.getCustomerByEmail(email);
-                String customerAddress = connection.getAddress(customer.getAddressId()); 
-                System.out.println("Customer found: " + customer + " Address: " + customerAddress ); 
+                //String customerAddress = connection.getAddress(customer.getAddressId()); 
+                String customerAddress = connection.getFullLocation(customer.getAddressId()); 
+                System.out.println("Customer found: " + customer ); 
             }
             else if (searchMethod == 3) {
                 exitPage = true;
@@ -224,7 +225,7 @@ public class App
                 
                 System.out.println("Adding an order... enter the required information");
 
-                System.out.println("Enter the Order ID to add (or 0 to have a new one generated)");
+                System.out.println("Enter the Order ID to add a product to an existing order (or 0 to start a new one)");
                 int order_id = reader.nextInt();
 
                 System.out.println("Enter the ID of the purchased product");
@@ -242,7 +243,7 @@ public class App
                 System.out.println("Enter the quantity of the product");
                 int quantity = reader.nextInt();
 
-                System.out.println("Enter the Order Date in the format (YYYY-MM-DD):");
+                System.out.println("Enter the Order Date in the format (YYYY-MM-DD)");
                 String orderDateString = reader.next();
                 Date orderDate = Date.valueOf(orderDateString);
 
@@ -262,7 +263,7 @@ public class App
                 System.out.println("Enter the ID of the customer whose orders you would like to find");
                 int customer_id = reader.nextInt();
                 List<Orders> customerOrders = connection.getCustomerOrders(customer_id);
-                System.out.println("\n|All Orders by Customer " + customer_id + " |\n");
+                System.out.println("\n|All Orders by Customer " + customer_id + "|\n");
                 DisplayUtilities.displayOrders(connection, customerOrders);
             }
 
@@ -272,11 +273,17 @@ public class App
                 for (Products allProduct : allProducts ){
                     System.out.println(allProduct);
                 }                
+                System.out.println("\nCheck if a certain quantity of product is available in any warehouse");
                 System.out.println("Enter a product id");
                 int product_id = reader.nextInt();
                 System.out.println("Enter a quantity to check if there is enough stock to allow the order");
                 int quantity = reader.nextInt();
-                System.out.println("The order is valid: " + connection.validateOrder(product_id, quantity));
+                if (connection.validateOrder(product_id, quantity).equals("true")){
+                    System.out.println("The order would be valid");
+                }
+                else {
+                    System.out.println("The order would be invalid");
+                }
             }
 
             if (action == 5){
@@ -320,12 +327,13 @@ public class App
             connection.addReview(productId, customerId, score, description);
         }
         if (action == 2){
-            // GET BACK TO THIS LATER!!! List<Reviews> allReviews = connection.get
+            DisplayUtilities.displayAllReviews(connection);
             System.out.println("Enter the ID of the review you would like to delete");
             int review_id = reader.nextInt();
             connection.deleteReview(review_id);
         }
         if (action == 3){
+            DisplayUtilities.displayAllReviews(connection);
             System.out.println("Enter the ID of the review you'd like to update");
             int review_id = reader.nextInt();
             handleReviewUpdate(reader, connection, review_id);
