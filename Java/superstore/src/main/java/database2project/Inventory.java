@@ -1,41 +1,36 @@
 package database2project;
 
-import java.sql.SQLData;
-import java.sql.SQLException;
-import java.sql.SQLInput;
-import java.sql.SQLOutput;
+import java.sql.*;
 
 public class Inventory implements SQLData {
     
     //Private fields for all fields of the Inventory table
+    private int inventoryId;
     private int warehouseId;
     private int productId;
     private int stock;
-    //Optional private fields (may not be used)
-    private Warehouses warehouse;
-    private Products product;
     public static final String TYPENAME = "INVENTORY_TYP";
 
 
     //Getters for the private fields
-    public int getWarehouseId(){
+    public int getInventoryId() {
+        return this.inventoryId;
+    }
+
+    public int getWarehouseId() {
         return this.warehouseId;
     }
-    public int getProductId(){
+    public int getProductId() {
         return this.productId;
     }
-    public int getStock(){
+    public int getStock() {
         return this.stock;
-    }
-    //Optional
-    public Warehouses getWarehouse(){
-        return this.warehouse;
-    }
-    public Products getProduct(){
-        return this.product;
     }
 
     // Set methods
+    public void setInventoryId(int inventoryId) {
+        this.inventoryId = inventoryId;
+    }
 
     public void setWarehouseId(int warehouseId) {
         this.warehouseId = warehouseId;
@@ -49,17 +44,9 @@ public class Inventory implements SQLData {
         this.stock = stock;
     }
 
-    // Optional for now
-    public void setWarehouse(Warehouses warehouse) {
-        this.warehouse = warehouse;
-    }
-
-    public void setProduct(Products product) {
-        this.product = product;
-    }
-
     //Constructor initializing all private fields
-    public Inventory(int warehouseId, int productId, int stock){
+    public Inventory(int inventoryId, int warehouseId, int productId, int stock){
+        this.inventoryId = inventoryId;
         this.warehouseId = warehouseId;
         this.productId = productId;
         this.stock = stock;
@@ -76,19 +63,22 @@ public class Inventory implements SQLData {
     
     @Override
     public void readSQL (SQLInput stream, String typeName) throws SQLException {
+        setInventoryId(stream.readInt());
         setWarehouseId(stream.readInt());
-        setProductId(stream.readInt());
+        setProductId(stream.readInt()); 
         setStock(stream.readInt());
     }
     
     @Override
     public void writeSQL (SQLOutput stream) throws SQLException {
+        stream.writeInt(getInventoryId());
         stream.writeInt(getWarehouseId());
         stream.writeInt(getProductId());
         stream.writeInt(getStock());
     }
 
     public String toString (){
-        return "Warehouse Id " + this.warehouseId + " Product Id " + this.productId + "/n Stock" + this.stock;
-    }   
+        return "Inventory Id: " + this.inventoryId + " Warehouse Id: " + this.warehouseId + " Product Id: " + this.productId + "\nStock: " + this.stock;
+    }
+       
 }

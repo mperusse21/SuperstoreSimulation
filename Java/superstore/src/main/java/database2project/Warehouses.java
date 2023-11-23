@@ -1,9 +1,13 @@
 package database2project;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.SQLData;
 import java.sql.SQLException;
 import java.sql.SQLInput;
 import java.sql.SQLOutput;
+import java.sql.Types;
+import java.util.Map;
 
 public class Warehouses implements SQLData {
  
@@ -83,6 +87,97 @@ public class Warehouses implements SQLData {
     public String toString (){
         return "Warehouse Id: " + this.warehouseId + ", " + this.warehouseName + ", Address Id:" + this.addressId;
     }   
+
+    // Not necessary but added
+    public static Warehouses getWarehouse(Connection conn, int warehouse_id) {
+        String sql = "{ ? = call warehouses_package.get_warehouse(?) }";
+        CallableStatement stmt = null;
+        Warehouses foundWarehouse = null;
+        try {
+            // Couldn't get it working without mapping so added
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Warehouses.TYPENAME,
+                    Class.forName("database2project.Warehouses"));
+            stmt = conn.prepareCall(sql);
+            stmt.registerOutParameter(1, Types.STRUCT, Warehouses.TYPENAME);
+            stmt.setInt(2, warehouse_id);
+            stmt.execute();
+            foundWarehouse = (Warehouses) stmt.getObject(1);
+            return foundWarehouse;
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+             // If an no warehouse could be found returns null and prints a message
+            System.out.println("Unable to find warehouse with specified id");
+            return foundWarehouse;
+    }
+
+    public static void deleteWarehouse(Connection conn, int warehouse_id){
+        String sql = "{ call warehouses_package.delete_warehouse(?)}";
+        CallableStatement stmt = null;
+        try{
+        stmt = conn.prepareCall(sql);
+        stmt.setInt(1, warehouse_id);
+        stmt.execute();
+        System.out.println("Removed warehouse with id: " + warehouse_id + " from the database");
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+            System.out.println("Unable to delete specified warehouse");
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Takes a review id and updates it's description to a provided string.
+     */
+    public static void updateWarehouseName(Connection conn, int warehouse_id, String warehouse_name) {
+        String sql = "{ call warehouses_package.updatewarehousename(?, ?)}";
+        CallableStatement stmt = null;
+        try {
+            stmt = conn.prepareCall(sql);
+            stmt.setInt(1, warehouse_id);
+            stmt.setString(2, warehouse_name);
+            stmt.execute();
+            System.out.println("Updated Warehouse " + warehouse_id + " name to: " + warehouse_name);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error when trying to update warehouse " + warehouse_id + " name");
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 
 

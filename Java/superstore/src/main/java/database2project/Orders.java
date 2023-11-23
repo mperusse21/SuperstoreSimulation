@@ -1,6 +1,7 @@
 package database2project;
 
 import java.sql.*;
+import java.util.Map;
 
 public class Orders implements SQLData {
     
@@ -12,12 +13,7 @@ public class Orders implements SQLData {
     private int quantity;
     private Double price;
     private Date orderDate;
-    //Optional private fields (may not be used)
-    private Products product;
-    private Customers customer;
-    // private Stores store;
     public static final String TYPENAME = "ORDERS_TYP";
-
 
     //Getters for the private fields
     public int getOrderId(){
@@ -41,16 +37,6 @@ public class Orders implements SQLData {
     public Date getOrderDate(){
         return this.orderDate;
     }
-    //Optional
-    public Products getProduct(){
-        return this.product;
-    }
-    public Customers getCustomer(){
-        return this.customer;
-    }
-/*     public Stores getStore(){
-        return this.store;
-    }*/
 
     // Set methods
     public void setOrderId(int orderId) {
@@ -81,15 +67,6 @@ public class Orders implements SQLData {
         this.orderDate = orderDate;
     }
 
-    // Optional for now
-    public void setProduct(Products product) {
-        this.product = product;
-    }
-
-    public void setCustomer(Customers customer) {
-        this.customer = customer;
-    }
- 
     //Constructor initializing all private fields
     public Orders(int orderId, int productId, int customerId, int storeId, int quantity, Double price, Date orderDate){
         this.orderId = orderId;
@@ -132,12 +109,103 @@ public class Orders implements SQLData {
         stream.writeDate(getOrderDate());
     }
 
-    //Not sure what to do here yet, might make product into an array of products 
-    /*public String toString (){
-        String returnString = "Order Id: " + this.orderId + " Customer Id " + this.customerId + " Store Id: " + this.storeId;
+    public String toString (){
+        return "Order Id: " + this.orderId + " Customer Id: " + this.customerId + " Store Id: " + this.storeId
+        + "\nProduct Id: " + this.productId + " Quantity: " + this.quantity + " Price: " + this.price + " Order Date: "
+        + this.orderDate + "\n" ;
+    }  
 
-        for (Products product : products){
-            returnString "/n" + 
+    // Method which adds an order using the add_order procedure
+    public void AddToDatabase(Connection conn) throws ClassNotFoundException{
+        String sql = "{ call orders_package.add_order(?)}";
+        CallableStatement stmt = null;
+        try {
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Orders.TYPENAME,
+            Class.forName("database2project.Orders")
+            );
+            Orders newOrder = new Orders(this.orderId, this.productId, this.customerId, 
+                this.storeId, this.quantity, this.price, this.orderDate);
+            stmt = conn.prepareCall(sql);
+            stmt.setObject(1, newOrder);
+            stmt.execute();
+            System.out.println("Successfully added order information to the database"); 
+        }      
+        catch (Exception e) {
+            e.printStackTrace();
         }
-    }  */ 
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
+        }         
+    }
+
+    public static void deleteOrder (Connection conn, int order_id){
+        String sql = "{ call orders_package.delete_order(?)}";
+        CallableStatement stmt = null;
+        try {
+            stmt = conn.prepareCall(sql);
+            stmt.setInt(1, order_id);
+            stmt.execute();
+            System.out.println("Removed order " + order_id + " from the database");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            }
+            catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /* Gets an order using the composite primary key (orderid and productid) and calling the sql get order function*/
+    public static Orders getOrder(Connection conn, int order_id, int product_id) {
+        String sql = "{ ? = call orders_package.get_order(?, ?)}";
+        Orders foundOrder = null;
+        CallableStatement stmt = null;
+        try {
+            // Couldn't get it working without mapping so added
+            Map map = conn.getTypeMap();
+            conn.setTypeMap(map);
+            map.put(Orders.TYPENAME,
+                    Class.forName("database2project.Orders"));
+            stmt = conn.prepareCall(sql);
+            stmt.registerOutParameter(1, Types.STRUCT, "ORDERS_TYP");
+            stmt.setInt(2, order_id);
+            stmt.setInt(3, product_id);
+            stmt.execute();
+            foundOrder = (Orders) stmt.getObject(1);
+            return foundOrder;
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+            // Will return a null found order if an error occurs
+            return foundOrder;
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

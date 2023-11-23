@@ -33,7 +33,7 @@ CREATE TABLE Customers (
     CustomerId      NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     Firstname       VARCHAR2(20),
     Lastname        VARCHAR2(20),
-    Email           VARCHAR2(30),
+    Email           VARCHAR2(30) NOT NULL,
     Addressid       NUMBER(5)          REFERENCES Addresses (AddressId)
 );
 /
@@ -46,11 +46,10 @@ CREATE TABLE Warehouses(
 /
 
 CREATE TABLE Inventory (
+    InventoryId     NUMBER(5)          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     WarehouseId     NUMBER(5)          REFERENCES Warehouses (WarehouseId),
     ProductId       NUMBER(5)          REFERENCES Products (ProductId),
-    Stock           NUMBER(10,0) CHECK(Stock >= 0),
-    
-    CONSTRAINT inventory_pk PRIMARY KEY (WarehouseId, ProductId)
+    Stock           NUMBER(10,0) CHECK(Stock >= 0)
 );
 /
 
@@ -69,8 +68,8 @@ CREATE TABLE Orders (
     ProductId       NUMBER(5)          REFERENCES Products (ProductId),
     CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
     StoreId         NUMBER(5)          REFERENCES Stores(StoreId),
-    Quantity        NUMBER(5,0),
-    Price           NUMBER (10,2),
+    Quantity        NUMBER(5,0) CHECK(Quantity >= 0),
+    Price           NUMBER (10,2) CHECK(Price >= 0),
     OrderDate       DATE,
     
     CONSTRAINT orders_pk PRIMARY KEY (OrderId, ProductId)
@@ -121,7 +120,7 @@ INSERT INTO Addresses (CityId) VALUES (5);
 -- Warehouse Addresses
 INSERT INTO Addresses (Address, CityId) VALUES ('100 rue William', 6);
 -- This is wrong but the address confused me
-INSERT INTO Addresses (Address, CityId) VALUES ('304 Rue François-Perrault, Villera Saint-Michel', 1);
+INSERT INTO Addresses (Address, CityId) VALUES ('304 Rue Francois-Perrault, Villera Saint-Michel', 1);
 INSERT INTO Addresses (Address, CityId) VALUES ('86700 Weston Rd', 2);
 INSERT INTO Addresses (Address, CityId) VALUES ('170 Sideroad', 7);
 INSERT INTO Addresses (Address, CityId) VALUES ('1231 Trudea road', 8);
@@ -205,25 +204,44 @@ INSERT INTO Warehouses (WarehouseName, AddressId)
     
 -- Inventory
 
-INSERT INTO Inventory VALUES (1, 9, 1000);
-INSERT INTO Inventory VALUES (1, 10, 10);
-INSERT INTO Inventory VALUES (1, 8, 6);
-INSERT INTO Inventory VALUES (1, 15, 2132);
-INSERT INTO Inventory VALUES (1, 16, 352222);
-INSERT INTO Inventory VALUES (2, 1, 24980);
-INSERT INTO Inventory VALUES (2, 4, 39484);
-INSERT INTO Inventory VALUES (3, 3, 103);
-INSERT INTO Inventory VALUES (3, 7, 43242);
-INSERT INTO Inventory VALUES (4, 6, 43242);
-INSERT INTO Inventory VALUES (4, 7, 6579);
-INSERT INTO Inventory VALUES (4, 14, 123);
-INSERT INTO Inventory VALUES (5, 2, 40);
-INSERT INTO Inventory VALUES (5, 5, 1000);
-INSERT INTO Inventory VALUES (5, 11, 98765);
-INSERT INTO Inventory VALUES (5, 17, 4543);
-INSERT INTO Inventory VALUES (6, 12, 450);
-INSERT INTO Inventory VALUES (6, 4, 3532);
-INSERT INTO Inventory VALUES (6, 13, 43523);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (1, 9, 1000);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (1, 10, 10);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (1, 8, 6);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (1, 15, 2132);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (1, 16, 352222);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (2, 1, 24980);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (2, 4, 39484);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (3, 3, 103);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (3, 7, 43242);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (4, 6, 43242);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (4, 7, 6579);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (4, 14, 123);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (5, 2, 40);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+VALUES (5, 5, 1000);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (5, 11, 98765);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (5, 17, 4543);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock)  
+VALUES (6, 12, 450);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (6, 4, 3532);
+INSERT INTO Inventory (WarehouseId, ProductId, Stock) 
+    VALUES (6, 13, 43523);
 
 
 -- Reviews
@@ -276,52 +294,52 @@ INSERT INTO Reviews (ProductId, CustomerId, Score, Flag, Description)
 -- Orders
 
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate)
-    VALUES (1, 1, 13, 2, 10, '2023-10-23');
+    VALUES (1, 1, 13, 2, 10.00, '2023-10-23');
 -- same order
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (2, 1, 6, 1, 30, '2023-10-23');
-INSERT INTO Orders VALUES (2, 3, 1, 6, 1, 16, '2023-10-23');
+    VALUES (2, 1, 6, 1, 30.00, '2023-10-23');
+INSERT INTO Orders VALUES (2, 3, 1, 6, 1, 16.00, '2023-10-23');
 --
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (2, 1, 11, 1, 45, '2023-10-02');
+    VALUES (2, 1, 11, 1, 45.00, '2023-10-02');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (4, 2, 5, 3, 50, NULL);
+    VALUES (4, 2, 5, 3, 50.00, NULL);
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (5, 3, 2, 1, 856600, NULL);
+    VALUES (5, 3, 2, 1, 856600.00, NULL);
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (6, 4, 9, 1, 2, '2023-10-23');
+    VALUES (6, 4, 9, 1, 2.00, '2023-10-23');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (7, 5, 14, 6, 10, '2020-05-06');
+    VALUES (7, 5, 14, 6, 10.00, '2020-05-06');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (8, 6, 3, 1, 50000, '2023-10-10');
+    VALUES (8, 6, 3, 1, 50000.00, '2023-10-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (8, 7, 3, 1, 50000, '2023-08-10');
+    VALUES (8, 7, 3, 1, 50000.00, '2023-08-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (9, 8, 4, 1, 970, '2023-04-21');
+    VALUES (9, 8, 4, 1, 970.00, '2023-04-21');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (10, 8, 11, 1, 40, '2023-10-11');
+    VALUES (10, 8, 11, 1, 40.00, '2023-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (11, 8, 11, 1, 40, '2010-10-11');
+    VALUES (11, 8, 11, 1, 40.00, '2010-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (7, 8, 14, 7, 10, '2022-05-06');
+    VALUES (7, 8, 14, 7, 10.00, '2022-05-06');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (11, 9, 12, 2, 80, '2023-10-07');
+    VALUES (11, 9, 12, 2, 80.00, '2023-10-07');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (10, 8, 11, 1, 38, '2022-10-11');
+    VALUES (10, 8, 11, 1, 38.00, '2022-10-11');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (3, 10, 1, 3, 50, '2023-10-01');
+    VALUES (3, 10, 1, 3, 50.00, '2023-10-01');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (12, 10, 10, 1, 10, '2023-10-10');
+    VALUES (12, 10, 10, 1, 10.00, '2023-10-10');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (12, 10, 10, 3, 30, '2019-09-12');
+    VALUES (12, 10, 10, 3, 30.00, '2019-09-12');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (13, 11, 4, 1, 9.5, '2019-04-03');
+    VALUES (13, 11, 4, 1, 9.50, '2019-04-03');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (14, 12, 7, 1, 200, '2020-01-20');
+    VALUES (14, 12, 7, 1, 200.00, '2020-01-20');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (15, 13, 13, 1, 13.5, '2021-12-29');
+    VALUES (15, 13, 13, 1, 13.50, '2021-12-29');
 INSERT INTO Orders (ProductId, CustomerId, StoreId, Quantity, Price, OrderDate) 
-    VALUES (15, 13, 8, 1, 15, '2021-12-29');
+    VALUES (15, 13, 8, 1, 15.00, '2021-12-29');
 
 
 -- Create types for the necessary tables:
@@ -345,6 +363,7 @@ CREATE OR REPLACE TYPE warehouse_typ AS OBJECT(
 /
 
 CREATE OR REPLACE TYPE inventory_typ AS OBJECT(
+    InventoryId     NUMBER(5),
     WarehouseId     NUMBER(5),
     ProductId       NUMBER(5),
     Stock           NUMBER(10,0)
