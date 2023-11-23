@@ -244,15 +244,19 @@ END;
 
 CREATE OR REPLACE PACKAGE products_package AS
 
-PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2);
+PROCEDURE add_products(vproduct IN products_type);
+
+PROCEDURE update_product_name(product_id NUMBER, product_name VARCHAR2);
+
+PROCEDURE update_product_category(product_id NUMBER, category_name VARCHAR2);
 
 TYPE products_name_varray IS VARRAY(100) OF NUMBER;
 
-CATEGORY_NOT_FOUND EXCEPTION;
+FUNCTION getAllProductsByCategory(category_name VARCHAR2) RETURN SYS_REFCURSOR;
 
-FUNCTION getProductsByCategory(category_name VARCHAR2) RETURN products_name_varray;
+FUNCTION getProduct(vproductid IN NUMBER) RETURN products_type; 
 
-FUNCTION getProduct(vproductid NUMBER) RETURN products_type; 
+FUNCTION getAllProducts RETURN SYS_REFCURSOR; 
 
 END products_package;
 /
@@ -261,31 +265,40 @@ END products_package;
 
 CREATE OR REPLACE PACKAGE BODY products_package AS 
 
---Procedure that updates the row corresponding to the ProductId value in the parameter with the new values given in the parameter
-PROCEDURE update_products(product_id NUMBER, product_name VARCHAR2, category_name VARCHAR2) IS
+PROCEDURE add_products(vproduct IN products_type) IS 
+BEGIN
+INSERT INTO Products (ProductName, Category)
+VALUES (vproduct.Productname, vproduct.Category);
+END add_products;
+
+--Procedure that updates the product name corresponding to the ProductId value in the parameter with the new value given in the parameter
+PROCEDURE update_product_name(product_id NUMBER, product_name VARCHAR2) IS
 BEGIN
 UPDATE Products SET ProductName = product_name WHERE ProductId = product_id;
-UPDATE Products SET Category = category_name WHERE ProductId = product_id;
-END update_products;
+END update_product_name;
 
---Function that returns all the ProductIds that are in a certain category (the parameter value)
-FUNCTION getProductsByCategory(category_name VARCHAR2)
-RETURN products_name_varray IS
-products_id products_name_varray := products_name_varray();
+--Procedure that updates the category corresponding to the ProductId value in the parameter with the new value given in the parameter
+PROCEDURE update_product_category(product_id NUMBER, category_name VARCHAR2) IS
 BEGIN
+UPDATE Products SET Category = category_name WHERE ProductId = product_id;
+END update_product_category;
+
+--Function that returns all the Products that are in a certain category (the parameter value)
+FUNCTION getAllProductsByCategory(category_name VARCHAR2)
+RETURN SYS_REFCURSOR AS all_products SYS_REFCURSOR;
+BEGIN
+OPEN all_products FOR
 SELECT
-ProductId BULK COLLECT INTO products_id FROM Products WHERE Category = category_name;
-IF products_id.COUNT < 1 THEN
-RAISE CATEGORY_NOT_FOUND;
-END IF;
-RETURN products_id;
-EXCEPTION
-WHEN CATEGORY_NOT_FOUND THEN
-DBMS_OUTPUT.PUT_LINE('Category does not exist');
-END getProductsByCategory;
+ProductId, ProductName, Category
+FROM
+Products
+WHERE
+Category = category_name;
+RETURN all_products;
+END getAllProductsByCategory; 
 
 --Function that returns a products_type corresponding to the ProductId value in the parameter
-FUNCTION getProduct (vproductid NUMBER)
+FUNCTION getProduct (vproductid IN NUMBER)
 RETURN products_type AS
 vproductname VARCHAR2(30);
 vcategory VARCHAR2(20);
@@ -303,17 +316,33 @@ vproducts := products_type(vproductid, vproductname, vcategory);
 RETURN vproducts;
 END getProduct;
 
+FUNCTION getAllProducts
+RETURN SYS_REFCURSOR AS all_products SYS_REFCURSOR;
+BEGIN
+OPEN all_products FOR
+SELECT
+ProductId, ProductName, Category
+FROM
+Products;
+RETURN all_products;
+END getAllProducts; 
+
 END products_package;
 /
 
 --Triggers
 
 CREATE OR REPLACE TRIGGER ProductsUpdate
-AFTER UPDATE ON Products
+AFTER INSERT OR UPDATE ON Products
 FOR EACH ROW
 BEGIN
+IF INSERTING THEN
+INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.ProductId, 'INSERT', 'PRODUCTS', SYSDATE);
+ELSIF UPDATING THEN
 INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified) VALUES (:NEW.ProductId, 'UPDATE', 'PRODUCTS', SYSDATE);
-END ProductsUpdate;
+END IF;
+END CustomersChange;
+/
 
 --Anonymous block (for testing)
 
@@ -346,14 +375,7 @@ END;
 
 CREATE OR REPLACE PACKAGE customers_package AS
 
-EMAIL_IN_USE EXCEPTION;
-
-PROCEDURE add_customers(vcustomer IN customers_type);
-
-PROCEDURE remove_customers(customer_id NUMBER);
-
-PROCEDURE update_customers(customer_id NUMBER, first_name VARCHAR2, last_name VARCHAR2,
-customer_email VARCHAR2, address_id NUMBER);
+FUNCTION getAllCustomers RETURN SYS_REFCURSOR;
 
 FUNCTION getCustomerByEmail (customer_email VARCHAR2) RETURN customers_type;
 
@@ -366,41 +388,16 @@ END customers_package;
 
 CREATE OR REPLACE PACKAGE BODY customers_package AS 
 
---Procedure that inserts a new row (the values of the given products_type in the parameter) in Customers
-PROCEDURE add_customers(vcustomer IN customers_type) IS 
-v_existing_email customers.email%TYPE; 
+FUNCTION getAllCustomers
+RETURN SYS_REFCURSOR AS all_customers SYS_REFCURSOR;
 BEGIN
-SELECT Email INTO v_existing_email
-FROM Customers
-WHERE Email = vcustomer.Email;
--- If the SELECT statement does not raise NO_DATA_FOUND, it means the email is already associated
--- Raise the custom exception in that case
-RAISE EMAIL_IN_USE;
-EXCEPTION
-WHEN NO_DATA_FOUND THEN
--- Email is not associated, proceed with the insertion
-INSERT INTO Customers (Firstname, Lastname, Email, AddressId)
-VALUES (vcustomer.Firstname, vcustomer.Lastname, vcustomer.Email, vcustomer.AddressId);
-WHEN EMAIL_IN_USE THEN
--- Handle the "Email Already Associated" scenario
-DBMS_OUTPUT.PUT_LINE('Email is already associated with a customer.');
-END add_customers;
-
---Procedure that deletes the row corresponding to the parammeter value in Customers
-PROCEDURE remove_customers(customer_id NUMBER) IS 
-BEGIN
-DELETE FROM Customers WHERE CustomerId = customer_id;
-END remove_customers;
-
---Procedure that updates the row corresponding to the CustomerId value in the parameter with the new values given in the parameter
-PROCEDURE update_customers(customer_id NUMBER, first_name VARCHAR2, last_name VARCHAR2,
-customer_email VARCHAR2, address_id NUMBER) IS
-BEGIN
-UPDATE Customers SET Firstname = first_name WHERE CustomerId = customer_id;
-UPDATE Customers SET Lastname = last_name WHERE CustomerId = customer_id;
-UPDATE Customers SET Email = customer_email WHERE CustomerId = customer_id;
-UPDATE Customers SET AddressId = address_id WHERE CustomerId = customer_id;
-END update_customers;
+OPEN all_customers FOR
+SELECT
+CustomerId, Firstname, Lastname, Email, AddressId
+FROM
+Customers;
+RETURN all_customers;
+END getAllCustomers; 
 
 --Function that returns a customers_type with corresponding email with the parameter value
 FUNCTION getCustomerByEmail (customer_email VARCHAR2)
@@ -448,25 +445,6 @@ END getCustomer;
 END customers_package;
 /
 
---Triggers
-
-CREATE OR REPLACE TRIGGER CustomersChange
-AFTER INSERT OR DELETE OR UPDATE ON Customers
-FOR EACH ROW
-BEGIN
-IF INSERTING THEN
-INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-VALUES (:NEW.CustomerId, 'INSERT', 'CUSTOMERS', SYSDATE);
-ELSIF DELETING THEN
-INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-VALUES (:OLD.CustomerId,'DELETE', 'CUSTOMERS', SYSDATE);
-ELSIF UPDATING THEN
-INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-VALUES (:NEW.CustomerId, 'UPDATE', 'CUSTOMERS', SYSDATE);
-END IF;
-END CustomersChange;
-/
-
 --Anonymous block (for testing)
 
 SELECT * FROM Customers;
@@ -490,24 +468,21 @@ customers_package.add_customers(new_customer);
 END;
 /
 
--- Audit Table
+CREATE OR REPLACE FUNCTION getAuditTable
+RETURN SYS_REFCURSOR AS all_changes SYS_REFCURSOR;
+BEGIN
+OPEN all_changes FOR
+SELECT
+AuditId, ChangedId, Action, TableChanged, DateModified
+FROM
+AuditTable;
+RETURN all_changes;
+END getAuditTable; 
 
-CREATE TABLE AuditTable (
 
-AuditId         NUMBER(10)      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
-ChangedId       NUMBER(5),
 
-Action          CHAR(6)         CHECK (Action IN ('INSERT', 'UPDATE', 'DELETE')),
 
-TableChanged    VARCHAR2(10)    CHECK (TableChanged IN ('PROVINCES', 'CITIES', 'ADDRESSES',
-'STORES', 'PRODUCTS', 'CUSTOMERS', 'WAREHOUSES', 'INVENTORY', 'REVIEWS', 'ORDERS')),
-
-DateModified    Date
-
-);
-
-DROP TABLE AuditTable CASCADE CONSTRAINTS;
 
 
 

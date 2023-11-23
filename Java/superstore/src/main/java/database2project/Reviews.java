@@ -7,7 +7,7 @@ import java.sql.SQLOutput;
 
 public class Reviews implements SQLData {
     
-    //Private fields for all fields of the Inventory table
+    //Private fields for all fields of the Reviews table
     private int reviewId;
     private int productId;
     private int customerId;

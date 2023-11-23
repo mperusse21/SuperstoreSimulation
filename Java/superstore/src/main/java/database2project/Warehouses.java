@@ -13,6 +13,7 @@ public class Warehouses implements SQLData {
     private int addressId;
     //Optional private field (may not be used)
     private Addresses address;
+
     public static final String TYPENAME = "WAREHOUSE_TYP";
 
     //Getters for the private fields
@@ -48,7 +49,6 @@ public class Warehouses implements SQLData {
     public void setAddress(Addresses address) {
         this.address = address;
     }
-
     //Constructor initializing all private fields
     public Warehouses(int warehouseId, String warehouseName, int addressId){
         this.warehouseId = warehouseId;
@@ -84,4 +84,5 @@ public class Warehouses implements SQLData {
         return "Warehouse Id: " + this.warehouseId + ", " + this.warehouseName + ", Address Id:" + this.addressId;
     }   
 }
+
 

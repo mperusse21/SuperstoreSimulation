@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class Orders implements SQLData {
     
-    //Private fields for all fields of the Customers table
+    //Private fields for all fields of the Orders table
     private int orderId;
     private int productId;
     private int customerId;
