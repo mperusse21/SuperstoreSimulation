@@ -137,6 +137,7 @@ INSERT INTO Stores (StoreName) VALUES ('store magic');
 INSERT INTO Stores (StoreName) VALUES ('super rue champlain');
 INSERT INTO Stores (StoreName) VALUES ('toy r us');
 INSERT INTO Stores (StoreName) VALUES ('marche atwater');
+INSERT INTO Stores (StoreName) VALUES ('JavaRestaurant');
 
 -- Products
 
@@ -158,7 +159,8 @@ INSERT INTO Products (ProductName, Category) VALUES ('pasta', 'Grocery');
 -- Products with 0 orders 
 INSERT INTO Products (ProductName, Category) VALUES ('tomato', 'Grocery');
 INSERT INTO Products (ProductName, Category) VALUES ('Train X745', 'Vehicle');
-
+INSERT INTO Products (ProductName, Category) VALUES ('Cake', 'Food');
+INSERT INTO Products (ProductName, Category) VALUES ('Pizza', 'Food');
 
 
 -- Customers
