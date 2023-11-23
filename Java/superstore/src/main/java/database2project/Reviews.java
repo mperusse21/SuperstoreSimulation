@@ -102,9 +102,9 @@ public class Reviews implements SQLData {
     }
 
     // toString method which returns a string representation of a Review (preliminary)
-    public String toString (){
-        return "| Review Id " + this.reviewId + " | Customer Id: " + this.customerId + " | Product Id: " + this.productId +
-        " | Score: " + this.score + " | Flags: " + this.flag + " | Description: " + this.description;
+    public String toString (Products p, Customers c){
+        return "| Review Id " + this.reviewId + c.toString() + p.toString() + 
+        "\n| Score: " + this.score + " | Flags: " + this.flag + " | Description: " + this.description;
     }
        
     // Method which adds an review using the add_review procedure
@@ -124,7 +124,7 @@ public class Reviews implements SQLData {
             System.out.println("Successfully added review to the database");
         }
         catch (Exception e){
-            e.printStackTrace();
+            System.out.println("Unable to add given review");
         }
         // Always tries to close stmt
         finally {
@@ -149,7 +149,7 @@ public class Reviews implements SQLData {
         System.out.println("Removed review with id: " + review_id + " from the database");
         }
         catch (SQLException e){
-            e.printStackTrace();
+            System.out.println("Unable to delete review " + review_id);
         }
         // Always tries to close stmt
         finally {
@@ -181,7 +181,7 @@ public class Reviews implements SQLData {
             foundReview = (Reviews) stmt.getObject(1);
             return foundReview;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to get review " + review_id);
             // Will return a null found order if an error occurs
             return foundReview;
         }

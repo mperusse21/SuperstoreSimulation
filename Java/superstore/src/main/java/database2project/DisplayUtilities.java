@@ -8,7 +8,42 @@ public class DisplayUtilities {
         for (Orders order : orders){
             Products product = connection.getProductById(order.getProductId());
             Customers customer = connection.getCustomerById(order.getCustomerId());
-            System.out.println(order.toString(product, customer));
+            String storeName = connection.getStore(order.getStoreId());
+            System.out.println(order.toString(product, customer, storeName));
         }
+    }
+
+    public static void displayReviews (SuperStoreServices connection, List<Reviews> reviews) throws SQLException, ClassNotFoundException{
+        for (Reviews review : reviews){
+            Products product = connection.getProductById(review.getProductId());
+            Customers customer = connection.getCustomerById(review.getCustomerId());
+            System.out.println(review.toString(product, customer));
+        }
+    }
+
+    public static void displayAllProducts (SuperStoreServices connection) throws ClassNotFoundException, SQLException{
+        System.out.println("\n|All Products|\n");
+        List<Products> allProducts = connection.getAllProducts();
+        for (Products allProduct : allProducts ){
+            System.out.println(allProduct);
+        }                
+    }
+
+    public static void displayAllCustomers (SuperStoreServices connection) throws ClassNotFoundException, SQLException{
+        System.out.println("\n|All Customers|\n");
+        List<Customers> allCustomers = connection.getAllCustomers();
+        for (Customers allCustomer : allCustomers ){
+            System.out.println(allCustomer);
+        }              
+    }
+
+    public static void displayAllInventory (SuperStoreServices connection) throws ClassNotFoundException, SQLException {
+        System.out.println("\n|All Inventory|\n");
+        List<Inventory> allInventory = connection.getAllInventory();
+        for (Inventory inventory : allInventory ){
+            Warehouses warehouse = connection.getWarehouse(inventory.getWarehouseId());
+            String address = connection.getAddress(warehouse.getAddressId());
+            System.out.println(inventory.toString(warehouse, address));
+        }     
     }
 }

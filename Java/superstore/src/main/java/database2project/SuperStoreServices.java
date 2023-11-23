@@ -196,5 +196,4 @@ public class SuperStoreServices {
             Products newProduct = new Products (0, productName, category);
             newProduct.AddToDatabase(this.conn);
         }
-
 }
