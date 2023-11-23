@@ -1,5 +1,159 @@
+-- Warehouses
+-- Package for functions and procedures related to the warehouse table
+CREATE OR REPLACE PACKAGE warehouses_package AS
+    PROCEDURE delete_warehouse (vwarehouseid IN NUMBER);
+    PROCEDURE updatewarehousename(vwarehouseid NUMBER, vwarehousename IN VARCHAR2);
+    FUNCTION get_warehouse (vwarehouseid NUMBER)
+        RETURN warehouse_typ;
+    WAREHOUSE_NOT_FOUND EXCEPTION;
+END warehouses_package;
+/
+
+CREATE OR REPLACE PACKAGE BODY warehouses_package AS 
+-- Deletes a warehouse (and all it's inventory) with a specified Id 
+PROCEDURE delete_warehouse (
+    vwarehouseid IN NUMBER
+) IS
+    BEGIN
+        DELETE FROM Inventory WHERE WarehouseId = vwarehouseid;
+        DELETE FROM Warehouses WHERE WarehouseId= vwarehouseid;
+        
+        IF SQL%NOTFOUND THEN
+            RAISE WAREHOUSE_NOT_FOUND;
+        END IF;
+    END;
+
+-- updates a specified warehouses name
+PROCEDURE updatewarehousename (
+    vwarehouseid IN NUMBER,
+    vwarehousename IN VARCHAR2
+    ) IS
+    BEGIN
+        UPDATE Warehouses
+        SET
+            WarehouseName = vwarehousename
+        WHERE
+            WarehouseId = vwarehouseid;
+        
+        IF SQL%NOTFOUND THEN
+            RAISE WAREHOUSE_NOT_FOUND;
+        END IF;
+    END;
+
+-- Gets a warehouse with a given id and returns an object of the warehouse_typ
+FUNCTION get_warehouse (vwarehouseid NUMBER)
+    RETURN warehouse_typ AS
+        vwarehousename VARCHAR2(20);
+        vaddressid NUMBER(5);
+        vwarehouse warehouse_typ;
+    BEGIN
+        SELECT
+            WarehouseName,
+            AddressId
+        INTO
+            vwarehousename,
+            vaddressid
+        FROM
+            Warehouses
+        WHERE
+            WarehouseId = vwarehouseid;
+        
+        vwarehouse := warehouse_typ(vwarehouseid, vwarehousename, vaddressid);
+        return vwarehouse;
+    END;
+END warehouses_package;
+/
+
+-- Inventory
+-- Package containing procedures and functions related to the inventory table.
+CREATE OR REPLACE PACKAGE inventory_package AS
+    PROCEDURE update_stock(vinventoryid IN NUMBER, vstock IN NUMBER);
+    FUNCTION get_stock (vinventoryid IN NUMBER)
+        RETURN NUMBER;
+    FUNCTION get_total_stock (vproductid NUMBER)
+        RETURN NUMBER;
+    FUNCTION get_all_inventory 
+        RETURN SYS_REFCURSOR;
+    INVENTORY_NOT_FOUND EXCEPTION;
+END inventory_package;
+/
+
+CREATE OR REPLACE PACKAGE BODY inventory_package AS 
+-- Updates a warehouse's stock of a product (using it's inventory id)
+PROCEDURE update_stock (
+    vinventoryid IN NUMBER,
+    vstock IN NUMBER
+) IS
+    BEGIN
+        UPDATE Inventory
+        SET
+            Stock = vstock
+        WHERE
+            InventoryId = vinventoryid;
+        
+        IF SQL%NOTFOUND THEN
+            RAISE INVENTORY_NOT_FOUND;
+        END IF;
+    END;
+
+-- Gets and returns the stock (number) of a product in a warehouse
+FUNCTION get_stock (vinventoryid NUMBER)
+    RETURN NUMBER AS
+        vstock NUMBER(10,0);
+    BEGIN
+        SELECT
+            Stock
+        INTO
+            vstock
+        FROM
+            Inventory
+        WHERE
+            InventoryId = vinventoryid;
+        
+        IF SQL%NOTFOUND THEN
+            RAISE INVENTORY_NOT_FOUND;
+        END IF;
+        
+        return vstock;
+    END;
+    
+-- Returns the total stock of a specific product across all warehouses
+FUNCTION get_total_stock (vproductid NUMBER)
+    RETURN NUMBER AS
+        total_stock NUMBER;
+    BEGIN
+        SELECT
+            -- Null is the same as having no stock
+            NVL(SUM(Stock), 0)
+        INTO 
+            total_stock
+        FROM
+            Inventory
+        WHERE
+            ProductId = vproductid;
+        RETURN total_stock;
+    END;
+    
+-- Returns a cursor containing the every row in the inventory table.
+FUNCTION get_all_inventory 
+    RETURN SYS_REFCURSOR AS
+        all_inventory SYS_REFCURSOR;
+    BEGIN
+        OPEN all_inventory FOR 
+        SELECT 
+            *
+        FROM
+            Inventory
+        ORDER BY
+            InventoryId ASC;
+        RETURN all_inventory;
+    END;
+END inventory_package;
+/
+
 -- Orders
--- when order placed: check if any warehouse has enough quantity, add the order, update quantity
+-- Package for all functions and procedures related to the orders table.
+-- Includes validation when adding an order.
 CREATE OR REPLACE PACKAGE orders_package AS
     PROCEDURE add_order(vorder IN orders_typ);
     PROCEDURE delete_order(vorderid IN NUMBER);
@@ -8,6 +162,8 @@ CREATE OR REPLACE PACKAGE orders_package AS
     FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
         RETURN VARCHAR2;
     FUNCTION get_customer_orders (vcustomerid NUMBER)
+        RETURN SYS_REFCURSOR;
+    FUNCTION get_all_orders 
         RETURN SYS_REFCURSOR;
     ORDER_NOT_FOUND EXCEPTION;
     OUT_OF_STOCK EXCEPTION;
@@ -56,24 +212,40 @@ PROCEDURE update_stock_after_order (vproductid IN NUMBER, vquantity IN NUMBER)
             Stock DESC
         FETCH FIRST ROW ONLY;
         
+        -- Calculates the new stock by subtracting the order quantity from current stock
         newStock := vstock - vquantity;
         
-        -- Calling the inventory package Update stock procedure
+        -- Calling the inventory package Update stock procedure to set the new stock
         inventory_package.update_stock(vinventoryid, newStock);
-        
     END;
     
+-- Was originally a boolean but couldn't get the boolean type to work in JDBC
+-- Returns true or false depending on if any warehouse has enough stock to fulfull an order
+FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
+    RETURN VARCHAR2 AS
+       max_stock NUMBER(10, 0);
+    BEGIN
+        max_stock := get_max_inventory(vproductid);
+        
+        IF max_stock < quantity THEN
+            return 'false';
+        ELSE
+            return 'true';
+        END IF;
+    END;    
+
+-- Takes an order object and adds it to the database if it passes validation.
 PROCEDURE add_order (
     vorder IN orders_typ
 ) AS
     vorder_id NUMBER(5) := vorder.OrderId;
     BEGIN
-    -- if there is not enough stock in any warehouse raises an exception
+    -- if there is not enough stock in any warehouse raises an exception (validate_order returns 'false')
     IF validate_order(vorder.ProductId, vorder.Quantity) = 'false' THEN
         RAISE OUT_OF_STOCK;
     END IF;
     
-    -- Handles when JDBC id is 0 (or null)
+    -- Handles when JDBC id is 0 (considered null and means an id will be generated)
     IF vorder_id = 0 THEN
         vorder_id := NULL;
     END IF;
@@ -90,7 +262,7 @@ PROCEDURE add_order (
                 vorder.OrderDate
         );
         
-        -- Calling the private procedure to update the stock reflecting the order quantity
+        -- After successful insert calls the private procedure to update the stock reflecting the order quantity
         update_stock_after_order(vorder.ProductId, vorder.Quantity);
     END;
     
@@ -105,7 +277,8 @@ PROCEDURE delete_order (
     END IF;
     END;
     
--- Gets an order with a certain id and product (example order 1 apple)
+-- Gets an order with a certain id and product (example order 1 apple).
+-- Then returns an order object with all relevant information.
 FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
     RETURN orders_typ AS
         vcustomerid      NUMBER(5);
@@ -135,22 +308,8 @@ FUNCTION get_order (vorderid IN NUMBER, vproductid IN NUMBER)
         vorder := orders_typ(vorderid, vproductid, vcustomerid, vstoreid, vquantity, vprice, vorderdate);
         return vorder;
     END;
-    
--- Was originally a boolean but couldn't get the boolean to work in JDBC
--- Returns true or false depending on if any warehouse has enough stock to fulfull an order
-FUNCTION validate_order (vproductid NUMBER, quantity NUMBER)
-    RETURN VARCHAR2 AS
-       max_stock NUMBER(10, 0);
-    BEGIN
-        max_stock := get_max_inventory(vproductid);
-        
-        IF max_stock < quantity THEN
-            return 'false';
-        ELSE
-            return 'true';
-        END IF;
-    END;
-    
+
+-- Returns a cursor containing all orders by a specific customer 
 FUNCTION get_customer_orders (vcustomerid NUMBER)
     RETURN SYS_REFCURSOR AS
         customer_orders SYS_REFCURSOR;
@@ -161,32 +320,31 @@ FUNCTION get_customer_orders (vcustomerid NUMBER)
         FROM
             Orders
         WHERE
-            CustomerId = vcustomerid; 
+            CustomerId = vcustomerid
+        ORDER BY
+            OrderId ASC; 
         RETURN customer_orders;
     END;
-    
+
+-- Returns a cursor containing all rows in the orders table.
+FUNCTION get_all_orders 
+    RETURN SYS_REFCURSOR AS
+        all_orders SYS_REFCURSOR;
+    BEGIN
+        OPEN all_orders FOR 
+        SELECT 
+            *
+        FROM
+            Orders
+        ORDER BY
+            OrderId ASC;
+        RETURN all_orders;
+    END;
 END orders_package;
 /
 
-CREATE OR REPLACE TRIGGER OrdersChange
-AFTER INSERT OR UPDATE OR DELETE ON Orders
-FOR EACH ROW
-BEGIN
-    IF INSERTING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.OrderId, 'INSERT', 'ORDERS', SYSDATE);
-    ELSIF DELETING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:OLD.OrderId, 'DELETE', 'ORDERS', SYSDATE);
-    ELSIF UPDATING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.OrderId, 'UPDATE', 'ORDERS', SYSDATE);
-    END IF;
-END;
-/
-
 -- Reviews 
-
+-- Package for functions and procedures related to the Reviews table.
 CREATE OR REPLACE PACKAGE reviews_package AS
     PROCEDURE add_review (vreview IN reviews_typ);
     PROCEDURE delete_review (vreviewid IN NUMBER);
@@ -222,7 +380,7 @@ PROCEDURE add_review (
             );
     END;
     
--- takes an reviewid and deletes all rows with the reviewid.
+-- takes a reviewid and deletes all rows with the reviewid.
 PROCEDURE delete_review (
         vreviewid IN NUMBER
     ) IS
@@ -231,8 +389,7 @@ PROCEDURE delete_review (
         IF SQL%NOTFOUND THEN
             RAISE REVIEW_NOT_FOUND;
         END IF;
-
-    END delete_review;
+    END;
     
 -- Takes necessary information and updates a review score
 PROCEDURE update_score(vreview_id NUMBER, vscore NUMBER) AS
@@ -250,7 +407,6 @@ PROCEDURE update_flag(vreview_id NUMBER, vflag VARCHAR2) AS
         IF SQL%NOTFOUND THEN
             RAISE REVIEW_NOT_FOUND;
         END IF;
-
     END; 
     
 -- Takes necessary information and updates a review description
@@ -260,10 +416,9 @@ PROCEDURE update_description(vreview_id NUMBER, vdescription VARCHAR2) AS
         IF SQL%NOTFOUND THEN
             RAISE REVIEW_NOT_FOUND;
         END IF;
-
     END; 
     
--- Gets and returns a review object
+-- Gets and returns a review object using a specified id
 FUNCTION get_review (vreviewid NUMBER)
     RETURN reviews_typ AS
         vproductid NUMBER(5);
@@ -292,7 +447,6 @@ FUNCTION get_review (vreviewid NUMBER)
         
         vreview := reviews_typ(vreviewid, vproductid, vcustomerid, vscore, vflag, vdescription);
         return vreview;
-
     END;
     
 -- Gets the average review score for a specific product
@@ -317,7 +471,7 @@ FUNCTION get_average_score (vproductid NUMBER)
 
     END;
     
--- Gets customers whose reviews have been flagged more than once
+-- Returns a cursor with all customers whose reviews have been flagged more than once
 FUNCTION get_flagged_customers 
     RETURN SYS_REFCURSOR AS
         flagged_customers SYS_REFCURSOR;
@@ -339,7 +493,9 @@ FUNCTION get_flagged_customers
             Email,
             Addressid 
         HAVING
-            SUM(Flag) > 1; 
+            SUM(Flag) > 1
+        ORDER BY 
+            CustomerId ASC; 
         RETURN flagged_customers;
     END;
     
@@ -354,97 +510,16 @@ FUNCTION get_flagged_reviews
         FROM
             Reviews
         WHERE
-            Flag > 0; 
+            Flag > 0
+        ORDER BY
+            ReviewId ASC; 
         RETURN flagged_reviews;
     END;
     
 END reviews_package;
 /
 
-
-CREATE OR REPLACE TRIGGER ReviewsChange
-AFTER INSERT OR UPDATE OR DELETE ON Reviews
-FOR EACH ROW
-BEGIN
-    IF INSERTING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.ReviewId, 'INSERT', 'REVIEWS', SYSDATE);
-    ELSIF DELETING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:OLD.ReviewId, 'DELETE', 'REVIEWS', SYSDATE);
-    ELSIF UPDATING THEN
-        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.ReviewId, 'UPDATE', 'REVIEWS', SYSDATE);
-    END IF;
-END;
-/
-
--- Warehouses
-
-CREATE OR REPLACE PACKAGE warehouses_package AS
-    PROCEDURE delete_warehouse (vwarehouseid IN NUMBER);
-    PROCEDURE updatewarehousename(vwarehouseid NUMBER, vwarehousename IN VARCHAR2);
-    FUNCTION get_warehouse (vwarehouseid NUMBER)
-        RETURN warehouse_typ;
-    WAREHOUSE_NOT_FOUND EXCEPTION;
-END warehouses_package;
-/
-
-CREATE OR REPLACE PACKAGE BODY warehouses_package AS 
--- Deletes a warehouse (and all it's inventory) with a specified Id 
-PROCEDURE delete_warehouse (
-    vwarehouseid IN NUMBER
-) IS
-    BEGIN
-        DELETE FROM Inventory WHERE WarehouseId = vwarehouseid;
-        DELETE FROM Warehouses WHERE WarehouseId= vwarehouseid;
-        
-        IF SQL%NOTFOUND THEN
-            RAISE WAREHOUSE_NOT_FOUND;
-        END IF;
-
-    END;
-
--- updates a specified warehouses name
-PROCEDURE updatewarehousename (
-    vwarehouseid IN NUMBER,
-    vwarehousename IN VARCHAR2
-    ) IS
-    BEGIN
-        UPDATE Warehouses
-        SET
-            WarehouseName = vwarehousename
-        WHERE
-            WarehouseId = vwarehouseid;
-        
-        IF SQL%NOTFOUND THEN
-            RAISE WAREHOUSE_NOT_FOUND;
-        END IF;
-
-    END;
-
-FUNCTION get_warehouse (vwarehouseid NUMBER)
-    RETURN warehouse_typ AS
-        vwarehousename VARCHAR2(20);
-        vaddressid NUMBER(5);
-        vwarehouse warehouse_typ;
-    BEGIN
-        SELECT
-            WarehouseName,
-            AddressId
-        INTO
-            vwarehousename,
-            vaddressid
-        FROM
-            Warehouses
-        WHERE
-            WarehouseId = vwarehouseid;
-        
-        vwarehouse := warehouse_typ(vwarehouseid, vwarehousename, vaddressid);
-        return vwarehouse;
-    END;
-END warehouses_package;
-/
+-- Triggers
 
 CREATE OR REPLACE TRIGGER WarehousesChange
 AFTER INSERT OR UPDATE OR DELETE ON Warehouses
@@ -463,147 +538,54 @@ BEGIN
 END;
 /
 
-
--- Inventory
-
-CREATE OR REPLACE PACKAGE inventory_package AS
-    PROCEDURE update_stock(vinventoryid IN NUMBER, vstock IN NUMBER);
-    FUNCTION get_stock (vinventoryid IN NUMBER)
-        RETURN NUMBER;
-    FUNCTION get_total_stock (vproductid NUMBER)
-        RETURN NUMBER;
-    FUNCTION get_all_inventory 
-        RETURN SYS_REFCURSOR;
-    INVENTORY_NOT_FOUND EXCEPTION;
-END inventory_package;
-/
-
-CREATE OR REPLACE PACKAGE BODY inventory_package AS 
--- Updates a warehouse's stock of a product
-PROCEDURE update_stock (
-    vinventoryid IN NUMBER,
-    vstock IN NUMBER
-) IS
-    BEGIN
-        UPDATE Inventory
-        SET
-            Stock = vstock
-        WHERE
-            InventoryId = vinventoryid;
-        
-        IF SQL%NOTFOUND THEN
-            RAISE INVENTORY_NOT_FOUND;
-        END IF;
-
-    END;
-
--- Gets the stock of a product in a warehouse
-FUNCTION get_stock (vinventoryid NUMBER)
-    RETURN NUMBER AS
-        vstock NUMBER(10,0);
-    BEGIN
-        SELECT
-            Stock
-        INTO
-            vstock
-        FROM
-            Inventory
-        WHERE
-            InventoryId = vinventoryid;
-        
-        IF SQL%NOTFOUND THEN
-            RAISE INVENTORY_NOT_FOUND;
-        END IF;
-        
-        return vstock;
-    END;
-    
--- Returns the total stock of a product across all warehouses
-FUNCTION get_total_stock (vproductid NUMBER)
-    RETURN NUMBER AS
-        total_stock NUMBER;
-    BEGIN
-        SELECT
-            -- Null is the same as having no stock
-            NVL(SUM(Stock), 0)
-        INTO 
-            total_stock
-        FROM
-            Inventory
-        WHERE
-            ProductId = vproductid;
-        RETURN total_stock;
-    END;
-    
--- Returns a cursor containing the total stock of every product in every warehouse.
-FUNCTION get_all_inventory 
-    RETURN SYS_REFCURSOR AS
-        all_inventory SYS_REFCURSOR;
-    BEGIN
-        OPEN all_inventory FOR 
-        SELECT 
-            *
-        FROM
-            Inventory;
-        RETURN all_inventory;
-    END;
-END inventory_package;
-/
-
 CREATE OR REPLACE TRIGGER InventoryChange
 AFTER INSERT OR UPDATE OR DELETE ON Inventory
 FOR EACH ROW
 BEGIN
     IF INSERTING THEN
         INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.WarehouseId, :NEW.ProductId, 'INSERT', 'INVENTORY', SYSDATE);
+        VALUES (:NEW.InventoryId, 'INSERT', 'INVENTORY', SYSDATE);
     ELSIF DELETING THEN
         INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:OLD.WarehouseId, :OLD.ProductId, 'DELETE', 'INVENTORY', SYSDATE);
+        VALUES (:OLD.InventoryId, 'DELETE', 'INVENTORY', SYSDATE);
     ELSIF UPDATING THEN
         INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
-        VALUES (:NEW.WarehouseId, :NEW.ProductId, 'UPDATE', 'INVENTORY', SYSDATE);
+        VALUES (:NEW.InventoryId, 'UPDATE', 'INVENTORY', SYSDATE);
     END IF;
 END;
 /
 
--- DROP TRIGGER InventoryChange;
+CREATE OR REPLACE TRIGGER OrdersChange
+AFTER INSERT OR UPDATE OR DELETE ON Orders
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.OrderId, 'INSERT', 'ORDERS', SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:OLD.OrderId, 'DELETE', 'ORDERS', SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.OrderId, 'UPDATE', 'ORDERS', SYSDATE);
+    END IF;
+END;
+/
 
-/* Testing 
-    -- Gets the number of times a product was ordered
-FUNCTION get_times_ordered (vproductid NUMBER)
-    RETURN NUMBER AS
-        times_ordered NUMBER(10);
-    BEGIN
-        SELECT
-            COUNT(*)
-        INTO
-            times_ordered
-        FROM
-            Orders
-        WHERE
-            ProductId = vproductid;
-        
-        IF times_ordered = 0 THEN
-            RAISE ORDER_NOT_FOUND;
-        END IF;
-        
-        return times_ordered;
-    END;
-
--- Adds inventory for a specific product in a specific warehouse from an object
-PROCEDURE add_inventory (
-    vinventory IN inventory_typ  
-    ) IS
-    BEGIN
-    INSERT INTO Inventory   
-        VALUES (
-                vinventory.WarehouseId,
-                vinventory.ProductId,
-                vinventory.Stock           
-        );
-    END;
-
-*/
-
+CREATE OR REPLACE TRIGGER ReviewsChange
+AFTER INSERT OR UPDATE OR DELETE ON Reviews
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.ReviewId, 'INSERT', 'REVIEWS', SYSDATE);
+    ELSIF DELETING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:OLD.ReviewId, 'DELETE', 'REVIEWS', SYSDATE);
+    ELSIF UPDATING THEN
+        INSERT INTO AuditTable (ChangedId, Action, TableChanged, DateModified)
+        VALUES (:NEW.ReviewId, 'UPDATE', 'REVIEWS', SYSDATE);
+    END IF;
+END;
+/
 

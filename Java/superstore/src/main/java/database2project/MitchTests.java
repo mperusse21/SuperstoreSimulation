@@ -62,7 +62,16 @@ public class MitchTests
             }*/
 
             //System.out.println(connection.getTotalStock(1));
-            connection.updateStock(13, 40);
+
+            /*List<Orders> orders = connection.getAllOrders();
+            for (Orders order : orders){
+                System.out.println(order);
+            }*/
+
+            /*List<Inventory> inventory = connection.getAllInventory();
+            for (Inventory item : inventory){
+                System.out.println(item);
+            }*/
         }
         
         // Catches any possible exceptions

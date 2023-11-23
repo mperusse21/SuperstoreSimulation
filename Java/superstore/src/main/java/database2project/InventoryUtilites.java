@@ -1,6 +1,8 @@
 package database2project;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InventoryUtilites {
     // Returns the total stock of a product across all warehouses
@@ -89,5 +91,40 @@ public class InventoryUtilites {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static List<Inventory> getAllInventory(Connection conn) {
+        String sql = "{ ? = call inventory_package.get_all_inventory()}";
+        CallableStatement stmt = null;
+        List<Inventory> inventoryList = new ArrayList<Inventory>(); 
+        try {
+            stmt = conn.prepareCall(sql);
+            stmt.registerOutParameter(1, Types.REF_CURSOR);
+            stmt.execute();
+            ResultSet results = (ResultSet) stmt.getObject(1);
+            while (results.next()) {
+                Inventory foundInventory = new Inventory(results.getInt("InventoryId"), results.getInt("WarehouseId"), 
+                results.getInt("ProductId"), results.getInt("Stock"));
+                inventoryList.add(foundInventory);
+            }
+            return inventoryList;
+        } 
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        // Always tries to close stmt
+        finally {
+            try {
+                if (!stmt.isClosed() && stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        // If an error occurs returns nulls and prints a message
+        System.out.println("Unable to find any inventory");
+        return null;
     }
 }

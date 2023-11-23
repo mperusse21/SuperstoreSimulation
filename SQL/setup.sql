@@ -74,8 +74,8 @@ CREATE TABLE Orders (
     ProductId       NUMBER(5)          REFERENCES Products (ProductId),
     CustomerId      NUMBER(5)          REFERENCES Customers (CustomerId),
     StoreId         NUMBER(5)          REFERENCES Stores(StoreId),
-    Quantity        NUMBER(5,0),
-    Price           NUMBER (10,2),
+    Quantity        NUMBER(5,0) CHECK(Quantity >= 0),
+    Price           NUMBER (10,2) CHECK(Price >= 0),
     OrderDate       DATE,
     
     CONSTRAINT orders_pk PRIMARY KEY (OrderId, ProductId)

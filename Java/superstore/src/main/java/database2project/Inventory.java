@@ -45,7 +45,8 @@ public class Inventory implements SQLData {
     }
 
     //Constructor initializing all private fields
-    public Inventory(int warehouseId, int productId, int stock){
+    public Inventory(int inventoryId, int warehouseId, int productId, int stock){
+        this.inventoryId = inventoryId;
         this.warehouseId = warehouseId;
         this.productId = productId;
         this.stock = stock;
@@ -62,20 +63,22 @@ public class Inventory implements SQLData {
     
     @Override
     public void readSQL (SQLInput stream, String typeName) throws SQLException {
+        setInventoryId(stream.readInt());
         setWarehouseId(stream.readInt());
-        setProductId(stream.readInt());
+        setProductId(stream.readInt()); 
         setStock(stream.readInt());
     }
     
     @Override
     public void writeSQL (SQLOutput stream) throws SQLException {
+        stream.writeInt(getInventoryId());
         stream.writeInt(getWarehouseId());
         stream.writeInt(getProductId());
         stream.writeInt(getStock());
     }
 
     public String toString (){
-        return "Warehouse Id " + this.warehouseId + " Product Id " + this.productId + "\nStock" + this.stock;
+        return "Inventory Id: " + this.inventoryId + " Warehouse Id: " + this.warehouseId + " Product Id: " + this.productId + "\nStock: " + this.stock;
     }
        
 }
