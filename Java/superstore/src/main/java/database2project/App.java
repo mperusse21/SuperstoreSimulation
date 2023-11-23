@@ -138,7 +138,7 @@ public class App
             System.out.println("| 5 - Back              |                         |");
             System.out.println("---------------------------------------------------\n");
             System.out.println("What is the desired action? (enter the corresponding numerical value)");
-            int action = setValidAction(reader, 5);
+            int action = AppUtilities.setValidAction(reader, 5);
             if (action == 1){
                 System.out.println("Enter the name of the new product: ");
                 // Flushes the reader
@@ -153,14 +153,14 @@ public class App
                 System.out.println("| 1 - Name               |  2 - Category          |");
                 System.out.println("---------------------------------------------------");
                 System.out.println("Which field would you like to update? (enter the corresponding numerical value)");
-                int field = setValidAction(reader, 2);
+                int field = AppUtilities.setValidAction(reader, 2);
                 if (field == 1) {
                     List<Products> allProducts = connection.getAllProducts();
                         for (Products allProduct : allProducts ){
                             System.out.println(allProduct);
                         }
                     System.out.println("Enter the product id of the product you wish to modify: ");
-                    int productId = reader.nextInt();
+                    int productId = AppUtilities.getValidInt(reader);
                     System.out.println("Enter the new product name: ");
                     // Flushes the reader
                     reader.nextLine();
@@ -173,7 +173,7 @@ public class App
                             System.out.println(allProduct);
                         }
                     System.out.println("Enter the product id of the product you wish to modify: ");
-                    int productId = reader.nextInt();
+                    int productId = AppUtilities.getValidInt(reader);
                     // Flushes the reader
                     reader.nextLine();
                     System.out.println("Enter the new product category: ");
