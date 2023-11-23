@@ -105,19 +105,19 @@ public class App
             System.out.println("How would you like to view customers? (enter the corresponding numerical value)");
             int searchMethod = AppUtilities.setValidAction(reader, 3);
             if (searchMethod == 1) {
-                List<Customers> allCustomers = connection.getAllCustomers();
-                for (Customers allCustomer : allCustomers ){
-                    String customerAddress = connection.getFullLocation(allCustomer.getAddressId()); 
-                    System.out.println(allCustomer + customerAddress);
-                }
+                DisplayUtilities.displayAllCustomers(connection);
             }
             else if (searchMethod == 2) {
+                try {
                 System.out.println("Please enter email: ");   
                 String email = reader.next(); 
                 Customers customer = connection.getCustomerByEmail(email);
-                //String customerAddress = connection.getAddress(customer.getAddressId()); 
                 String customerAddress = connection.getFullLocation(customer.getAddressId()); 
                 System.out.println("Customer found: " + customer + customerAddress); 
+                }
+                catch (SQLException e){
+                    System.out.println("No customer associated with this email");
+                }
             }
             else if (searchMethod == 3) {
                 exitPage = true;
@@ -155,10 +155,7 @@ public class App
                 System.out.println("Which field would you like to update? (enter the corresponding numerical value)");
                 int field = AppUtilities.setValidAction(reader, 2);
                 if (field == 1) {
-                    List<Products> allProducts = connection.getAllProducts();
-                        for (Products allProduct : allProducts ){
-                            System.out.println(allProduct);
-                        }
+                    DisplayUtilities.displayAllProducts(connection);                               
                     System.out.println("Enter the product id of the product you wish to modify: ");
                     int productId = AppUtilities.getValidInt(reader);
                     System.out.println("Enter the new product name: ");
@@ -168,10 +165,7 @@ public class App
                     connection.updateProductName(productId, productName);
                 }
                 else if (field == 2) {
-                    List<Products> allProducts = connection.getAllProducts();
-                        for (Products allProduct : allProducts ){
-                            System.out.println(allProduct);
-                        }
+                    DisplayUtilities.displayAllProducts(connection);
                     System.out.println("Enter the product id of the product you wish to modify: ");
                     int productId = AppUtilities.getValidInt(reader);
                     // Flushes the reader
@@ -183,10 +177,7 @@ public class App
 
             }
             else if (action == 3){
-                List<Products> allProducts = connection.getAllProducts();
-                for (Products allProduct : allProducts ){
-                    System.out.println(allProduct);
-                }
+                DisplayUtilities.displayAllProducts(connection);
             }
             else if (action == 4){
                 System.out.println("Enter your desired product category: ");
@@ -255,7 +246,7 @@ public class App
                 int store_id = AppUtilities.getValidInt(reader);
 
                 System.out.println("Enter the price");
-                double price = reader.nextDouble();
+                double price = AppUtilities.getValidDouble(reader);
 
                 System.out.println("Enter the quantity of the product");
                 int quantity = AppUtilities.getValidInt(reader);

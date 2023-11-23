@@ -35,7 +35,8 @@ public class DisplayUtilities {
         System.out.println("\n|All Customers|\n");
         List<Customers> allCustomers = connection.getAllCustomers();
         for (Customers allCustomer : allCustomers ){
-            System.out.println(allCustomer);
+            String customerAddress = connection.getFullLocation(allCustomer.getAddressId()); 
+            System.out.println(allCustomer + customerAddress);
         }              
     }
 

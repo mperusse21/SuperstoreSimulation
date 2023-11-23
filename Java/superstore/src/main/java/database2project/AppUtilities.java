@@ -70,6 +70,25 @@ public class AppUtilities {
         return -1;
     }
 
+    /* prompts the user until they enter a valid int, prints a message if they enter a String or Double */
+    public static Double getValidDouble (Scanner reader){
+        boolean isValid = false;
+        Double validDouble;
+
+        while (!isValid){
+            try {
+                validDouble = Double.parseDouble(reader.next());
+
+                return validDouble;
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("Invalid input, must enter a double");
+            }
+        }
+        // Will never be reached
+        return null;
+    }
+
        /* prompts the user until they enter a valid Date, prints a message if they enter an invalid one */
     public static Date getValidDate (Scanner reader){
         boolean isValid = false;
