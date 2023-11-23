@@ -80,6 +80,7 @@ public class Warehouses implements SQLData {
         fullLocation + " | ";
     }   
 
+    // Gets a warehouse object from the database and stores it into a java object
     public static Warehouses getWarehouse(Connection conn, int warehouse_id) {
         String sql = "{ ? = call warehouses_package.get_warehouse(?) }";
         CallableStatement stmt = null;
@@ -116,6 +117,7 @@ public class Warehouses implements SQLData {
             return foundWarehouse;
     }
 
+    // Deletes a warehouse with a specified id
     public static void deleteWarehouse(Connection conn, int warehouse_id){
         String sql = "{ call warehouses_package.delete_warehouse(?)}";
         CallableStatement stmt = null;

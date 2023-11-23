@@ -193,6 +193,7 @@ public class ReviewsUtilities {
         return null;
     }
 
+    // Gets a list of review objects representing all reviews in the database.
     public static List<Reviews> getAllReviews(Connection conn) {
         String sql = "{ ? = call reviews_package.get_all_reviews()}";
         CallableStatement stmt = null;

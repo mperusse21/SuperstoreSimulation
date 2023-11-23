@@ -4,6 +4,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Various methods related to Inventory, including update and searches. 
+ */
 public class InventoryUtilites {
     // Returns the total stock of a product across all warehouses
     public static int getTotalStock(Connection conn, int product_id) {
@@ -62,6 +65,7 @@ public class InventoryUtilites {
         }
     }
 
+    // Returns a list of all inventory rows in the database.
     public static List<Inventory> getAllInventory(Connection conn) {
         String sql = "{ ? = call inventory_package.get_all_inventory()}";
         CallableStatement stmt = null;

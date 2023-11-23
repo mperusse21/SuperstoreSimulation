@@ -3,7 +3,11 @@ package database2project;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Class which provides a way to display various searches and can be used in the application.
+ */
 public class DisplayUtilities {
+    // Prints a list of orders in a more user friendly format
     public static void displayOrders (SuperStoreServices connection, List<Orders> orders) throws SQLException, ClassNotFoundException{
         for (Orders order : orders){
             Products product = connection.getProductById(order.getProductId());
@@ -13,7 +17,7 @@ public class DisplayUtilities {
             System.out.println(order.toString(product, customer, storeName, fullLocation));
         }
     }
-
+    // Prints a list of reviews in a more user friendly format
     public static void displayReviews (SuperStoreServices connection, List<Reviews> reviews) throws SQLException, ClassNotFoundException{
         for (Reviews review : reviews){
             Products product = connection.getProductById(review.getProductId());
@@ -23,6 +27,7 @@ public class DisplayUtilities {
         }
     }
 
+    // Prints all products 
     public static void displayAllProducts (SuperStoreServices connection) throws ClassNotFoundException, SQLException{
         System.out.println("\n|All Products|\n");
         List<Products> allProducts = connection.getAllProducts();
@@ -31,6 +36,7 @@ public class DisplayUtilities {
         }                
     }
 
+    // Prints all customers
     public static void displayAllCustomers (SuperStoreServices connection) throws ClassNotFoundException, SQLException{
         System.out.println("\n|All Customers|\n");
         List<Customers> allCustomers = connection.getAllCustomers();
@@ -40,6 +46,7 @@ public class DisplayUtilities {
         }              
     }
 
+    // Prints all inventory
     public static void displayAllInventory (SuperStoreServices connection) throws ClassNotFoundException, SQLException {
         System.out.println("\n|All Inventory|\n");
         List<Inventory> allInventory = connection.getAllInventory();
@@ -50,6 +57,7 @@ public class DisplayUtilities {
         }     
     }
 
+    // Prints all reviews
     public static void displayAllReviews (SuperStoreServices connection) throws ClassNotFoundException, SQLException {
         System.out.println("\n|All Inventory|\n");
         List<Reviews> allReviews = connection.getAllReviews();

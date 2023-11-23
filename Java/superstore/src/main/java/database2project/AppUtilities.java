@@ -2,8 +2,11 @@ package database2project;
 
 import java.sql.Date;
 import java.util.Scanner;
-
+/**
+ * Contains methods to help run the application, mostly for validation.
+ */
 public class AppUtilities {
+    // Sets a valid range for an int and loops until the user provides one.
     public static int setValidAction (Scanner reader, int max) {
         boolean isValid = false;
         int action = 0;
@@ -19,6 +22,7 @@ public class AppUtilities {
         return action;
     }
 
+    // Handles review update prompts, the user selects from updating the score, flag, or description.
     public static void handleReviewUpdate(Scanner reader, SuperStoreServices connection, int review_id){
         System.out.println("Choose an update option:");
         System.out.println("1. Update Score");

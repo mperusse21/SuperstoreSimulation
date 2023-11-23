@@ -1,5 +1,9 @@
 -- Warehouses
+
 -- Package for functions and procedures related to the warehouse table
+
+-- Specification
+
 CREATE OR REPLACE PACKAGE warehouses_package AS
     PROCEDURE delete_warehouse (vwarehouseid IN NUMBER);
     PROCEDURE updatewarehousename(vwarehouseid NUMBER, vwarehousename IN VARCHAR2);
@@ -8,6 +12,8 @@ CREATE OR REPLACE PACKAGE warehouses_package AS
     WAREHOUSE_NOT_FOUND EXCEPTION;
 END warehouses_package;
 /
+
+-- Body
 
 CREATE OR REPLACE PACKAGE BODY warehouses_package AS 
 -- Deletes a warehouse (and all it's inventory) with a specified Id 
@@ -65,7 +71,11 @@ END warehouses_package;
 /
 
 -- Inventory
+
 -- Package containing procedures and functions related to the inventory table.
+
+-- Specification
+
 CREATE OR REPLACE PACKAGE inventory_package AS
     PROCEDURE update_stock(vinventoryid IN NUMBER, vstock IN NUMBER);
     FUNCTION get_total_stock (vproductid NUMBER)
@@ -75,6 +85,8 @@ CREATE OR REPLACE PACKAGE inventory_package AS
     INVENTORY_NOT_FOUND EXCEPTION;
 END inventory_package;
 /
+
+-- Body
 
 CREATE OR REPLACE PACKAGE BODY inventory_package AS 
 -- Updates a warehouse's stock of a product (using it's inventory id)
@@ -129,8 +141,12 @@ END inventory_package;
 /
 
 -- Orders
+
 -- Package for all functions and procedures related to the orders table.
 -- Includes validation when adding an order.
+
+-- Specification
+
 CREATE OR REPLACE PACKAGE orders_package AS
     PROCEDURE add_order(vorder IN orders_typ);
     PROCEDURE delete_order(vorderid IN NUMBER);
@@ -146,6 +162,8 @@ CREATE OR REPLACE PACKAGE orders_package AS
     OUT_OF_STOCK EXCEPTION;
 END orders_package;
 /
+
+-- Body
 
 CREATE OR REPLACE PACKAGE BODY orders_package AS 
 -- Private function that gets and returns the max stock in any warehouse,
@@ -321,7 +339,11 @@ END orders_package;
 /
 
 -- Reviews 
+
 -- Package for functions and procedures related to the Reviews table.
+
+-- Specification
+
 CREATE OR REPLACE PACKAGE reviews_package AS
     PROCEDURE add_review (vreview IN reviews_typ);
     PROCEDURE delete_review (vreviewid IN NUMBER);
@@ -341,6 +363,8 @@ CREATE OR REPLACE PACKAGE reviews_package AS
     REVIEW_NOT_FOUND EXCEPTION;
 END reviews_package;
 /
+
+-- Body
 
 CREATE OR REPLACE PACKAGE BODY reviews_package AS 
 -- Adds a review using a review object
@@ -494,7 +518,8 @@ FUNCTION get_flagged_reviews
             ReviewId ASC; 
         RETURN flagged_reviews;
     END;
-    
+
+-- Returns a cursor containg all rows in the review table.
 FUNCTION get_all_reviews 
         RETURN SYS_REFCURSOR AS
         all_reviews SYS_REFCURSOR;

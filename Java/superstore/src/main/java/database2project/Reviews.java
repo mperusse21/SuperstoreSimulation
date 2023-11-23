@@ -108,7 +108,7 @@ public class Reviews implements SQLData {
         " Score: " + this.score + " | Flags: " + this.flag + " | Description: " + this.description + "\n";
     }
        
-    // Method which adds an review using the add_review procedure
+    // Method which adds a review to the database using the add_review procedure
     public void AddToDatabase(Connection conn) {
         CallableStatement stmt = null;
         try {
@@ -140,6 +140,7 @@ public class Reviews implements SQLData {
         }
     }
 
+    // Deletes a review with a specified id from the database.
     public static void deleteReview(Connection conn, int review_id){
         String sql = "{ call reviews_package.delete_review(?)}";
         CallableStatement stmt = null;
@@ -165,6 +166,7 @@ public class Reviews implements SQLData {
         }
     }
     
+    // Gets a review object from the database and stores it into a java reviews object.
     public static Reviews getReview(Connection conn, int review_id) {
         String sql = "{ ? = call reviews_package.get_review(?)}";
         Reviews foundReview = null;
