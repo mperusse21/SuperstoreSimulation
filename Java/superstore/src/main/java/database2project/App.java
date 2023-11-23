@@ -50,7 +50,7 @@ public class App
                     accessCustomers(connection, reader);
                 }
                 else if (tableToAccess == 2) {
-                    //accessProducts(connection, reader);
+                    accessProducts(connection, reader);
                 }
                 else if (tableToAccess == 3) {
                     accessOrders(connection, reader);
@@ -221,7 +221,7 @@ public class App
     public static void accessOrders (SuperStoreServices connection, Scanner reader) throws ClassNotFoundException, SQLException {
         boolean exitPage = false;
         while (!exitPage) {
-            System.out.println("                         | Orders |                         ");
+            System.out.println("\n                         | Orders |                         ");
             System.out.println("------------------------------------------------------------");
             System.out.println("| 1 - Add                    |  2 - Delete                 |");
             System.out.println("------------------------------------------------------------");
@@ -243,10 +243,12 @@ public class App
                 System.out.println("Enter the Order ID to add a product to an existing order (or 0 to start a new one)");
                 int order_id = AppUtilities.getValidInt(reader);
 
-                System.out.println("Enter the ID of the purchased product");
+                DisplayUtilities.displayAllProducts(connection);
+                System.out.println("\nEnter the ID of the purchased product");
                 int product_id = AppUtilities.getValidInt(reader);
 
-                System.out.println("Enter the ID of the customer");
+                DisplayUtilities.displayAllCustomers(connection);
+                System.out.println("\nEnter the ID of the customer");
                 int customer_id = AppUtilities.getValidInt(reader);
 
                 System.out.println("Enter the ID of the store");
@@ -258,9 +260,8 @@ public class App
                 System.out.println("Enter the quantity of the product");
                 int quantity = AppUtilities.getValidInt(reader);
 
-                System.out.println("Enter the Order Date in the format (YYYY-MM-DD)");
-                String orderDateString = reader.next();
-                Date orderDate = Date.valueOf(orderDateString);
+                System.out.println("Enter the Order Date in the format YYYY-MM-DD");
+                Date orderDate = AppUtilities.getValidDate(reader);
 
                 // Tries to add an order
                 connection.addOrder(order_id, product_id, customer_id, store_id, quantity, price, orderDate); 
@@ -278,8 +279,13 @@ public class App
                 System.out.println("Enter the ID of the customer whose orders you would like to find");
                 int customer_id = AppUtilities.getValidInt(reader);
                 List<Orders> customerOrders = connection.getCustomerOrders(customer_id);
+                if (customerOrders.size() == 0){
+                    System.out.println("There are no orders by customer " + customer_id);
+                }
+                else {
                 System.out.println("\n|All Orders by Customer " + customer_id + "|\n");
                 DisplayUtilities.displayOrders(connection, customerOrders);
+                }
             }
 
             if (action == 4){
@@ -307,136 +313,161 @@ public class App
         }
     }
 
-        public static void accessReviews (SuperStoreServices connection, Scanner reader) throws ClassNotFoundException, SQLException {
-        System.out.println("                          | Reviews |                         ");
-        System.out.println("--------------------------------------------------------------");
-        System.out.println("| 1 - Add                      |  2 - Delete                 |");
-        System.out.println("--------------------------------------------------------------");
-        System.out.println("| 3 - Update                   |  4 - Search Flagged Reviews |");
-        System.out.println("--------------------------------------------------------------");
-        System.out.println("| 5 - Search Flagged Customers |  6 - Get Average Score      |");
-        System.out.println("-------------------------------------------------------------\n");
-        System.out.println("What is the desired action? (enter the corresponding numerical value)");
+    public static void accessReviews (SuperStoreServices connection, Scanner reader) throws ClassNotFoundException, SQLException {
+        boolean exitPage = false;
+        while (!exitPage) {
+            System.out.println("\n                          | Reviews |                         ");
+            System.out.println("--------------------------------------------------------------");
+            System.out.println("| 1 - Add                      |  2 - Delete                 |");
+            System.out.println("--------------------------------------------------------------");
+            System.out.println("| 3 - Update                   |  4 - Search Flagged Reviews |");
+            System.out.println("--------------------------------------------------------------");
+            System.out.println("| 5 - Search Flagged Customers |  6 - Get Average Score      |");
+            System.out.println("--------------------------------------------------------------");
+            System.out.println("| 7 - Search All               |  8 - Back                   |");
+            System.out.println("-------------------------------------------------------------\n");
+            System.out.println("What is the desired action? (enter the corresponding numerical value)");
 
-        int action = AppUtilities.setValidAction(reader, 6);
-        if (action == 1){
-            System.out.println("Adding a review... enter the required information");
-            DisplayUtilities.displayAllProducts(connection);
-            System.out.println("Enter the ID of the reviewed product");
-            int productId = AppUtilities.getValidInt(reader);
-            
-            DisplayUtilities.displayAllCustomers(connection);
+            int action = AppUtilities.setValidAction(reader, 8);
+            if (action == 1){
+                System.out.println("Adding a review... enter the required information");
+                DisplayUtilities.displayAllProducts(connection);
+                System.out.println("Enter the ID of the reviewed product");
+                int productId = AppUtilities.getValidInt(reader);
+                
+                DisplayUtilities.displayAllCustomers(connection);
 
-            System.out.println("Enter the ID of the reviewing customer");
-            int customerId = AppUtilities.getValidInt(reader);
+                System.out.println("Enter the ID of the reviewing customer");
+                int customerId = AppUtilities.getValidInt(reader);
 
-            System.out.println("Enter the score (from 1 to 5)");
-            int score = AppUtilities.getValidInt(reader);
-            // Flushes the reader
-            reader.nextLine();
+                System.out.println("Enter the score (from 1 to 5)");
+                int score = AppUtilities.getValidInt(reader);
+                // Flushes the reader
+                reader.nextLine();
 
-            System.out.println("Enter the description");
-            String description = reader.nextLine();
+                System.out.println("Enter the description");
+                String description = reader.nextLine();
 
-            // Review id is always generated and flag always starts at 0.
-            connection.addReview(productId, customerId, score, description);
-        }
-        if (action == 2){
-            DisplayUtilities.displayAllReviews(connection);
-            System.out.println("Enter the ID of the review you would like to delete");
-            int review_id = reader.nextInt();
-            connection.deleteReview(review_id);
-        }
-        if (action == 3){
-            DisplayUtilities.displayAllReviews(connection);
-            System.out.println("Enter the ID of the review you'd like to update");
-            int review_id = reader.nextInt();
-            AppUtilities.handleReviewUpdate(reader, connection, review_id);
-        }
-        if (action == 4){
-            List<Reviews> flaggedReviews = connection.getFlaggedReviews();
-            if (flaggedReviews.size() == 0){
-                System.out.println("There are no flagged Reviews");
+                // Review id is always generated and flag always starts at 0.
+                connection.addReview(productId, customerId, score, description);
             }
-            else {
-                System.out.println("\n|All Flagged Reviews|\n");
-                DisplayUtilities.displayReviews(connection, flaggedReviews);
-                System.out.println("Enter the ID of the review you'd like to modify");
-                int review_id = AppUtilities.getValidInt(reader);;
-                System.out.println("Press 1 to delete the review or 2 to update it");
-                int choice = AppUtilities.setValidAction(reader, 2);
-                if (choice == 1){
-                    connection.deleteReview(review_id);
+            if (action == 2){
+                DisplayUtilities.displayAllReviews(connection);
+                System.out.println("Enter the ID of the review you would like to delete");
+                int review_id = reader.nextInt();
+                connection.deleteReview(review_id);
+            }
+            if (action == 3){
+                DisplayUtilities.displayAllReviews(connection);
+                System.out.println("Enter the ID of the review you'd like to update");
+                int review_id = reader.nextInt();
+                AppUtilities.handleReviewUpdate(reader, connection, review_id);
+            }
+            if (action == 4){
+                List<Reviews> flaggedReviews = connection.getFlaggedReviews();
+                if (flaggedReviews.size() == 0){
+                    System.out.println("There are no flagged Reviews");
                 }
+                else {
+                    System.out.println("\n|All Flagged Reviews|\n");
+                    DisplayUtilities.displayReviews(connection, flaggedReviews);
+                    System.out.println("Enter the ID of the review you'd like to modify");
+                    int review_id = AppUtilities.getValidInt(reader);;
+                    System.out.println("Press 1 to delete the review or 2 to update it");
+                    int choice = AppUtilities.setValidAction(reader, 2);
+                    if (choice == 1){
+                        connection.deleteReview(review_id);
+                    }
 
-                if (choice == 2){
-                    AppUtilities.handleReviewUpdate(reader, connection, review_id); 
+                    if (choice == 2){
+                        AppUtilities.handleReviewUpdate(reader, connection, review_id); 
+                    }
                 }
             }
-        }
-        if (action == 5){
-            List<Customers> flaggedCustomers = connection.getFlaggedCustomers();
-            if (flaggedCustomers.size() == 0){
-                System.out.println("There are no flagged Customers");
+            if (action == 5){
+                List<Customers> flaggedCustomers = connection.getFlaggedCustomers();
+                if (flaggedCustomers.size() == 0){
+                    System.out.println("There are no flagged Customers");
+                }
+                else {
+                    System.out.println("\n|All Flagged Customers|\n");
+                    for (Customers customer : flaggedCustomers ){
+                        System.out.println(customer);
+                    } 
+                }                       
             }
-            else {
-                System.out.println("\n|All Flagged Customers|\n");
-                for (Customers customer : flaggedCustomers ){
-                    System.out.println(customer);
-                } 
-            }                       
-        }
-        if (action == 6){
-            DisplayUtilities.displayAllProducts(connection);
-            System.out.println("Enter a product's ID to get it's average review score");
-            int product_id = reader.nextInt();
-            System.out.println("The average score of product " + product_id + " is: " + connection.getAverageScore(product_id));
+            if (action == 6){
+                DisplayUtilities.displayAllProducts(connection);
+                System.out.println("Enter a product's ID to get it's average review score");
+                int product_id = reader.nextInt();
+                System.out.println("The average score of product " + product_id + " is: " + connection.getAverageScore(product_id));
+            }  
 
-        }  
+            if (action == 7){
+                DisplayUtilities.displayAllReviews(connection);;
+            }
+
+            if (action == 8){
+                exitPage = true;
+            }
+        }
     }
 
     public static void accessInventory (SuperStoreServices connection, Scanner reader) throws ClassNotFoundException, SQLException {
-        System.out.println("                         | Inventory |                         ");
-        System.out.println("---------------------------------------------------------------");
-        System.out.println("| 1 - Update Stock             |  2 - Update Warehouse Name   |");
-        System.out.println("---------------------------------------------------------------");
-        System.out.println("| 3 - Delete Warehouse         |  4 - Get Total Stock         |");
-        System.out.println("--------------------------------------------------------------\n");
-        System.out.println("What is the desired action? (enter the corresponding numerical value)");
+        boolean exitPage = false;
+        while (!exitPage) {
+            System.out.println("\n                         | Inventory |                         ");
+            System.out.println("---------------------------------------------------------------");
+            System.out.println("| 1 - Update Stock             |  2 - Update Warehouse Name   |");
+            System.out.println("---------------------------------------------------------------");
+            System.out.println("| 3 - Delete Warehouse         |  4 - Get Total Stock         |");
+            System.out.println("---------------------------------------------------------------");
+            System.out.println("| 5 - Search All               |  6 - Back                    |");
+            System.out.println("--------------------------------------------------------------\n");
+            System.out.println("What is the desired action? (enter the corresponding numerical value)");
 
-        int action = AppUtilities.setValidAction(reader, 4);
-        if (action == 1){
-            DisplayUtilities.displayAllInventory(connection);
-            System.out.println("Enter the inventory ID you'd like to update");
-            int inventory_id = AppUtilities.getValidInt(reader);
-            System.out.println("Enter the new amount of stock");
-            int stock = AppUtilities.getValidInt(reader);
-            connection.updateStock(inventory_id, stock);
-        }
-        if (action == 2){
-            // All warehouses with stock that can be updated are in inventory
-            DisplayUtilities.displayAllInventory(connection);
-            System.out.println("Enter the ID of the warehouse you'd like to update");
-            int warehouse_id = AppUtilities.getValidInt(reader);
-            System.out.println("Enter the new name");
-            // Flushing the scanner 
-            reader.nextLine();
-            String name = reader.nextLine();
-            connection.updateWarehouseName(warehouse_id, name);
-        }
+            int action = AppUtilities.setValidAction(reader, 6);
+            if (action == 1){
+                DisplayUtilities.displayAllInventory(connection);
+                System.out.println("Enter the inventory ID you'd like to update");
+                int inventory_id = AppUtilities.getValidInt(reader);
+                System.out.println("Enter the new amount of stock");
+                int stock = AppUtilities.getValidInt(reader);
+                connection.updateStock(inventory_id, stock);
+            }
+            if (action == 2){
+                // All warehouses with stock that can be updated are in inventory
+                DisplayUtilities.displayAllInventory(connection);
+                System.out.println("Enter the ID of the warehouse you'd like to update");
+                int warehouse_id = AppUtilities.getValidInt(reader);
+                System.out.println("Enter the new name");
+                // Flushing the scanner 
+                reader.nextLine();
+                String name = reader.nextLine();
+                connection.updateWarehouseName(warehouse_id, name);
+            }
 
-        if (action == 3){
-            // All warehouses that can be deleted are in inventory
-            DisplayUtilities.displayAllInventory(connection);
-            System.out.println("Enter the ID of the warehouse you'd like to delete (entering 0 will always return to the menu)");
-            int warehouse_id = AppUtilities.getValidInt(reader);
-            connection.deleteWarehouse(warehouse_id);
-        }
-        if (action == 4){
-            DisplayUtilities.displayAllProducts(connection);
-            System.out.println("Enter a product ID to get it's total stock");
-            int product_id = AppUtilities.getValidInt(reader);
-            System.out.println("The total stock of product " + product_id + " across all warehouses is: " + connection.getTotalStock(product_id));
+            if (action == 3){
+                // All warehouses that can be deleted are in inventory
+                DisplayUtilities.displayAllInventory(connection);
+                System.out.println("Enter the ID of the warehouse you'd like to delete");
+                int warehouse_id = AppUtilities.getValidInt(reader);
+                connection.deleteWarehouse(warehouse_id);
+            }
+            if (action == 4){
+                DisplayUtilities.displayAllProducts(connection);
+                System.out.println("Enter a product ID to get it's total stock");
+                int product_id = AppUtilities.getValidInt(reader);
+                System.out.println("The total stock of product " + product_id + " across all warehouses is: " + connection.getTotalStock(product_id));
+            }
+
+            if (action == 5){
+                DisplayUtilities.displayAllInventory(connection);
+            }
+
+            if (action == 6){
+                exitPage = true;
+            }
         }
     }
 }

@@ -210,7 +210,7 @@ public class SuperStoreServices {
             int cityId = Addresses.getCityId(this.conn, address);
             String city = Cities.getCity(this.conn, cityId);
             String province = Cities.getProvince(this.conn, cityId);
-            return " | Address: " + address + " | City: " + city + " | Province: " + province;
+            return " Address: " + address + " | City: " + city + " | Province: " + province;
         }
     }
 

@@ -9,7 +9,8 @@ public class DisplayUtilities {
             Products product = connection.getProductById(order.getProductId());
             Customers customer = connection.getCustomerById(order.getCustomerId());
             String storeName = connection.getStore(order.getStoreId());
-            System.out.println(order.toString(product, customer, storeName));
+            String fullLocation = connection.getFullLocation(customer.getAddressId());
+            System.out.println(order.toString(product, customer, storeName, fullLocation));
         }
     }
 
@@ -17,7 +18,8 @@ public class DisplayUtilities {
         for (Reviews review : reviews){
             Products product = connection.getProductById(review.getProductId());
             Customers customer = connection.getCustomerById(review.getCustomerId());
-            System.out.println(review.toString(product, customer));
+            String fullLocation = connection.getFullLocation(customer.getAddressId());
+            System.out.println(review.toString(product, customer, fullLocation));
         }
     }
 
@@ -53,7 +55,8 @@ public class DisplayUtilities {
         for (Reviews review : allReviews ){
             Products product = connection.getProductById(review.getProductId());
             Customers customer = connection.getCustomerById(review.getCustomerId());
-            System.out.println(review.toString(product, customer));
+            String fullLocation = connection.getFullLocation(customer.getAddressId());
+            System.out.println(review.toString(product, customer, fullLocation));
         }     
     }
 }

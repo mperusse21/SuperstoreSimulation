@@ -1,5 +1,6 @@
 package database2project;
 
+import java.sql.Date;
 import java.util.Scanner;
 
 public class AppUtilities {
@@ -67,5 +68,23 @@ public class AppUtilities {
         }
         // Will never be reached
         return -1;
+    }
+
+       /* prompts the user until they enter a valid Date, prints a message if they enter an invalid one */
+    public static Date getValidDate (Scanner reader){
+        boolean isValid = false;
+        while (!isValid){
+            try {
+                String validDateString = reader.next();
+                Date validDate = Date.valueOf(validDateString);
+
+                return validDate;
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("Invalid date, must be in format YYYY-MM-DD");
+            }
+        }
+        // Will never be reached
+        return null;
     }
 }

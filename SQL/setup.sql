@@ -91,7 +91,7 @@ CREATE TABLE AuditTable (
 
 -- Cities
 INSERT INTO Cities (City, Province) VALUES ('Montreal', 'Quebec');
-INSERT INTO Cities (City, Province) VALUES ('Toronto', 'Ontatio');
+INSERT INTO Cities (City, Province) VALUES ('Toronto', 'Ontario');
 INSERT INTO Cities (City, Province) VALUES ('Calgary', 'Alberta');
 INSERT INTO Cities (City, Province) VALUES ('Laval', 'Quebec');
 INSERT INTO Cities (City, Province) VALUES ('Brossard', 'Quebec');
