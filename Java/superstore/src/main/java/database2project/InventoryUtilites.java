@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InventoryUtilites {
-    // Returns the total stock of a product across all warehouses
+    /*// Returns the total stock of a product across all warehouses
     public static int getStock(Connection conn, int inventory_id) {
         String sql = "{ ? = call inventory_package.get_stock(?)}";
         int result = 0;
@@ -33,7 +33,7 @@ public class InventoryUtilites {
         
         // In case of error returns -1
         return -1;
-    }
+    }*/
 
     // Returns the total stock of a product across all warehouses
     public static int getTotalStock(Connection conn, int product_id) {

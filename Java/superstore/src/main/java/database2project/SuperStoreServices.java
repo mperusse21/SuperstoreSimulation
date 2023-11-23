@@ -107,10 +107,6 @@ public class SuperStoreServices {
         return InventoryUtilites.getTotalStock(this.conn, product_id);
     }
 
-    public int getStock(int inventory_id) {
-        return InventoryUtilites.getStock(this.conn, inventory_id);
-    }
-
     public List<Customers> getFlaggedCustomers() {
         return ReviewsUtilities.getFlaggedCustomers(this.conn);
     }

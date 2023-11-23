@@ -88,7 +88,6 @@ public class Warehouses implements SQLData {
         return "Warehouse Id: " + this.warehouseId + ", " + this.warehouseName + ", Address Id:" + this.addressId;
     }   
 
-    // Not necessary but added
     public static Warehouses getWarehouse(Connection conn, int warehouse_id) {
         String sql = "{ ? = call warehouses_package.get_warehouse(?) }";
         CallableStatement stmt = null;
@@ -152,7 +151,7 @@ public class Warehouses implements SQLData {
     }
 
     /**
-     * Takes a review id and updates it's description to a provided string.
+     * Takes a warehouse id and updates it's name to a provided string.
      */
     public static void updateWarehouseName(Connection conn, int warehouse_id, String warehouse_name) {
         String sql = "{ call warehouses_package.updatewarehousename(?, ?)}";
