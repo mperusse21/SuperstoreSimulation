@@ -74,9 +74,9 @@ public class Warehouses implements SQLData {
     }
 
     // toString method which returns a string representation of a Warehouse, 
-    public String toString (String address){
+    public String toString (String fullLocation){
         return "| Warehouse Id: " + this.warehouseId + " | Warehouse Name: " + this.warehouseName + " | Address Id: " + this.addressId + 
-        " | Address: " + address;
+        fullLocation;
     }   
 
     public static Warehouses getWarehouse(Connection conn, int warehouse_id) {

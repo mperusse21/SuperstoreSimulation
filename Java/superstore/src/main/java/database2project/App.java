@@ -50,7 +50,7 @@ public class App
                     accessCustomers(connection, reader);
                 }
                 else if (tableToAccess == 2) {
-                    accessProducts(connection, reader);
+                    //accessProducts(connection, reader);
                 }
                 else if (tableToAccess == 3) {
                     accessOrders(connection, reader);
@@ -107,7 +107,8 @@ public class App
             if (searchMethod == 1) {
                 List<Customers> allCustomers = connection.getAllCustomers();
                 for (Customers allCustomer : allCustomers ){
-                    System.out.println(allCustomer);
+                    String customerAddress = connection.getFullLocation(allCustomer.getAddressId()); 
+                    System.out.println(allCustomer + customerAddress);
                 }
             }
             else if (searchMethod == 2) {
@@ -116,7 +117,7 @@ public class App
                 Customers customer = connection.getCustomerByEmail(email);
                 //String customerAddress = connection.getAddress(customer.getAddressId()); 
                 String customerAddress = connection.getFullLocation(customer.getAddressId()); 
-                System.out.println("Customer found: " + customer ); 
+                System.out.println("Customer found: " + customer + customerAddress); 
             }
             else if (searchMethod == 3) {
                 exitPage = true;
@@ -140,9 +141,11 @@ public class App
             int action = setValidAction(reader, 5);
             if (action == 1){
                 System.out.println("Enter the name of the new product: ");
-                String productName = reader.next();
+                // Flushes the reader
+                reader.nextLine();
+                String productName = reader.nextLine();
                 System.out.println("Enter the category of the new product: ");
-                String category = reader.next();
+                String category = reader.nextLine();
                 connection.addProduct(productName, category);
             }
             else if (action == 2){
@@ -152,17 +155,29 @@ public class App
                 System.out.println("Which field would you like to update? (enter the corresponding numerical value)");
                 int field = setValidAction(reader, 2);
                 if (field == 1) {
+                    List<Products> allProducts = connection.getAllProducts();
+                        for (Products allProduct : allProducts ){
+                            System.out.println(allProduct);
+                        }
                     System.out.println("Enter the product id of the product you wish to modify: ");
                     int productId = reader.nextInt();
                     System.out.println("Enter the new product name: ");
-                    String productName = reader.next();
+                    // Flushes the reader
+                    reader.nextLine();
+                    String productName = reader.nextLine();
                     connection.updateProductName(productId, productName);
                 }
                 else if (field == 2) {
+                    List<Products> allProducts = connection.getAllProducts();
+                        for (Products allProduct : allProducts ){
+                            System.out.println(allProduct);
+                        }
                     System.out.println("Enter the product id of the product you wish to modify: ");
                     int productId = reader.nextInt();
+                    // Flushes the reader
+                    reader.nextLine();
                     System.out.println("Enter the new product category: ");
-                    String category = reader.next();
+                    String category = reader.nextLine();
                     connection.updateProductCategory(productId, category);
                 }
 
@@ -340,27 +355,37 @@ public class App
         }
         if (action == 4){
             List<Reviews> flaggedReviews = connection.getFlaggedReviews();
-            System.out.println("\n|All Flagged Reviews|\n");
-            DisplayUtilities.displayReviews(connection, flaggedReviews);
-            System.out.println("Enter the ID of the review you'd like to modify");
-            int review_id = AppUtilities.getValidInt(reader);;
-            System.out.println("Press 1 to delete the review or 2 to update it");
-            int choice = AppUtilities.setValidAction(reader, 2);
-            if (choice == 1){
-                connection.deleteReview(review_id);
+            if (flaggedReviews.size() == 0){
+                System.out.println("There are no flagged Reviews");
             }
+            else {
+                System.out.println("\n|All Flagged Reviews|\n");
+                DisplayUtilities.displayReviews(connection, flaggedReviews);
+                System.out.println("Enter the ID of the review you'd like to modify");
+                int review_id = AppUtilities.getValidInt(reader);;
+                System.out.println("Press 1 to delete the review or 2 to update it");
+                int choice = AppUtilities.setValidAction(reader, 2);
+                if (choice == 1){
+                    connection.deleteReview(review_id);
+                }
 
-            if (choice == 2){
-                AppUtilities.handleReviewUpdate(reader, connection, review_id); 
+                if (choice == 2){
+                    AppUtilities.handleReviewUpdate(reader, connection, review_id); 
+                }
             }
-
         }
         if (action == 5){
             List<Customers> flaggedCustomers = connection.getFlaggedCustomers();
+            if (flaggedCustomers.size() == 0){
+                System.out.println("There are no flagged Customers");
+            }
+            else {
                 System.out.println("\n|All Flagged Customers|\n");
                 for (Customers customer : flaggedCustomers ){
                     System.out.println(customer);
-                }                        }
+                } 
+            }                       
+        }
         if (action == 6){
             DisplayUtilities.displayAllProducts(connection);
             System.out.println("Enter a product's ID to get it's average review score");
