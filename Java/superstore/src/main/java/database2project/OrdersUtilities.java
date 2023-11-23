@@ -4,6 +4,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class with methods related to Orders, all different searches with different goals.
+ */
 public class OrdersUtilities {
     /*
      * Takes a product id and a quantity, validates whether or not the order would be allowed
@@ -78,6 +81,7 @@ public class OrdersUtilities {
         return null;
     }
 
+    // Returns a list of all orders in the database
     public static List<Orders> getAllOrders(Connection conn) {
         String sql = "{ ? = call orders_package.get_all_orders()}";
         CallableStatement stmt = null;

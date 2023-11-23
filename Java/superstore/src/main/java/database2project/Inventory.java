@@ -55,7 +55,7 @@ public class Inventory implements SQLData {
     //empty constructor to be used for getStock PROBABLY NOT NEEDED!!!
     //public Inventory (){};
 
-    // SQL methods
+    // SQL methods NOT USED!
     @Override 
     public String getSQLTypeName () throws SQLException {
         return Inventory.TYPENAME;
@@ -79,7 +79,7 @@ public class Inventory implements SQLData {
 
     // Returns a string representation of an inventory row, takes a warehouse and full address location as input
     public String toString (Warehouses w, String fullLocation){
-        return "| Inventory Id: " + this.inventoryId + w.toString(fullLocation) + "| Product Id: " + this.productId + "| Stock: " + this.stock;
+        return "| Inventory Id: " + this.inventoryId + w.toString(fullLocation) + "Product Id: " + this.productId + " | Stock: " + this.stock;
     }
        
 }

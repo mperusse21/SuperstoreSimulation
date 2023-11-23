@@ -7,6 +7,8 @@ public class SuperStoreServices {
     private String url = "jdbc:oracle:thin:@198.168.52.211:1521/pdbora19c.dawsoncollege.qc.ca";
     private Connection conn;
 
+    // Mitchell's methods
+
     // Constructor which takes username and password and creates a connection
     // (Exceptions will be handled in the application)
     public SuperStoreServices(String user, String password) throws SQLException {
@@ -64,6 +66,8 @@ public class SuperStoreServices {
         Warehouses.deleteWarehouse(this.conn, warehouse_id);
     }
 
+    // Methods for updating columns in various tables
+
     public void updateScore(int review_id, int score) {
         ReviewsUtilities.updateScore(this.conn, review_id, score);
     }
@@ -84,6 +88,8 @@ public class SuperStoreServices {
         Warehouses.updateWarehouseName(this.conn, warehouse_id, warehouse_name);
     }
 
+    // Get methods which return objects
+
     public Orders getOrder(int order_id, int product_id) {
         return Orders.getOrder(this.conn, order_id, product_id);
     }
@@ -97,11 +103,11 @@ public class SuperStoreServices {
     }
 
     // Search methods
-    // Gets the average review score for a product
+
     public Double getAverageScore(int product_id) {
         return ReviewsUtilities.getAverageScore(this.conn, product_id);
     }
-
+    
     public int getTotalStock(int product_id) {
         return InventoryUtilites.getTotalStock(this.conn, product_id);
     }
@@ -130,6 +136,8 @@ public class SuperStoreServices {
         return ReviewsUtilities.getAllReviews(conn); 
     }
 
+    // Mohammad's methods
+
     public void updateProductName(int productId, String productName) throws SQLException {
 
         String sql = "{call products_package.update_product_name(?,?)}";
@@ -139,7 +147,7 @@ public class SuperStoreServices {
             stmt.execute();
             System.out.println("Product has successfully been updated!");
         }
-}
+    }
 
     public void updateProductCategory(int productId, String category) throws SQLException {
 

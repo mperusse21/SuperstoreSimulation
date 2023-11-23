@@ -112,7 +112,7 @@ public class Orders implements SQLData {
     // Returns a string representation of an order.
     // (Takes a product, customer, and strings representing the full address and store name)
     public String toString (Products p, Customers c, String storeName, String fullLocation){
-        return "| Order Id: " + this.orderId  + c.toString() + fullLocation +
+        return "| Order Id: " + this.orderId + " " + c.toString() + fullLocation +
         "\n" + p.toString() + " Quantity: " + this.quantity + " | Price: " + this.price + " | Order Date: "
         + this.orderDate + "| Store ID: " + this.storeId + " | Store Name: " + storeName + "\n";
     }  

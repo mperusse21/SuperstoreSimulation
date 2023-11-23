@@ -28,6 +28,7 @@ public class App
             }
         }
         
+        // The main application, loops until the user hits 7 on the menu screen.
         try {
             System.out.println("Welcome to our super store!\n");
             boolean exitProgram = false;
@@ -92,8 +93,10 @@ public class App
      
     }
 
+    // The user interface for the customers table
     public static void accessCustomers(SuperStoreServices connection, Scanner reader) throws SQLException, ClassNotFoundException {
         boolean exitPage = false;
+        // Loops until the user enters 3
         while (!exitPage) {
             System.out.println("                                            \n");
             System.out.println("                 | CUSTOMERS |                ");
@@ -124,9 +127,11 @@ public class App
             }
         }
     }
-
+    
+    // The user interface for the products table
     public static void accessProducts(SuperStoreServices connection, Scanner reader) throws SQLException, ClassNotFoundException {
         boolean exitPage = false;
+        // Loops until the user enters 5
         while (!exitPage) {
             System.out.println("                                                 \n");
             System.out.println("                  | PRODUCTS |                     ");
@@ -194,6 +199,7 @@ public class App
 
     }
 
+    // Prints the audit table
     public static void accessAudit(SuperStoreServices connection, Scanner reader) throws SQLException, ClassNotFoundException {
 
         List<AuditTable> audits = connection.getAuditTable();
@@ -209,8 +215,10 @@ public class App
         }
     }
 
+    // The user interface for the orders table
     public static void accessOrders (SuperStoreServices connection, Scanner reader) throws ClassNotFoundException, SQLException {
         boolean exitPage = false;
+        // Loops until the user enters 5
         while (!exitPage) {
             System.out.println("\n                         | Orders |                         ");
             System.out.println("------------------------------------------------------------");
@@ -285,7 +293,7 @@ public class App
                 for (Products allProduct : allProducts ){
                     System.out.println(allProduct);
                 }                
-                System.out.println("\nCheck if a certain quantity of product is available in any warehouse");
+                System.out.println("\nCheck if a certain quantity of a product is available in any warehouse");
                 System.out.println("Enter a product id");
                 int product_id = AppUtilities.getValidInt(reader);
                 System.out.println("Enter a quantity to check if there is enough stock to allow the order");
@@ -303,9 +311,11 @@ public class App
             }
         }
     }
-
+    
+    // The user interface for the reviews table
     public static void accessReviews (SuperStoreServices connection, Scanner reader) throws ClassNotFoundException, SQLException {
         boolean exitPage = false;
+        // Loops until the user enters 8
         while (!exitPage) {
             System.out.println("\n                          | Reviews |                         ");
             System.out.println("--------------------------------------------------------------");
@@ -404,8 +414,10 @@ public class App
         }
     }
 
+    // The user interface for the inventory and warehouse tables
     public static void accessInventory (SuperStoreServices connection, Scanner reader) throws ClassNotFoundException, SQLException {
         boolean exitPage = false;
+        // Loops until the user enters 6
         while (!exitPage) {
             System.out.println("\n                         | Inventory |                         ");
             System.out.println("---------------------------------------------------------------");
