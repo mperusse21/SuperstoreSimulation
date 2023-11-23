@@ -5,8 +5,7 @@ import java.util.Map;
 
 public class Orders implements SQLData {
     
-    //Private fields for all fields of the Customers table
-    // Used integer to allow nulls
+    //Private fields for all fields of the Orders table
     private int orderId;
     private int productId;
     private int customerId;

@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class App 
 {
     public static void main( String[] args ) {
-        Scanner reader = new Scanner(System.in);
+        /*Scanner reader = new Scanner(System.in);
         SuperStoreServices connection = null;
 
         try {
@@ -33,7 +33,7 @@ public class App
             }
 
             reader.close();
-        }
+        }*/
      
     }
 }
