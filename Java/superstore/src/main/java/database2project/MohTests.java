@@ -27,6 +27,7 @@ public class MohTests {
             System.out.println(address);
             String city = connection.getCity(1);
             System.out.println(city);
+            //conn.addProduct("Broccoli", "Grocery");
             //Products product = conn.getProductById(14);
             //System.out.println(product);
             //List<Products> products = conn.getProductsByCategory("Grocery");
@@ -41,6 +42,10 @@ public class MohTests {
             }
             String store = conn.getStore(2);
             System.out.println(store);
+            List<Customers> allCustomers = connection.getAllCustomers();
+            for (Customers allCustomer : allCustomers ){
+                System.out.println(allCustomer);
+            }
         }
         
         // Catches any possible exceptions

@@ -155,6 +155,37 @@ public class Products implements SQLData {
               return productList;
     
         }
+
+    // Method which adds a product using the add_products procedure
+    public void AddToDatabase(Connection conn) throws ClassNotFoundException {
+            String sql = "{ call products_package.add_products(?)}";
+            CallableStatement stmt = null;
+            try {
+                Map map = conn.getTypeMap();
+                conn.setTypeMap(map);
+                map.put(Products.TYPENAME, Class.forName("database2project.Products"));
+                Products newProduct = new Products(this.productId, this.productName, this.category);
+                stmt = conn.prepareCall(sql);
+                stmt.setObject(1, newProduct);
+                stmt.execute();
+                System.out.println("Successfully added product information to the database"); 
+            }      
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            // Always tries to close stmt
+            finally {
+                try{
+                    if (!stmt.isClosed() && stmt != null) {
+                        stmt.close();
+                    }
+                }
+                catch (SQLException e){
+                    e.printStackTrace();
+                }
+            }         
+        }
+
     }
 
 

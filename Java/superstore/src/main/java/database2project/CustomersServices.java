@@ -1,6 +1,7 @@
 package database2project;
 
 import java.sql.*;
+import java.util.List;
 
 public class CustomersServices {
 
@@ -20,18 +21,6 @@ public class CustomersServices {
         }
     }
 
-    public void addCustomer(Customers newCustomer){
-
-    }
-
-    public void removeCustomer(int customerId){
-
-    }
-
-    public void updateCustomer(int customerId, String firstname, String lastname, String email, int addressId){
-
-    }
-
     public Customers getCustomerByEmail(String email) throws SQLException, ClassNotFoundException{
         return Customers.getCustomerByEmail(this.connection, email);
     }
@@ -46,6 +35,10 @@ public class CustomersServices {
 
     public String getCity(int cityId) throws SQLException, ClassNotFoundException {
         return Cities.getCity(this.connection, cityId);
+    }
+
+    public List<Customers> getAllCustomers() throws SQLException, ClassNotFoundException {
+        return Customers.getAllCustomers(this.connection);
     }
 
 }

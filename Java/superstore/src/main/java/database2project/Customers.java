@@ -1,6 +1,8 @@
 package database2project;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Customers implements SQLData {
@@ -92,7 +94,7 @@ public class Customers implements SQLData {
     //toString for Customers
     @Override
     public String toString(){
-        return "| Customer Id: " + this.customerId + " | Fullname: " + this.firstname + " " + this.lastname + " | Email: " + this.email + " | Address Id: " + this.addressId;
+        return "| Customer Id: " + this.customerId + " | Fullname: " + this.firstname + " " + this.lastname + " | Email: " + this.email + " | Address Id: " + this.addressId + " |";
     }
 
 
@@ -131,6 +133,38 @@ public class Customers implements SQLData {
 
     }
 
+     public static List<Customers> getAllCustomers(Connection conn) {
+        String sql = "{ call ? := customers_package.getAllCustomers() }";
+        CallableStatement stmt = null;
+        ResultSet results = null;
+        List<Customers> customerList = new ArrayList<Customers>();
+        try{
+            stmt = conn.prepareCall(sql);
+            stmt.registerOutParameter(1, Types.REF_CURSOR);
+            stmt.execute();
+            results = (ResultSet) stmt.getObject(1);
+            while (results.next()){
+                Customers allCustomer = new Customers (results.getInt("CustomerId"), results.getString("Firstname"), results.getString("Lastname"), results.getString("Email"), results.getInt("Addressid")); 
+                customerList.add(allCustomer);
+            }
+        }
 
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            try{
+                if (!stmt.isClosed() && stmt != null){
+                    stmt.close();
+                }
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+           
+              return customerList;
+    
+        }
 
 }

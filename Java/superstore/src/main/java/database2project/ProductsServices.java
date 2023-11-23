@@ -60,5 +60,11 @@ public class ProductsServices {
     public String getStore(int storeId) throws SQLException, ClassNotFoundException {
         return Stores.getStore(this.connection, storeId);
     }
+
+    public void addProduct(String productName, String category) throws SQLException, ClassNotFoundException {            
+            Products newProduct = new Products (0, productName, category);
+            newProduct.AddToDatabase(this.connection);
+        }
+
     
 }
