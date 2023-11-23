@@ -134,6 +134,7 @@ public class SuperStoreServices {
             stmt.setInt(1, productId);
             stmt.setString(2, productName);
             stmt.execute();
+            System.out.println("Product has successfully been updated!");
         }
 }
 
@@ -144,6 +145,7 @@ public class SuperStoreServices {
                 stmt.setInt(1, productId);
                 stmt.setString(2, category);
                 stmt.execute();
+                System.out.println("Product has successfully been updated!");
             }
     }
 

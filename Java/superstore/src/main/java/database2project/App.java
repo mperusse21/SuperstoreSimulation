@@ -30,38 +30,45 @@ public class App
         
         try {
             System.out.println("Welcome to our super store!\n");
-            System.out.println("       | SUPERSTORE MENU |       ");
-            System.out.println("----------------------------------");
-            System.out.println("| 1 - Account   |  2 - Product   |");
-            System.out.println("----------------------------------");
-            System.out.println("| 3 - Order     |  4 - Review    |");
-            System.out.println("----------------------------------");
-            System.out.println("| 5 - Inventory |  6 - History   |");
-            System.out.println("----------------------------------\n");
-            System.out.println("What would you like to access? (enter the corresponding numerical value)");
-            int tableToAccess = reader.nextInt();
+            boolean exitProgram = false;
+            while (!exitProgram) {
+                System.out.println("                               \n");
+                System.out.println("       | SUPERSTORE MENU |       ");
+                System.out.println("----------------------------------");
+                System.out.println("| 1 - Account   |  2 - Product   |");
+                System.out.println("----------------------------------");
+                System.out.println("| 3 - Order     |  4 - Review    |");
+                System.out.println("----------------------------------");
+                System.out.println("| 5 - Inventory |  6 - History   |");
+                System.out.println("----------------------------------");
+                System.out.println("| 7 - Exit      |                |");
+                System.out.println("----------------------------------\n");
+                System.out.println("What would you like to access? (enter the corresponding numerical value)");
+                int tableToAccess = setValidAction(reader, 7);
 
-            if (tableToAccess == 1) {
-                accessCustomers(connection);
-            }
-            else if (tableToAccess == 2) {
-                accessProducts(connection);
-            }
-            else if (tableToAccess == 3) {
-                accessOrders(connection, reader);
-            }
-            else if (tableToAccess == 4) {
-                accessReviews(connection, reader);
-            }
-            else if (tableToAccess == 5) {
-                accessInventory(connection, reader);
-            }
-            else if (tableToAccess == 6) {
-                accessAudit(connection);
-            }
-            else {
+                if (tableToAccess == 1) {
+                    accessCustomers(connection, reader);
+                }
+                else if (tableToAccess == 2) {
+                    accessProducts(connection, reader);
+                }
+                else if (tableToAccess == 3) {
+                    accessOrders(connection, reader);
+                }
+                else if (tableToAccess == 4) {
+                    accessReviews(connection, reader);
+                }
+                else if (tableToAccess == 5) {
+                    accessInventory(connection, reader);
+                }
+                else if (tableToAccess == 6) {
+                    accessAudit(connection, reader);
+                }
+                else if (tableToAccess == 7) {
+                    exitProgram = true;
+                }
 
-            }
+             }
             
 
         }
@@ -85,49 +92,110 @@ public class App
      
     }
 
-    public static void accessCustomers(SuperStoreServices connection) throws SQLException, ClassNotFoundException {
-        Scanner reader = new Scanner(System.in);
-        System.out.println("                 | CUSTOMERS |                ");
-        System.out.println("----------------------------------------------");
-        System.out.println("| 1 - Search All     |  2 - Search By Email  |");
-        System.out.println("----------------------------------------------\n");
-        System.out.println("How would you like to view customers? (enter the corresponding numerical value)");
-        int searchMethod = reader.nextInt();
-        if (searchMethod == 1) {
-            List<Customers> allCustomers = connection.getAllCustomers();
-            for (Customers allCustomer : allCustomers ){
-                System.out.println(allCustomer);
+    public static void accessCustomers(SuperStoreServices connection, Scanner reader) throws SQLException, ClassNotFoundException {
+        boolean exitPage = false;
+        while (!exitPage) {
+            System.out.println("                                            \n");
+            System.out.println("                 | CUSTOMERS |                ");
+            System.out.println("----------------------------------------------");
+            System.out.println("| 1 - Search All     |  2 - Search By Email  |");
+            System.out.println("----------------------------------------------");
+            System.out.println("| 3 - Back           |                       |");
+            System.out.println("----------------------------------------------\n");
+            System.out.println("How would you like to view customers? (enter the corresponding numerical value)");
+            int searchMethod = setValidAction(reader, 3);
+            if (searchMethod == 1) {
+                List<Customers> allCustomers = connection.getAllCustomers();
+                for (Customers allCustomer : allCustomers ){
+                    System.out.println(allCustomer);
+                }
+            }
+            else if (searchMethod == 2) {
+                System.out.println("Please enter email: ");   
+                String email = reader.next(); 
+                Customers customer = connection.getCustomerByEmail(email);
+                String customerAddress = connection.getAddress(customer.getAddressId()); 
+                System.out.println("Customer found: " + customer + " Address: " + customerAddress ); 
+            }
+            else if (searchMethod == 3) {
+                exitPage = true;
             }
         }
-        else if (searchMethod == 2) {
-            System.out.println("Please enter email: ");   
-            String email = reader.next(); 
-            Customers customer = connection.getCustomerByEmail(email);
-            String customerAddress = connection.getAddress(customer.getAddressId()); 
-            System.out.println("Customer found: " + customer + " Address: " + customerAddress ); 
+    }
+
+    public static void accessProducts(SuperStoreServices connection, Scanner reader) throws SQLException, ClassNotFoundException {
+        boolean exitPage = false;
+        while (!exitPage) {
+            System.out.println("                                                 \n");
+            System.out.println("                  | PRODUCTS |                     ");
+            System.out.println("---------------------------------------------------");
+            System.out.println("| 1 - Add               |  2 - Update             |");
+            System.out.println("---------------------------------------------------");
+            System.out.println("| 3 - Search All        |  4 - Search By Category |");
+            System.out.println("---------------------------------------------------");
+            System.out.println("| 5 - Back              |                         |");
+            System.out.println("---------------------------------------------------\n");
+            System.out.println("What is the desired action? (enter the corresponding numerical value)");
+            int action = setValidAction(reader, 5);
+            if (action == 1){
+                System.out.println("Enter the name of the new product: ");
+                String productName = reader.next();
+                System.out.println("Enter the category of the new product: ");
+                String category = reader.next();
+                connection.addProduct(productName, category);
+            }
+            else if (action == 2){
+                System.out.println("---------------------------------------------------");
+                System.out.println("| 1 - Name               |  2 - Category          |");
+                System.out.println("---------------------------------------------------");
+                System.out.println("Which field would you like to update? (enter the corresponding numerical value)");
+                int field = setValidAction(reader, 2);
+                if (field == 1) {
+                    System.out.println("Enter the product id of the product you wish to modify: ");
+                    int productId = reader.nextInt();
+                    System.out.println("Enter the new product name: ");
+                    String productName = reader.next();
+                    connection.updateProductName(productId, productName);
+                }
+                else if (field == 2) {
+                    System.out.println("Enter the product id of the product you wish to modify: ");
+                    int productId = reader.nextInt();
+                    System.out.println("Enter the new product category: ");
+                    String category = reader.next();
+                    connection.updateProductCategory(productId, category);
+                }
+
+            }
+            else if (action == 3){
+                List<Products> allProducts = connection.getAllProducts();
+                for (Products allProduct : allProducts ){
+                    System.out.println(allProduct);
+                }
+            }
+            else if (action == 4){
+                System.out.println("Enter your desired product category: ");
+                String category = reader.next();
+                List<Products> products = connection.getProductsByCategory(category);
+                for (Products foundProducts : products ){
+                    System.out.println(foundProducts);
+                }
+            }
+            else if (action == 5) {
+                exitPage = true;
+            }
         }
-    }
-
-    public static void accessProducts(SuperStoreServices connection) throws SQLException, ClassNotFoundException {
-        Scanner reader = new Scanner(System.in);
-        System.out.println("                  | PRODUCTS |                     ");
-        System.out.println("---------------------------------------------------");
-        System.out.println("| 1 - Add               |  2 - Update             |");
-        System.out.println("---------------------------------------------------");
-        System.out.println("| 3 - Search All        |  4 - Search By Category |");
-        System.out.println("---------------------------------------------------\n");
-        System.out.println("What is the desired action? (enter the corresponding numerical value)");
 
     }
 
-    public static void accessAudit(SuperStoreServices connection) throws SQLException, ClassNotFoundException {
+    public static void accessAudit(SuperStoreServices connection, Scanner reader) throws SQLException, ClassNotFoundException {
 
         List<AuditTable> audits = connection.getAuditTable();
         if (audits.size() == 0) {
             System.out.println("Your history is empty");
         }
         else {
-            System.out.println("                  | History |                     ");
+            System.out.println("                                     | History |                                  ");
+            System.out.println("--------------------------------------------------------------------------------\n");
         for (AuditTable audit : audits) {
             System.out.println(audit);
             } 
