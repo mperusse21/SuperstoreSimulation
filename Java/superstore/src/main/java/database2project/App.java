@@ -141,9 +141,11 @@ public class App
             int action = setValidAction(reader, 5);
             if (action == 1){
                 System.out.println("Enter the name of the new product: ");
-                String productName = reader.next();
+                // Flushes the reader
+                reader.nextLine();
+                String productName = reader.nextLine();
                 System.out.println("Enter the category of the new product: ");
-                String category = reader.next();
+                String category = reader.nextLine();
                 connection.addProduct(productName, category);
             }
             else if (action == 2){
@@ -153,17 +155,29 @@ public class App
                 System.out.println("Which field would you like to update? (enter the corresponding numerical value)");
                 int field = setValidAction(reader, 2);
                 if (field == 1) {
+                    List<Products> allProducts = connection.getAllProducts();
+                        for (Products allProduct : allProducts ){
+                            System.out.println(allProduct);
+                        }
                     System.out.println("Enter the product id of the product you wish to modify: ");
                     int productId = reader.nextInt();
                     System.out.println("Enter the new product name: ");
-                    String productName = reader.next();
+                    // Flushes the reader
+                    reader.nextLine();
+                    String productName = reader.nextLine();
                     connection.updateProductName(productId, productName);
                 }
                 else if (field == 2) {
+                    List<Products> allProducts = connection.getAllProducts();
+                        for (Products allProduct : allProducts ){
+                            System.out.println(allProduct);
+                        }
                     System.out.println("Enter the product id of the product you wish to modify: ");
                     int productId = reader.nextInt();
+                    // Flushes the reader
+                    reader.nextLine();
                     System.out.println("Enter the new product category: ");
-                    String category = reader.next();
+                    String category = reader.nextLine();
                     connection.updateProductCategory(productId, category);
                 }
 
