@@ -107,7 +107,8 @@ public class App
             if (searchMethod == 1) {
                 List<Customers> allCustomers = connection.getAllCustomers();
                 for (Customers allCustomer : allCustomers ){
-                    System.out.println(allCustomer);
+                    String customerAddress = connection.getFullLocation(allCustomer.getAddressId()); 
+                    System.out.println(allCustomer + customerAddress);
                 }
             }
             else if (searchMethod == 2) {
@@ -116,7 +117,7 @@ public class App
                 Customers customer = connection.getCustomerByEmail(email);
                 //String customerAddress = connection.getAddress(customer.getAddressId()); 
                 String customerAddress = connection.getFullLocation(customer.getAddressId()); 
-                System.out.println("Customer found: " + customer ); 
+                System.out.println("Customer found: " + customer + customerAddress); 
             }
             else if (searchMethod == 3) {
                 exitPage = true;
