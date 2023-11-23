@@ -50,7 +50,7 @@ public class App
                     accessCustomers(connection, reader);
                 }
                 else if (tableToAccess == 2) {
-                    accessProducts(connection, reader);
+                    //accessProducts(connection, reader);
                 }
                 else if (tableToAccess == 3) {
                     accessOrders(connection, reader);
@@ -346,27 +346,37 @@ public class App
         }
         if (action == 4){
             List<Reviews> flaggedReviews = connection.getFlaggedReviews();
-            System.out.println("\n|All Flagged Reviews|\n");
-            DisplayUtilities.displayReviews(connection, flaggedReviews);
-            System.out.println("Enter the ID of the review you'd like to modify");
-            int review_id = AppUtilities.getValidInt(reader);;
-            System.out.println("Press 1 to delete the review or 2 to update it");
-            int choice = AppUtilities.setValidAction(reader, 2);
-            if (choice == 1){
-                connection.deleteReview(review_id);
+            if (flaggedReviews.size() == 0){
+                System.out.println("There are no flagged Reviews");
             }
+            else {
+                System.out.println("\n|All Flagged Reviews|\n");
+                DisplayUtilities.displayReviews(connection, flaggedReviews);
+                System.out.println("Enter the ID of the review you'd like to modify");
+                int review_id = AppUtilities.getValidInt(reader);;
+                System.out.println("Press 1 to delete the review or 2 to update it");
+                int choice = AppUtilities.setValidAction(reader, 2);
+                if (choice == 1){
+                    connection.deleteReview(review_id);
+                }
 
-            if (choice == 2){
-                AppUtilities.handleReviewUpdate(reader, connection, review_id); 
+                if (choice == 2){
+                    AppUtilities.handleReviewUpdate(reader, connection, review_id); 
+                }
             }
-
         }
         if (action == 5){
             List<Customers> flaggedCustomers = connection.getFlaggedCustomers();
+            if (flaggedCustomers.size() == 0){
+                System.out.println("There are no flagged Customers");
+            }
+            else {
                 System.out.println("\n|All Flagged Customers|\n");
                 for (Customers customer : flaggedCustomers ){
                     System.out.println(customer);
-                }                        }
+                } 
+            }                       
+        }
         if (action == 6){
             DisplayUtilities.displayAllProducts(connection);
             System.out.println("Enter a product's ID to get it's average review score");

@@ -43,8 +43,8 @@ public class DisplayUtilities {
         List<Inventory> allInventory = connection.getAllInventory();
         for (Inventory inventory : allInventory ){
             Warehouses warehouse = connection.getWarehouse(inventory.getWarehouseId());
-            String address = connection.getAddress(warehouse.getAddressId());
-            System.out.println(inventory.toString(warehouse, address));
+            String fullLocation = connection.getFullLocation(warehouse.getAddressId());
+            System.out.println(inventory.toString(warehouse, fullLocation));
         }     
     }
 
