@@ -30,8 +30,7 @@ public class SuperStoreServices {
     // uses it's built in AddToDatabase method.
     // Also performs validation.
     public void addOrder(int orderId, int productId, int customerId, int storeId, int quantity, Double price,
-            Date orderDate)
-            throws SQLException, ClassNotFoundException {
+            Date orderDate) {
         Orders newOrder = new Orders(orderId, productId, customerId, storeId, quantity, price, orderDate);
         // Does validation here and in SQL for added safety
         if (OrdersUtilities.validateOrder(this.conn, productId, quantity).equals("true")) {
@@ -43,10 +42,10 @@ public class SuperStoreServices {
 
     // Method which takes input needed to add a review, creates a Review object and
     // uses it's built in AddToDatabase method.
-    public void addReview(int reviewId, int productId, int customerId, int score,
-            String description) throws ClassNotFoundException {
-        // Every review is flagged 0 times when added
-        Reviews newReview = new Reviews(reviewId, productId, customerId, score, 0, description);
+    public void addReview(int productId, int customerId, int score,
+            String description) {
+        // Every review is flagged 0 times when added and review id is always generated
+        Reviews newReview = new Reviews(0, productId, customerId, score, 0, description);
         newReview.AddToDatabase(this.conn);
     }
 

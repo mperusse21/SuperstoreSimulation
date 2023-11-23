@@ -180,7 +180,6 @@ INSERT INTO Customers (Firstname, Lastname, Email, AddressId) VALUES ('Olivia', 
 
 INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse A', 13);
--- This is the weird one
 INSERT INTO Warehouses (WarehouseName, AddressId) 
     VALUES ('Warehouse B', 14);
 INSERT INTO Warehouses (WarehouseName, AddressId) 

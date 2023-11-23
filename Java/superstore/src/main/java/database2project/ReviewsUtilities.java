@@ -16,7 +16,7 @@ public class ReviewsUtilities {
         CallableStatement stmt = null;
         try {
             stmt = conn.prepareCall(sql);
-            stmt.registerOutParameter(1, Types.INTEGER);
+            stmt.registerOutParameter(1, Types.DOUBLE);
             stmt.setInt(2, product_id);
             stmt.execute();
             result = stmt.getDouble(1);

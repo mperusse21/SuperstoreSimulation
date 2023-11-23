@@ -109,14 +109,13 @@ public class Orders implements SQLData {
         stream.writeDate(getOrderDate());
     }
 
-    public String toString (){
-        return "Order Id: " + this.orderId + " Customer Id: " + this.customerId + " Store Id: " + this.storeId
-        + "\nProduct Id: " + this.productId + " Quantity: " + this.quantity + " Price: " + this.price + " Order Date: "
-        + this.orderDate + "\n" ;
+    public String toString (Products p, Customers c){
+        return "| Order Id: " + this.orderId  + p.toString() +  c.toString() + "| Quantity: " + this.quantity + "| Price: " + this.price + "| Order Date: "
+        + this.orderDate;
     }  
 
     // Method which adds an order using the add_order procedure
-    public void AddToDatabase(Connection conn) throws ClassNotFoundException{
+    public void AddToDatabase(Connection conn) {
         String sql = "{ call orders_package.add_order(?)}";
         CallableStatement stmt = null;
         try {

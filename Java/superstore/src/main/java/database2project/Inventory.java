@@ -78,7 +78,7 @@ public class Inventory implements SQLData {
     }
 
     public String toString (){
-        return "Inventory Id: " + this.inventoryId + " Warehouse Id: " + this.warehouseId + " Product Id: " + this.productId + "\nStock: " + this.stock;
+        return "| Inventory Id: " + this.inventoryId + "| Warehouse Id: " + this.warehouseId + "| Product Id: " + this.productId + "| Stock: " + this.stock + " |";
     }
        
 }

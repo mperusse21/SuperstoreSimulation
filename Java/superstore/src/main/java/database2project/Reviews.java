@@ -103,19 +103,19 @@ public class Reviews implements SQLData {
 
     // toString method which returns a string representation of a Review (preliminary)
     public String toString (){
-        return "Review " + this.reviewId + " by customer " + this.customerId + " for product with the id " + this.productId +
-        ". Score: " + this.score + " Number of Flags: " + this.flag + "\nDescription: " + this.description;
+        return "| Review Id " + this.reviewId + " | Customer Id: " + this.customerId + " | Product Id: " + this.productId +
+        " | Score: " + this.score + " | Flags: " + this.flag + " | Description: " + this.description;
     }
        
     // Method which adds an review using the add_review procedure
-    public void AddToDatabase(Connection conn) throws ClassNotFoundException {
+    public void AddToDatabase(Connection conn) {
         CallableStatement stmt = null;
         try {
             Map map = conn.getTypeMap();
             conn.setTypeMap(map);
             map.put(Reviews.TYPENAME,
                     Class.forName("database2project.Reviews"));
-            Reviews newReview = new Reviews(this.reviewId, this.productId, this.customerId, this.score, this.flag,
+            Reviews newReview = new Reviews(this.reviewId, this.productId, this.customerId, this.score, 0,
                     this.description);
             String sql = "{ call reviews_package.add_review(?)}";
             stmt = conn.prepareCall(sql);
@@ -123,7 +123,7 @@ public class Reviews implements SQLData {
             stmt.execute();
             System.out.println("Successfully added review to the database");
         }
-        catch (SQLException e){
+        catch (Exception e){
             e.printStackTrace();
         }
         // Always tries to close stmt

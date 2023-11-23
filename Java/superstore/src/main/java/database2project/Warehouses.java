@@ -134,7 +134,6 @@ public class Warehouses implements SQLData {
         System.out.println("Removed warehouse with id: " + warehouse_id + " from the database");
         }
         catch (SQLException e){
-            e.printStackTrace();
             System.out.println("Unable to delete specified warehouse");
         }
         // Always tries to close stmt
