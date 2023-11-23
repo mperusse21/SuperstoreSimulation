@@ -196,6 +196,7 @@ public class SuperStoreServices {
             Products newProduct = new Products (0, productName, category);
             newProduct.AddToDatabase(this.conn);
         }
+<<<<<<< HEAD
 
     public String getFullLocation(int addressId) throws SQLException, ClassNotFoundException {
         if (addressId == 0) {
@@ -210,4 +211,6 @@ public class SuperStoreServices {
         }
     }
 
+=======
+>>>>>>> bd09f9cb5fb830fb4ff3ed3a2e8e57b5f5f24953
 }

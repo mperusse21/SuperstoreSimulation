@@ -22,7 +22,7 @@ public class ReviewsUtilities {
             result = stmt.getDouble(1);
             return result;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Unable to get average score of product " + product_id);
             return result;
         }
         // Always tries to close stmt
@@ -50,7 +50,6 @@ public class ReviewsUtilities {
             stmt.execute();
             System.out.println("Updated review: " + review_id + " score to: " + score);
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println("Error when trying to update review " + review_id + " score");
         }
         // Always tries to close stmt
@@ -78,7 +77,6 @@ public class ReviewsUtilities {
             stmt.execute();
             System.out.println("Updated review: " + review_id + " flag to: " + flag);
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println("Error when trying to update review " + review_id + " flag");
         }
         // Always tries to close stmt
@@ -106,7 +104,6 @@ public class ReviewsUtilities {
             stmt.execute();
             System.out.println("Updated review " + review_id + " description to: " + description);
         } catch (SQLException e) {
-            e.printStackTrace();
             System.out.println("Error when trying to update review " + review_id + " description");
         }
         // Always tries to close stmt
@@ -141,7 +138,6 @@ public class ReviewsUtilities {
             return customerList;
         } 
         catch (SQLException e) {
-            e.printStackTrace();
         }
         // Always tries to close stmt
         finally {
@@ -178,7 +174,6 @@ public class ReviewsUtilities {
             return reviewsList;
         } 
         catch (SQLException e) {
-            e.printStackTrace();
         }
         // Always tries to close stmt
         finally {

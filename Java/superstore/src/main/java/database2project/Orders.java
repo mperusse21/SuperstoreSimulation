@@ -109,9 +109,10 @@ public class Orders implements SQLData {
         stream.writeDate(getOrderDate());
     }
 
-    public String toString (Products p, Customers c){
-        return "| Order Id: " + this.orderId  + p.toString() +  c.toString() + "| Quantity: " + this.quantity + "| Price: " + this.price + "| Order Date: "
-        + this.orderDate;
+    public String toString (Products p, Customers c, String storeName){
+        return "| Order Id: " + this.orderId  + c.toString() +
+        "\n" + p.toString() + " Quantity: " + this.quantity + " | Price: " + this.price + " | Order Date: "
+        + this.orderDate + "| Store ID: " + this.storeId + " | Store Name: " + storeName + "\n";
     }  
 
     // Method which adds an order using the add_order procedure
@@ -132,7 +133,7 @@ public class Orders implements SQLData {
             System.out.println("Successfully added order information to the database"); 
         }      
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to add given order");
         }
         // Always tries to close stmt
         finally {
@@ -157,7 +158,7 @@ public class Orders implements SQLData {
             System.out.println("Removed order " + order_id + " from the database");
         }
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to delete order " + order_id);
         }
         // Always tries to close stmt
         finally {
@@ -192,7 +193,7 @@ public class Orders implements SQLData {
             return foundOrder;
         } 
         catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unable to get order " + order_id);
             // Will return a null found order if an error occurs
             return foundOrder;
         }
