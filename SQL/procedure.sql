@@ -14,6 +14,8 @@ PROCEDURE remove_cities(city_id NUMBER);
 
 FUNCTION getCity(city_id NUMBER) RETURN VARCHAR2;
 
+FUNCTION getProvince(city_id NUMBER) RETURN VARCHAR2;
+
 END cities_package;
 /
 
@@ -48,6 +50,16 @@ SELECT
 City INTO city_name FROM Cities WHERE CityId = city_id;
 RETURN city_name;
 END getCity;
+
+--Function that returns the province corresponding to the CityId value inside the parameter
+FUNCTION getProvince(city_id NUMBER)
+RETURN VARCHAR2 IS
+province_name VARCHAR2(50);   
+BEGIN
+SELECT
+Province INTO province_name FROM Cities WHERE CityId = city_id;
+RETURN province_name;
+END getProvince;
 
 END cities_package;
 /

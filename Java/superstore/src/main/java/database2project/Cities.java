@@ -44,4 +44,20 @@ public class Cities {
         }
 
     }
+
+    public static String getProvince (Connection conn, int cityId) throws SQLException, ClassNotFoundException {
+        String sql = "{ ? = call cities_package.getProvince(?)}";
+        String foundProvince = null;
+        try (CallableStatement stmt = conn.prepareCall(sql)){
+
+            stmt.registerOutParameter(1, Types.VARCHAR);
+            stmt.setInt(2, cityId);
+            stmt.execute();
+            foundProvince = stmt.getString(1);
+            return foundProvince;
+        }
+
+    }
+
+
 }
