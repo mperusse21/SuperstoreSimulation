@@ -52,8 +52,9 @@ public class DisplayUtilities {
         List<Inventory> allInventory = connection.getAllInventory();
         for (Inventory inventory : allInventory ){
             Warehouses warehouse = connection.getWarehouse(inventory.getWarehouseId());
+            Products product = connection.getProductById(inventory.getProductId());
             String fullLocation = connection.getFullLocation(warehouse.getAddressId());
-            System.out.println(inventory.toString(warehouse, fullLocation));
+            System.out.println(inventory.toString(warehouse, product, fullLocation));
         }     
     }
 
