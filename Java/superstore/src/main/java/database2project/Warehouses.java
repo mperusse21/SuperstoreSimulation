@@ -76,7 +76,7 @@ public class Warehouses implements SQLData {
     // toString method which returns a string representation of a Warehouse, 
     // takes a string representing the full address location
     public String toString (String fullLocation){
-        return "| Warehouse Id: " + this.warehouseId + " | Warehouse Name: " + this.warehouseName + " | Address Id: " + this.addressId + 
+        return "| Warehouse Id: " + this.warehouseId + " | Warehouse Name: " + this.warehouseName + " | Address Id: " + this.addressId + " | " +
         fullLocation + " | ";
     }   
 

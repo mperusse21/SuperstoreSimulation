@@ -393,7 +393,9 @@ public class App
                 else {
                     System.out.println("\n|All Flagged Customers|\n");
                     for (Customers customer : flaggedCustomers ){
-                        System.out.println(customer);
+                        String customerAddress = connection.getFullLocation(customer.getAddressId()); 
+                        System.out.println(customer + customerAddress);
+
                     } 
                 }                       
             }
