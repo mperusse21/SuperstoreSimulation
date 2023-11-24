@@ -60,7 +60,7 @@ public class DisplayUtilities {
 
     // Prints all reviews
     public static void displayAllReviews (SuperStoreServices connection) throws ClassNotFoundException, SQLException {
-        System.out.println("\n|All Inventory|\n");
+        System.out.println("\n|All Reviews|\n");
         List<Reviews> allReviews = connection.getAllReviews();
         for (Reviews review : allReviews ){
             Products product = connection.getProductById(review.getProductId());
