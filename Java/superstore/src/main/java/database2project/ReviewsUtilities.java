@@ -96,10 +96,6 @@ public class ReviewsUtilities {
      */
     public static void updateDescription(Connection conn, int review_id, String description) {
         String sql = "{ call reviews_package.update_description(?, ?)}";
-        // if the user enters null then passes a null value instead of the string null
-        if (description.equals("null")){
-            description = null;
-        }
         CallableStatement stmt = null;
         try {
             stmt = conn.prepareCall(sql);
