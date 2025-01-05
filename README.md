@@ -4,10 +4,9 @@ Mitchell Perusse Student ID:2111028 and Mohammad Mahbub Rahman Student ID:223638
 
 GitLab Repository: https://gitlab.com/MohammadRahman/fall2023database2project.git
 
-Word planning document: https://collegedawson-my.sharepoint.com/:w:/r/personal/mitchell_perusse1_dawsoncollege_qc_ca/Documents/Database2Tasks.docx?d=w67abb89419df4386a2de42bc752bf033&csf=1&web=1&e=KLN3X5
-
 To setup the database:
-	1) Run remove.sql to remove existing data inside your Oracle database (example tables with the same name)
+	
+ 	1) Run remove.sql to remove existing data inside your Oracle database (example tables with the same name)
 
 	2) Continue by running setup.sql to create all tables (including the audit table), types, and insert the relevant info.
 	
@@ -24,11 +23,11 @@ To setup the database:
 	
 Assumptions made: We made a few assumptions in the setup of our database, they are listed below:
 				
-				- That the order price doesn't depend on the date (even though in reality it probably would)
+	- That the order price doesn't depend on the date (even though in reality it probably would)
 				
-				- That all stores and warehouses are located in Canada
+	- That all stores and warehouses are located in Canada
 				
-				- That one order id can represent multiple unique products (why we used a composite primary key for orders).
+	- That one order id can represent multiple unique products (why we used a composite primary key for orders).
 		
 				
 				
